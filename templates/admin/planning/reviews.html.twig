@@ -5,10 +5,7 @@
 
 {% block body %}
 <style>
-    /* Forcer le thème sombre sur cette page spécifique */
-    .content-area {
-        background: #0f172a !important;
-    }
+    .content-area { background: #0f172a !important; }
     .table-card {
         background: #1e293b !important;
         border: 1px solid rgba(99, 102, 241, 0.2) !important;
@@ -33,23 +30,104 @@
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
     }
     .text-indigo { color: #818cf8 !important; }
+
+    /* Sentiment badges */
+    .badge-sentiment {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 5px 12px; border-radius: 20px;
+        font-size: 0.75rem; font-weight: 600; letter-spacing: 0.03em;
+        transition: all 0.3s ease;
+    }
+    .badge-positive { background: linear-gradient(135deg,#22c55e22,#16a34a33); border:1px solid #22c55e55; color:#4ade80; }
+    .badge-negative { background: linear-gradient(135deg,#ef444422,#dc262633); border:1px solid #ef444455; color:#f87171; }
+    .badge-neutral  { background: linear-gradient(135deg,#eab30822,#ca8a0433); border:1px solid #eab30855; color:#fbbf24; }
+    .badge-pending  { background: rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); color:#94a3b8; }
+
+    /* Analyze-all button */
+    #btn-analyze-all {
+        background: linear-gradient(135deg,#6366f1,#a855f7); border:none; border-radius:8px;
+        color:#fff; font-weight:600; padding:6px 16px; font-size:0.85rem;
+        transition:opacity 0.2s,transform 0.15s; cursor:pointer;
+    }
+    #btn-analyze-all:hover { opacity:.88; transform:translateY(-1px); }
+    #btn-analyze-all:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+    /* Per-row analyze button */
+    .btn-analyze-one {
+        background:none; border:1px solid rgba(99,102,241,0.4); border-radius:6px;
+        color:#818cf8; padding:3px 8px; font-size:0.75rem; cursor:pointer; transition:all 0.2s;
+    }
+    .btn-analyze-one:hover { background:rgba(99,102,241,0.15); border-color:#818cf8; }
+
+    /* Live indicator */
+    #live-dot {
+        display:inline-block; width:8px; height:8px; background:#22c55e;
+        border-radius:50%; margin-right:5px;
+        animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+        0%,100% { opacity:1; transform:scale(1); }
+        50%      { opacity:.4; transform:scale(0.7); }
+    }
+
+    /* New row slide-in */
+    @keyframes slideInRow {
+        from { opacity:0; transform:translateY(-12px); background:rgba(99,102,241,0.18); }
+        to   { opacity:1; transform:translateY(0);     background:transparent; }
+    }
+    .row-new { animation: slideInRow 0.55s ease; }
+
+    /* Badge pop-in */
+    @keyframes fadeInScale {
+        from { opacity:0; transform:scale(0.7); }
+        to   { opacity:1; transform:scale(1); }
+    }
+    .badge-animate { animation: fadeInScale 0.35s ease; }
+
+    /* Spinner */
+    .spinner-sm {
+        display:inline-block; width:14px; height:14px;
+        border:2px solid rgba(255,255,255,.3); border-top-color:#fff;
+        border-radius:50%; animation:spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
 </style>
 
 <div class="container-fluid fade-in">
-    <div class="table-card shadow-lg" style="border-radius: 12px; overflow: hidden;">
-        <div class="p-4 d-flex justify-content-between align-items-center" style="background: rgba(30, 41, 59, 0.5); border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+    <div class="table-card shadow-lg" style="border-radius:12px; overflow:hidden;">
+
+        {# ── Header ── #}
+        <div class="p-4 d-flex justify-content-between align-items-center"
+             style="background:rgba(30,41,59,.5); border-bottom:1px solid rgba(255,255,255,.1);">
             <div class="d-flex align-items-center">
-                <a href="{{ path('admin_planning_index') }}" class="btn btn-sm btn-outline-light me-3 border-0" title="Back to Planning List">
+                <a href="{{ path('admin_planning_index') }}" class="btn btn-sm btn-outline-light me-3 border-0">
                     <i class="bi bi-arrow-left-circle-fill fs-5"></i>
                 </a>
                 <h5 class="text-white mb-0">
-                    <i class="bi bi-chat-left-dots-fill me-2" style="color: #818cf8;"></i>All Received Reviews
+                    <i class="bi bi-chat-left-dots-fill me-2" style="color:#818cf8;"></i>
+                    All Received Reviews
                 </h5>
             </div>
-            <span class="badge" id="review-count" style="background: #6366f1;">{{ reviews|length }} reviews in total</span>
+            <div class="d-flex align-items-center gap-3">
+                <span id="live-indicator" style="color:#4ade80; font-size:.8rem;">
+                    <span id="live-dot"></span>Live
+                </span>
+                <span class="badge" id="review-count" style="background:#6366f1;">
+                    {{ reviews|length }} reviews in total
+                </span>
+                <button id="btn-analyze-all" title="Analyze all reviews with HuggingFace AI">
+                    🤖 Analyze All with AI
+                </button>
+            </div>
         </div>
 
-        <div class="table-responsive p-3" id="reviews-container">
+        {# ── AI status bar ── #}
+        <div id="ai-status-bar" class="px-4 py-2"
+             style="display:none; background:rgba(99,102,241,.08); border-bottom:1px solid rgba(99,102,241,.2);">
+            <span id="ai-status-text" class="small" style="color:#a5b4fc;"></span>
+        </div>
+
+        <div class="table-responsive p-3">
             <table class="table table-hover align-middle mb-0">
                 <thead>
                     <tr>
@@ -57,16 +135,23 @@
                         <th class="py-3">Planning / Session</th>
                         <th class="py-3 text-center">Rating</th>
                         <th class="py-3">Comment</th>
+                        <th class="py-3 text-center">
+                            <i class="bi bi-robot me-1" style="color:#818cf8;"></i>Sentiment
+                        </th>
                         <th class="py-3">Date</th>
                         <th class="py-3 text-center">Action</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="reviews-tbody">
                     {% for review in reviews %}
-                        <tr class="review-row" id="review-{{ review.id }}">
+                        <tr class="review-row" id="review-row-{{ review.id }}">
                             <td class="py-3 px-4">
                                 <div class="d-flex align-items-center">
-                                    <div class="avatar-circle me-3" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: white;">
+                                    <div class="avatar-circle me-3"
+                                         style="background:linear-gradient(135deg,#6366f1 0%,#a855f7 100%);
+                                                width:32px;height:32px;border-radius:50%;
+                                                display:flex;align-items:center;justify-content:center;
+                                                font-size:12px;font-weight:bold;color:white;">
                                         {{ review.user.username|first|upper }}
                                     </div>
                                     <span class="fw-bold text-white">{{ review.user.username }}</span>
@@ -75,20 +160,36 @@
                             <td>
                                 <div class="small">
                                     <span class="text-indigo fw-bold d-block">{{ review.planning.type.value }}</span>
-                                    <span style="color: #94a3b8;">{{ review.planning.description|slice(0, 30) }}...</span>
+                                    <span style="color:#94a3b8;">{{ review.planning.description|slice(0,30) }}...</span>
                                 </div>
                             </td>
                             <td class="text-center">
                                 <div class="stars text-warning">
                                     {% for i in 1..5 %}
-                                        <i class="bi bi-star-fill {{ i <= review.rating ? '' : 'text-muted' }}" style="font-size: 0.8rem;"></i>
+                                        <i class="bi bi-star-fill {{ i <= review.rating ? '' : 'text-muted' }}"
+                                           style="font-size:.8rem;"></i>
                                     {% endfor %}
                                 </div>
                             </td>
                             <td>
-                                <div class="review-content p-2 rounded">
-                                    {{ review.content }}
-                                </div>
+                                <div class="review-content p-2 rounded">{{ review.content }}</div>
+                            </td>
+                            <td class="text-center">
+                                <span id="sentiment-badge-{{ review.id }}"
+                                      class="badge-sentiment badge-animate
+                                        {% if review.sentiment == 'positive' %}badge-positive
+                                        {% elseif review.sentiment == 'negative' %}badge-negative
+                                        {% elseif review.sentiment == 'neutral' %}badge-neutral
+                                        {% else %}badge-pending{% endif %}">
+                                    {% if review.sentiment == 'positive' %}🟢 Positive
+                                    {% elseif review.sentiment == 'negative' %}🔴 Negative
+                                    {% elseif review.sentiment == 'neutral' %}🟡 Neutral
+                                    {% else %}⏳ Not analyzed{% endif %}
+                                </span><br>
+                                <button class="btn-analyze-one mt-1"
+                                        data-review-id="{{ review.id }}" title="Analyze this review">
+                                    🔍 Analyze
+                                </button>
                             </td>
                             <td>
                                 <span class="small text-white-50">
@@ -96,8 +197,12 @@
                                 </span>
                             </td>
                             <td class="text-center">
-                                <form action="{{ path('admin_review_delete', {id: review.id}) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this review?');" style="display:inline-block;">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete-review-' ~ review.id) }}">
+                                <form action="{{ path('admin_review_delete',{id:review.id}) }}"
+                                      method="POST"
+                                      onsubmit="return confirm('Delete this review?');"
+                                      style="display:inline-block;">
+                                    <input type="hidden" name="_token"
+                                           value="{{ csrf_token('delete-review-' ~ review.id) }}">
                                     <button type="submit" class="btn btn-sm btn-outline-danger border-0">
                                         <i class="bi bi-trash3-fill"></i>
                                     </button>
@@ -105,8 +210,8 @@
                             </td>
                         </tr>
                     {% else %}
-                        <tr>
-                            <td colspan="6" class="text-center py-5">
+                        <tr id="empty-row">
+                            <td colspan="7" class="text-center py-5">
                                 <div class="text-white-50">No reviews have been published yet.</div>
                             </td>
                         </tr>
@@ -120,31 +225,195 @@
 
 {% block javascripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const reviewsContainer = document.getElementById('reviews-container');
-    const reviewCountBadge = document.getElementById('review-count');
-    
-    function refreshReviews() {
-        fetch(window.location.href, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(response => response.text())
-        .then(html => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const newContentNode = doc.getElementById('reviews-container');
-            const newCountNode = doc.getElementById('review-count');
-            
-            if (newContentNode && newCountNode && reviewsContainer.innerHTML !== newContentNode.innerHTML) {
-                reviewsContainer.innerHTML = newContentNode.innerHTML;
-                reviewCountBadge.innerHTML = newCountNode.innerHTML;
-                reviewsContainer.style.opacity = '0.5';
-                setTimeout(() => reviewsContainer.style.opacity = '1', 200);
-            }
-        })
-        .catch(error => console.error('Error polling:', error));
+document.addEventListener('DOMContentLoaded', function () {
+
+    /* ─── helpers ─── */
+    const CSRF      = '{{ csrf_token('analyze_reviews') }}';
+    const FEED_URL  = '{{ path('admin_planning_reviews_feed') }}';
+    const ANALYZE_ALL_URL = '{{ path('admin_reviews_analyze_all') }}';
+
+    function sentimentLabel(s) {
+        return {positive:'🟢 Positive', negative:'🔴 Negative', neutral:'🟡 Neutral'}[s] || '⏳ Not analyzed';
     }
-    setInterval(refreshReviews, 2000);
+    function sentimentClass(s) {
+        return {positive:'badge-positive', negative:'badge-negative', neutral:'badge-neutral'}[s] || 'badge-pending';
+    }
+
+    function starsHTML(rating) {
+        let html = '';
+        for (let i = 1; i <= 5; i++) {
+            html += `<i class="bi bi-star-fill ${i <= rating ? '' : 'text-muted'}" style="font-size:.8rem;"></i>`;
+        }
+        return html;
+    }
+
+    function updateBadge(id, sentiment) {
+        const badge = document.getElementById('sentiment-badge-' + id);
+        if (!badge) return;
+        badge.className = 'badge-sentiment badge-animate ' + sentimentClass(sentiment);
+        badge.textContent = sentimentLabel(sentiment);
+    }
+
+    function showStatus(msg) {
+        document.getElementById('ai-status-bar').style.display = 'block';
+        document.getElementById('ai-status-text').textContent = msg;
+    }
+    function hideStatus() {
+        document.getElementById('ai-status-bar').style.display = 'none';
+    }
+
+    /* ─── real-time polling ─── */
+    let knownIds = new Set(
+        Array.from(document.querySelectorAll('.review-row')).map(r => r.id.replace('review-row-',''))
+    );
+
+    async function pollFeed() {
+        try {
+            const res  = await fetch(FEED_URL, { headers: {'X-Requested-With':'XMLHttpRequest'} });
+            const data = await res.json();
+
+            // Update counter
+            document.getElementById('review-count').textContent = data.total + ' reviews in total';
+
+            // Remove empty-row if it exists
+            const emptyRow = document.getElementById('empty-row');
+
+            const tbody = document.getElementById('reviews-tbody');
+
+            data.reviews.forEach(r => {
+                const rowId = 'review-row-' + r.id;
+
+                // Update existing badge (sentiment may have changed)
+                if (knownIds.has(String(r.id))) {
+                    updateBadge(r.id, r.sentiment);
+                    return;
+                }
+
+                // New review — build and prepend row
+                if (emptyRow) emptyRow.remove();
+
+                knownIds.add(String(r.id));
+
+                const stars = starsHTML(r.rating);
+                const badgeCls   = sentimentClass(r.sentiment);
+                const badgeLabel = sentimentLabel(r.sentiment);
+
+                const tr = document.createElement('tr');
+                tr.id        = rowId;
+                tr.className = 'review-row row-new';
+                tr.innerHTML = `
+                    <td class="py-3 px-4">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-circle me-3"
+                                 style="background:linear-gradient(135deg,#6366f1,#a855f7);
+                                        width:32px;height:32px;border-radius:50%;
+                                        display:flex;align-items:center;justify-content:center;
+                                        font-size:12px;font-weight:bold;color:white;">
+                                ${r.initial}
+                            </div>
+                            <span class="fw-bold text-white">${escHtml(r.username)}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="small">
+                            <span class="text-indigo fw-bold d-block">${escHtml(r.type)}</span>
+                            <span style="color:#94a3b8;">${escHtml(r.planning)}...</span>
+                        </div>
+                    </td>
+                    <td class="text-center"><div class="stars text-warning">${stars}</div></td>
+                    <td><div class="review-content p-2 rounded">${escHtml(r.content)}</div></td>
+                    <td class="text-center">
+                        <span id="sentiment-badge-${r.id}"
+                              class="badge-sentiment badge-animate ${badgeCls}">
+                            ${badgeLabel}
+                        </span><br>
+                        <button class="btn-analyze-one mt-1"
+                                data-review-id="${r.id}" title="Analyze this review">
+                            🔍 Analyze
+                        </button>
+                    </td>
+                    <td><span class="small text-white-50"><i class="bi bi-clock me-1"></i>${escHtml(r.createdAt)}</span></td>
+                    <td class="text-center">
+                        <span class="text-white-50 small">🗑️</span>
+                    </td>
+                `;
+
+                tbody.prepend(tr);
+
+                // Bind analyze button for new row
+                tr.querySelector('.btn-analyze-one').addEventListener('click', handleAnalyzeOne);
+            });
+
+        } catch(e) {
+            console.warn('Feed poll error:', e);
+        }
+    }
+
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g,'&amp;')
+            .replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;');
+    }
+
+    // Poll every 3 seconds
+    setInterval(pollFeed, 3000);
+
+    /* ─── Analyze All button ─── */
+    const btnAll = document.getElementById('btn-analyze-all');
+    btnAll.addEventListener('click', async function () {
+        btnAll.disabled = true;
+        btnAll.innerHTML = '<span class="spinner-sm"></span> Analyzing…';
+        showStatus('🤖 Sending reviews to HuggingFace AI… please wait.');
+
+        try {
+            const res  = await fetch(ANALYZE_ALL_URL, {
+                method: 'POST',
+                headers: {'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
+                body: JSON.stringify({_token: CSRF}),
+            });
+            const data = await res.json();
+
+            if (data.success && Array.isArray(data.results)) {
+                data.results.forEach(r => updateBadge(r.id, r.sentiment));
+                showStatus('✅ Analysis complete — ' + data.results.length + ' review(s) analyzed.');
+            } else {
+                showStatus('⚠️ Unexpected server response.');
+            }
+        } catch(err) {
+            showStatus('❌ Error: ' + err.message);
+        }
+
+        btnAll.disabled = false;
+        btnAll.innerHTML = '🤖 Analyze All with AI';
+        setTimeout(hideStatus, 6000);
+    });
+
+    /* ─── Per-row Analyze buttons (existing rows) ─── */
+    async function handleAnalyzeOne(e) {
+        const btn      = e.currentTarget;
+        const reviewId = btn.dataset.reviewId;
+        btn.disabled   = true;
+        btn.textContent = '⏳';
+
+        try {
+            const res  = await fetch(`/admin/planning/review/${reviewId}/analyze`, {
+                method: 'POST',
+                headers: {'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'},
+                body: JSON.stringify({_token: CSRF}),
+            });
+            const data = await res.json();
+            if (data.success) updateBadge(data.id, data.sentiment);
+        } catch (err) { console.error('Analyze error:', err); }
+
+        btn.disabled    = false;
+        btn.textContent = '🔍 Analyze';
+    }
+
+    document.querySelectorAll('.btn-analyze-one').forEach(btn =>
+        btn.addEventListener('click', handleAnalyzeOne)
+    );
 });
 </script>
 {% endblock %}

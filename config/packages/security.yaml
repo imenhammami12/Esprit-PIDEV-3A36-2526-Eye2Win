@@ -68,7 +68,7 @@ security:
         - { path: ^/login,                 roles: PUBLIC_ACCESS }
         - { path: ^/register,              roles: PUBLIC_ACCESS }
         - { path: ^/admin/login,           roles: PUBLIC_ACCESS }
-        # NOUVEAU — webhook Stripe doit être public (Stripe appelle sans session)
+        # Stripe webhook public
         - { path: ^/coins/webhook,         roles: PUBLIC_ACCESS }
         # Back office
         - { path: ^/admin/audit,           roles: ROLE_SUPER_ADMIN }
@@ -80,9 +80,13 @@ security:
         - { path: ^/video,                 roles: ROLE_USER }
         - { path: ^/dashboard,             roles: ROLE_USER }
         - { path: ^/complaints,            roles: ROLE_USER }
-        # NOUVEAU — Live streams et achat de coins
+        # Live streams et achat de coins
         - { path: ^/live,                  roles: ROLE_USER }
         - { path: ^/coins,                 roles: ROLE_USER }
+        # Sessions et planning
+        - { path: ^/my-sessions,           roles: ROLE_USER }
+        - { path: ^/planing,               roles: ROLE_USER }
+        - { path: ^/planning,              roles: ROLE_USER }  # ← ajoutez cette ligne
 
 when@test:
     security:

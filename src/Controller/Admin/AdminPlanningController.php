@@ -8,8 +8,10 @@ use App\Entity\PlanningLevel;
 use App\Entity\PlanningType;
 use App\Repository\PlanningRepository;
 use App\Repository\ReviewRepository;
+use App\Service\SentimentAnalysisService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -216,6 +218,33 @@ class AdminPlanningController extends AbstractController
         ]);
     }
 
+    /**
+     * JSON feed used by the admin page for real-time polling.
+     * Returns all reviews ordered newest-first with their current sentiment.
+     */
+    #[Route('/reviews/feed', name: 'admin_planning_reviews_feed', methods: ['GET'])]
+    public function reviewsFeed(ReviewRepository $reviewRepository): JsonResponse
+    {
+        $reviews = $reviewRepository->findBy([], ['createdAt' => 'DESC']);
+
+        $data = array_map(function (Review $r) {
+            return [
+                'id'        => $r->getId(),
+                'username'  => $r->getUser()->getUsername(),
+                'initial'   => mb_strtoupper(mb_substr($r->getUser()->getUsername(), 0, 1)),
+                'type'      => $r->getPlanning()->getType()->value,
+                'planning'  => mb_substr($r->getPlanning()->getDescription(), 0, 30),
+                'rating'    => $r->getRating(),
+                'content'   => $r->getContent(),
+                'sentiment' => $r->getSentiment(),
+                'createdAt' => $r->getCreatedAt()->format('d/m/Y H:i'),
+                'deleteToken' => '', // token generated client-side via Twig is not needed here
+            ];
+        }, $reviews);
+
+        return $this->json(['reviews' => $data, 'total' => count($data)]);
+    }
+
     #[Route('/review/{id}/delete', name: 'admin_review_delete', methods: ['POST'])]
     public function deleteReview(
         Request $request,
@@ -239,5 +268,51 @@ class AdminPlanningController extends AbstractController
         
         $this->addFlash('success', 'The review has been deleted.');
         return $this->redirectToRoute('admin_planning_reviews');
+    }
+
+    #[Route('/reviews/analyze-all', name: 'admin_reviews_analyze_all', methods: ['POST'])]
+    public function analyzeAllReviews(
+        ReviewRepository $reviewRepository,
+        EntityManagerInterface $em,
+        SentimentAnalysisService $sentimentService
+    ): JsonResponse {
+        $reviews = $reviewRepository->findAll();
+        $results = [];
+
+        foreach ($reviews as $review) {
+            $sentiment = $sentimentService->analyze(
+                $review->getContent() ?? '',
+                $review->getRating() ?? 3
+            );
+            $review->setSentiment($sentiment);
+            $results[] = ['id' => $review->getId(), 'sentiment' => $sentiment];
+        }
+
+        $em->flush();
+
+        return $this->json(['success' => true, 'results' => $results]);
+    }
+
+    #[Route('/review/{id}/analyze', name: 'admin_review_analyze', methods: ['POST'])]
+    public function analyzeReview(
+        int $id,
+        ReviewRepository $reviewRepository,
+        EntityManagerInterface $em,
+        SentimentAnalysisService $sentimentService
+    ): JsonResponse {
+        $review = $reviewRepository->find($id);
+
+        if (!$review) {
+            return $this->json(['error' => 'Review not found'], 404);
+        }
+
+        $sentiment = $sentimentService->analyze(
+            $review->getContent() ?? '',
+            $review->getRating() ?? 3
+        );
+        $review->setSentiment($sentiment);
+        $em->flush();
+
+        return $this->json(['success' => true, 'id' => $id, 'sentiment' => $sentiment]);
     }
 }
