@@ -21,7 +21,7 @@ security:
             form_login:
                 login_path: admin_login
                 check_path: admin_login
-                default_target_path: admin_dashboard
+                default_target_path: admin_planning_index
                 enable_csrf: true
             logout:
                 path: admin_logout

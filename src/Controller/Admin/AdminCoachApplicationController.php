@@ -119,6 +119,8 @@ class AdminCoachApplicationController extends AbstractController
             'sortOrder' => $sortOrder,
             'stats' => $stats,
             'applicationStatuses' => ApplicationStatus::cases(),
+            'sortBy' => $sortBy,
+            'sortOrder' => $sortOrder,
         ]);
     }
     

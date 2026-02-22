@@ -28,9 +28,21 @@ class AdminUserController extends AbstractController
         $search = $request->query->get('search', '');
         $roleFilter = $request->query->get('role', '');
         $statusFilter = $request->query->get('status', '');
+        $sortBy = $request->query->get('sort', 'createdAt');
+        $sortOrder = $request->query->get('order', 'DESC');
+        
+        // Validate sort parameters
+        $validSortFields = ['username', 'email', 'fullName', 'createdAt'];
+        if (!in_array($sortBy, $validSortFields)) {
+            $sortBy = 'createdAt';
+        }
+        
+        if (!in_array($sortOrder, ['ASC', 'DESC'])) {
+            $sortOrder = 'DESC';
+        }
         
         $queryBuilder = $userRepository->createQueryBuilder('u')
-            ->orderBy('u.createdAt', 'DESC');
+            ->orderBy('u.' . $sortBy, $sortOrder);
         
         // Search by name, email or username
         if ($search) {
