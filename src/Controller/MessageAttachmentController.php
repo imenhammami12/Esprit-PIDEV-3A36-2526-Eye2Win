@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\MessageAttachment;
 use App\Repository\ChannelRepository;
+use App\Service\ChannelAccessService;
 use App\Service\CloudinaryUploader;
 use App\Service\CloudinaryUploaderCHAT;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -23,7 +24,7 @@ final class MessageAttachmentController extends AbstractController
     }
 
     #[Route('/attachments/{id}/download', name: 'community_attachment_download', requirements: ['id'=>'\d+'])]
-    public function download(MessageAttachment $att, ChannelRepository $channelRepo,CloudinaryUploaderCHAT $cloudinaryUploader): Response
+    public function download(MessageAttachment $att, ChannelRepository $channelRepo,CloudinaryUploaderCHAT $cloudinaryUploader,ChannelAccessService $access): Response
     {
         $msg = $att->getMessage();
         $channel = $msg->getChannel();
@@ -35,13 +36,14 @@ final class MessageAttachmentController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
+        if (!$access->canAccess($channel, $this->getUser())) {
+            throw $this->createAccessDeniedException();
+        }
+
         if ($msg->isDeleted()) {
             throw $this->createNotFoundException();
         }
 
-//        if ($att->getUrl()) {
-//            return $this->redirect($att->getUrl());
-//        }
 
         if ($att->getUrl() && ($att->getCloudResourceType() === 'image' || str_starts_with((string)$att->getMimeType(), 'image/'))) {
             return $this->redirect($att->getUrl());

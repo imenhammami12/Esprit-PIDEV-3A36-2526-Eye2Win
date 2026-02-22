@@ -4,6 +4,7 @@ namespace App\Controller\Community;
 
 use App\Entity\Message;
 use App\Form\MessageType;
+use App\Service\ChannelAccessService;
 use App\Service\CloudinaryUploader;
 use App\Service\CloudinaryUploaderCHAT;
 use Doctrine\ORM\EntityManagerInterface;
@@ -230,7 +231,8 @@ final class MessageController extends AbstractController
         ChannelRepository $channelRepo,
         HubInterface $hub,
         CloudinaryUploaderCHAT $cloudinaryUploader,
-        Environment $twig
+        Environment $twig,
+        ChannelAccessService $access
     ): Response {
 
         // ✅ visibility check
@@ -238,6 +240,11 @@ final class MessageController extends AbstractController
         $visibleIds = array_map(fn($c) => $c->getId(), $visible);
         if (!in_array($channel->getId(), $visibleIds, true)) {
             throw $this->createAccessDeniedException("Channel non accessible.");
+        }
+
+        // ✅ must be allowed to access (private membership)
+        if (!$access->canAccess($channel, $this->getUser())) {
+            throw $this->createAccessDeniedException("Private channel: access required.");
         }
 
         $message = new Message();

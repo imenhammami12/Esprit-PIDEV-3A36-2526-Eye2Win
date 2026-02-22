@@ -15,21 +15,60 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Service\ChannelAccessService;
+use App\Repository\ChannelJoinRequestRepository;
+
+use App\Repository\ChannelMemberRepository;
 
 class ChannelController extends AbstractController
 {
     #[Route('/channels', name: 'community_channels_index')]
-    public function index(ChannelRepository $repo, NotificationRepository $notificationRepo): Response
+    public function index(ChannelRepository $repo,
+                          NotificationRepository $notificationRepo,
+                          ChannelJoinRequestRepository $reqRepo,
+                          ChannelMemberRepository $memberRepo
+    ): Response
     {
         $channels = $repo->findVisibleForUser($this->getUser());
         $channelNotifications = [];
+
         if ($this->getUser()) {
             $channelNotifications = $notificationRepo->findChannelNotificationsForUser($this->getUser());
+        }
+
+        $pendingChannelIds = [];
+
+        if ($this->getUser()) {
+            $pending = $reqRepo->createQueryBuilder('r')
+                ->select('IDENTITY(r.channel) as cid')
+                ->andWhere('r.requester = :me')
+                ->andWhere('r.status = :pending')
+                ->setParameter('me', $this->getUser())
+                ->setParameter('pending', 'pending')
+                ->getQuery()
+                ->getArrayResult();
+
+            $pendingChannelIds = array_map(fn($row) => (int) $row['cid'], $pending);
+        }
+
+        $memberChannelIds = [];
+
+        if ($this->getUser()) {
+            $memberships = $memberRepo->createQueryBuilder('m')
+                ->select('IDENTITY(m.channel) as cid')
+                ->andWhere('m.user = :me')
+                ->setParameter('me', $this->getUser())
+                ->getQuery()
+                ->getArrayResult();
+
+            $memberChannelIds = array_map(fn($row) => (int) $row['cid'], $memberships);
         }
 
         return $this->render('community/channel/index.html.twig', [
             'channels' => $channels,
             'channelNotifications' => $channelNotifications, //notif is now no more displayed in the page itself (icon)
+            'pendingChannelIds' => $pendingChannelIds,
+            'memberChannelIds' => $memberChannelIds,
         ]);
     }
 
@@ -62,8 +101,14 @@ class ChannelController extends AbstractController
     }
 
     #[Route('/channels/{id}', name: 'community_channels_show', requirements: ['id' => '\d+'])]
-    public function show(Channel $channel, MessageRepository $messageRepo, Request $request, EntityManagerInterface $em, ChannelRepository $channelRepo
-    ): Response
+    public function show(Channel $channel,
+                         MessageRepository $messageRepo,
+                         Request $request,
+                         EntityManagerInterface $em,
+                         ChannelRepository $channelRepo,
+                         ChannelAccessService $access,
+                         NotificationRepository $notificationRepo,
+                         ChannelJoinRequestRepository $reqRepo): Response
     {
         // Access control: only APPROVED+active+allowed (same logic as index)
         $visible = $channelRepo->findVisibleForUser($this->getUser());
@@ -71,6 +116,24 @@ class ChannelController extends AbstractController
 
         if (!in_array($channel->getId(), $visibleIds, true)) {
             throw $this->createAccessDeniedException("Channel non accessible.");
+        }
+
+        // ✅ NEW: enforce access for private
+        if (!$access->canAccess($channel, $this->getUser())) {
+            $user = $this->getUser();
+            $pending = null;
+            if ($user) {
+                $pending = $reqRepo->findOneBy([
+                    'channel' => $channel,
+                    'requester' => $user,
+                    'status' => 'pending',
+                ]);
+            }
+
+            return $this->render('community/channel/locked.html.twig', [
+                'channel' => $channel,
+                'pendingRequest' => $pending,
+            ]);
         }
 
         //$messages = $messageRepo->findForChannelVisible($channel->getId());

@@ -18,7 +18,7 @@ class Notification
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\Column(length: 20, enumType: NotificationType::class)]
+    #[ORM\Column(length: 50, enumType: NotificationType::class)]
     private ?NotificationType $type = null;
 
     #[ORM\Column(type: Types::TEXT)]
