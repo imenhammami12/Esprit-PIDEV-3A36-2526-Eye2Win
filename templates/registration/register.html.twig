@@ -682,19 +682,51 @@
     const termsBody  = document.getElementById('termsBody');
     const readFill   = document.getElementById('readFill');
     const scrollHint = document.getElementById('scrollHint');
+    const termsRow   = document.querySelector('.terms-row');
 
     /*
      * Find the checkbox using multiple strategies — Symfony generates its own ID
      * (e.g. registration_form_agreeTerms) so we cannot hardcode it.
-     * Strategy 1: class we added via form_widget attr
-     * Strategy 2: input[type=checkbox] inside #termsFormGroup
      */
     const checkbox = document.querySelector('.terms-checkbox')
                   || document.querySelector('#termsFormGroup input[type="checkbox"]');
 
     const LOGIN_URL = '{{ path('app_login') }}';
 
-    let hasReadAll = false;
+    let hasReadAll       = false;
+    let _acceptedViaModal = false; /* internal flag — only Accept button may check the box */
+
+    /* ── BLOCK direct interaction with the checkbox ── */
+    if (checkbox) {
+        /* Block direct click on the checkbox itself */
+        checkbox.addEventListener('click', function (e) {
+            /* If already checked and user wants to uncheck → allow */
+            if (this.checked) return;
+            /* Otherwise block and open the modal */
+            e.preventDefault();
+            openModal(e);
+        });
+
+        /* Extra safety: block any programmatic change not coming from acceptBtn */
+        checkbox.addEventListener('change', function () {
+            if (this.checked && !_acceptedViaModal) {
+                this.checked = false;
+            }
+        });
+    }
+
+    /* ── BLOCK click on the whole terms-row label (except the link) ── */
+    if (termsRow) {
+        termsRow.addEventListener('click', function (e) {
+            /* Let the "Terms & Conditions" link open the modal normally */
+            if (e.target.id === 'openTermsLink') return;
+            /* If already accepted and user clicks to uncheck → allow */
+            if (checkbox && checkbox.checked) return;
+            /* Otherwise block label's default behaviour and open modal */
+            e.preventDefault();
+            openModal(e);
+        });
+    }
 
     /* ── Scroll progress ── */
     function onBodyScroll() {
@@ -714,22 +746,22 @@
         }
     }
 
-    /* ── Open ── */
+    /* ── Open modal ── */
     function openModal(e) {
-        e.preventDefault();
+        if (e && e.preventDefault) e.preventDefault();
         modal.classList.add('active');
         document.body.style.overflow = 'hidden';
+        /* Reset scroll and progress every time the modal opens */
         termsBody.scrollTop = 0;
         readFill.style.width = '0%';
+        hasReadAll = false;
+        acceptBtn.disabled = true;
+        acceptBtn.style.cursor = 'not-allowed';
         scrollHint.style.opacity = '1';
         scrollHint.style.pointerEvents = '';
-        if (!hasReadAll) {
-            acceptBtn.disabled = true;
-            acceptBtn.style.cursor = 'not-allowed';
-        }
     }
 
-    /* ── Close ── */
+    /* ── Close modal ── */
     function closeModal() {
         modal.classList.remove('active');
         document.body.style.overflow = '';
@@ -740,13 +772,15 @@
     openLink.addEventListener('click', openModal);
     closeBtn.addEventListener('click', closeModal);
 
-    /* Accept → tick checkbox → close */
+    /* Accept → tick checkbox (only possible after full scroll) → close */
     acceptBtn.addEventListener('click', function () {
         if (this.disabled) return;
         if (checkbox) {
+            _acceptedViaModal = true;          /* allow the change event */
             checkbox.checked = true;
             checkbox.dispatchEvent(new Event('change', { bubbles: true }));
             checkbox.dispatchEvent(new Event('input',  { bubbles: true }));
+            _acceptedViaModal = false;         /* lock it back */
         }
         closeModal();
     });
@@ -754,31 +788,38 @@
     /* Decline → untick → redirect to login */
     declineBtn.addEventListener('click', function () {
         if (checkbox) {
+            _acceptedViaModal = true;
             checkbox.checked = false;
             checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+            _acceptedViaModal = false;
         }
+        hasReadAll = false;
         closeModal();
         window.location.href = LOGIN_URL;
     });
 
-    /* Overlay click / Escape key */
-    modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
-    document.addEventListener('keydown', e => {
+    /* Overlay click */
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+    });
+
+    /* Escape key */
+    document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
     });
 
     /* ── Phone number live validation ── */
-    const phoneInput  = document.getElementById('phone-input');
-    const phoneIcon   = document.getElementById('phone-icon');
+    const phoneInput    = document.getElementById('phone-input');
+    const phoneIcon     = document.getElementById('phone-icon');
     const phoneFeedback = document.getElementById('phone-feedback');
-    const phoneMsg    = document.getElementById('phone-message');
+    const phoneMsg      = document.getElementById('phone-message');
 
     if (phoneInput) {
         phoneInput.addEventListener('input', function () {
             const val = this.value.trim();
 
             if (val === '') {
-                // Optional field — clear state
+                /* Optional field — clear state */
                 this.style.borderColor = '';
                 phoneIcon.className = 'live-validation-icon fas';
                 phoneFeedback.style.display = 'none';
