@@ -42,34 +42,63 @@ class ChannelRepository extends ServiceEntityRepository
     //        ;
     //    }
 
+//    public function findVisibleForUser(?UserInterface $user = null): array
+//    {
+//        $qb = $this->createQueryBuilder('c')
+//            ->andWhere('c.status = :approved')
+//            ->andWhere('c.isActive = :active')
+//            ->setParameter('approved', \App\Entity\Channel::STATUS_APPROVED)
+//            ->setParameter('active', true)
+//            ->orderBy('c.createdAt', 'DESC')
+//            ;
+//        // visitor => only public
+//        if ($user === null) {
+//            $qb->andWhere('c.type = :public')
+//                ->setParameter('public', Channel::TYPE_PUBLIC);
+//            return $qb->getQuery()->getResult();
+//        }
+//
+//        // Logged-in => show public + private (both visible)
+//        $qb->andWhere('c.type IN (:types)')
+//            ->setParameter('types', [Channel::TYPE_PUBLIC, Channel::TYPE_PRIVATE]);
+//
+//
+//        // user => public OR createdBy = me
+//        $roles = method_exists($user, 'getRoles') ? $user->getRoles() : [];
+//        $isAdmin = in_array('ROLE_ADMIN', $roles, true);
+//
+//        if (!$isAdmin) {
+//            $qb->andWhere('c.type = :public OR c.createdBy = :me')
+//                ->setParameter('public', Channel::TYPE_PUBLIC)
+//                ->setParameter('me', $user->getUserIdentifier());
+//        }
+//
+//        return $qb->getQuery()->getResult();
+//    } /// returns only channels that are approved + active /// used in channelController index+show
+
     public function findVisibleForUser(?UserInterface $user = null): array
     {
         $qb = $this->createQueryBuilder('c')
             ->andWhere('c.status = :approved')
             ->andWhere('c.isActive = :active')
-            ->setParameter('approved', \App\Entity\Channel::STATUS_APPROVED)
+            ->setParameter('approved', Channel::STATUS_APPROVED)
             ->setParameter('active', true)
-            ->orderBy('c.createdAt', 'DESC')
-            ;
-        // visitor => only public
+            ->orderBy('c.createdAt', 'DESC');
+
+        // Visitor => only public
         if ($user === null) {
             $qb->andWhere('c.type = :public')
                 ->setParameter('public', Channel::TYPE_PUBLIC);
+
             return $qb->getQuery()->getResult();
         }
 
-        // user => public OR createdBy = me
-    $roles = method_exists($user, 'getRoles') ? $user->getRoles() : [];
-    $isAdmin = in_array('ROLE_ADMIN', $roles, true);
-
-    if (!$isAdmin) {
-        $qb->andWhere('c.type = :public OR c.createdBy = :me')
-            ->setParameter('public', Channel::TYPE_PUBLIC)
-            ->setParameter('me', $user->getUserIdentifier());
-    }
+        // Logged-in => show public + private (both visible)
+        $qb->andWhere('c.type IN (:types)')
+            ->setParameter('types', [Channel::TYPE_PUBLIC, Channel::TYPE_PRIVATE]);
 
         return $qb->getQuery()->getResult();
-    } /// returns only channels that are approved + active /// used in channelController index+show
+    }
 
     public function findAdminList(string $q, string $status, string $type, string $active, string $sort, string $dir): array
     {

@@ -13,6 +13,9 @@ enum NotificationType: string
     case CHANNEL_REJECTED = 'CHANNEL_REJECTED';
     case ACCOUNT_WARNING = 'ACCOUNT_WARNING';
     case SYSTEM = 'SYSTEM';
+    case CHANNEL_ACCESS_REQUEST = 'CHANNEL_ACCESS_REQUEST';
+    case CHANNEL_ACCESS_APPROVED = 'CHANNEL_ACCESS_APPROVED';
+    case CHANNEL_ACCESS_REJECTED = 'CHANNEL_ACCESS_REJECTED';
 
     public function getLabel(): string
     {
@@ -26,6 +29,9 @@ enum NotificationType: string
             self::CHANNEL_REJECTED => 'Channel rejeté',
             self::ACCOUNT_WARNING => 'Avertissement',
             self::SYSTEM => 'Système',
+            self::CHANNEL_ACCESS_REQUEST => 'Channel access request',
+            self::CHANNEL_ACCESS_APPROVED => 'Access to approved channel',
+            self::CHANNEL_ACCESS_REJECTED => 'Access to rejected channel',
         };
     }
 
@@ -41,6 +47,9 @@ enum NotificationType: string
             self::CHANNEL_REJECTED => '❌',
             self::ACCOUNT_WARNING => '⚠️',
             self::SYSTEM => 'ℹ️',
+            self::CHANNEL_ACCESS_REQUEST => '🔒',
+            self::CHANNEL_ACCESS_APPROVED => '✅',
+            self::CHANNEL_ACCESS_REJECTED => '❌',
         };
     }
 }

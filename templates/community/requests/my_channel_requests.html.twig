@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container py-4">
+        <h2>My channels requests</h2>
+        <p class="text-muted">Pending access requests for your private channels.</p>
+
+        {% if requests is empty %}
+            <div class="alert alert-info">No pending requests.</div>
+        {% else %}
+            <div class="table-responsive">
+                <table class="table table-dark table-striped align-middle">
+                    <thead>
+                    <tr>
+                        <th>Channel</th>
+                        <th>Requester</th>
+                        <th>Requested at</th>
+                        <th style="width: 320px;">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for r in requests %}
+                        <tr>
+                            <td>
+                                <strong>{{ r.channel.name }}</strong>
+                                <div class="text-muted" style="font-size:12px;">#{{ r.channel.id }}</div>
+                            </td>
+                            <td>
+                                <strong>{{ r.requester.username ?? r.requester.userIdentifier }}</strong>
+                                <div class="text-muted" style="font-size:12px;">{{ r.requester.userIdentifier }}</div>
+                            </td>
+                            <td>{{ r.requestedAt ? r.requestedAt|date('d/m/Y H:i') : '-' }}</td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <form method="post" action="{{ path('community_request_approve', {id: r.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('approve_req_' ~ r.id) }}">
+                                        <button class="btn btn-success btn-sm">Approve</button>
+                                    </form>
+
+                                    <form method="post" action="{{ path('community_request_reject', {id: r.id}) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('reject_req_' ~ r.id) }}">
+                                        <input type="text" name="reason" class="form-control form-control-sm" placeholder="Reason (optional)" style="max-width: 170px;">
+                                        <button class="btn btn-danger btn-sm">Reject</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+
+        <a href="{{ path('community_channels_index') }}" class="btn btn-link mt-3">Back</a>
+    </div>
+{% endblock %}
