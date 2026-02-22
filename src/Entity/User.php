@@ -135,9 +135,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: TrainingSession::class)]
     private Collection $trainingSessions;
 
+<<<<<<< HEAD
     #[ORM\OneToMany(targetEntity: Video::class, mappedBy: 'uploadedBy', orphanRemoval: true)]
     private Collection $videos;
 
+=======
+<<<<<<< Updated upstream
+=======
+    /**
+     * @var Collection<int, Video>
+     */
+    #[ORM\OneToMany(targetEntity: Video::class, mappedBy: 'uploadedBy', orphanRemoval: true)]
+    private Collection $videos;
+
+
+>>>>>>> Stashed changes
+>>>>>>> origin/gestion-planning/training-session
     public function __construct()
     {
         $this->ownedTeams       = new ArrayCollection();
@@ -378,6 +391,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     {
         return $this->trainingSessions;
     }
+<<<<<<< HEAD
 
     public function getVideos(): Collection
     {
@@ -405,25 +419,56 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
 
     // ===== 2FA =====
 
+=======
+<<<<<<< Updated upstream
+=======
+
+    // ===== MÉTHODES 2FA - CORRIGÉES POUR MYSQL 5.6 =====
+
+    /**
+     * Vérifie si l'authentification 2FA est activée pour cet utilisateur
+     */
+>>>>>>> origin/gestion-planning/training-session
     public function isTotpAuthenticationEnabled(): bool
     {
         return $this->isTotpEnabled && $this->totpSecret !== null;
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * Retourne l'identifiant utilisateur pour l'authentification TOTP
+     */
+>>>>>>> origin/gestion-planning/training-session
     public function getTotpAuthenticationUsername(): string
     {
         return $this->email;
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * Retourne la configuration TOTP pour cet utilisateur
+     */
+>>>>>>> origin/gestion-planning/training-session
     public function getTotpAuthenticationConfiguration(): ?TotpConfigurationInterface
     {
         if (!$this->totpSecret) {
             return null;
         }
+<<<<<<< HEAD
         return new TotpConfiguration(
             $this->totpSecret,
             TotpConfiguration::ALGORITHM_SHA1,
             30,
+=======
+
+        // Configuration: secret, algorithme SHA1, période de 30 secondes, 6 chiffres
+        return new TotpConfiguration(
+            $this->totpSecret, 
+            TotpConfiguration::ALGORITHM_SHA1, 
+            30, 
+>>>>>>> origin/gestion-planning/training-session
             6
         );
     }
@@ -447,23 +492,48 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     public function setIsTotpEnabled(bool $isTotpEnabled): static
     {
         $this->isTotpEnabled = $isTotpEnabled;
+<<<<<<< HEAD
+=======
+        
+        // Mettre à jour la date d'activation automatiquement
+>>>>>>> origin/gestion-planning/training-session
         if ($isTotpEnabled && $this->totpEnabledAt === null) {
             $this->totpEnabledAt = new \DateTimeImmutable();
         } elseif (!$isTotpEnabled) {
             $this->totpEnabledAt = null;
         }
+<<<<<<< HEAD
         return $this;
     }
 
+=======
+        
+        return $this;
+    }
+
+    /**
+     * CORRIGÉ: Getter pour backup codes (décode depuis JSON stocké en TEXT)
+     */
+>>>>>>> origin/gestion-planning/training-session
     public function getBackupCodes(): ?array
     {
         if ($this->backupCodesJson === null || $this->backupCodesJson === '') {
             return null;
         }
+<<<<<<< HEAD
+=======
+        
+>>>>>>> origin/gestion-planning/training-session
         $decoded = json_decode($this->backupCodesJson, true);
         return is_array($decoded) ? $decoded : null;
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * CORRIGÉ: Setter pour backup codes (encode en JSON pour stockage en TEXT)
+     */
+>>>>>>> origin/gestion-planning/training-session
     public function setBackupCodes(?array $backupCodes): static
     {
         $this->backupCodesJson = $backupCodes !== null ? json_encode($backupCodes) : null;
@@ -481,6 +551,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
         return $this;
     }
 
+<<<<<<< HEAD
     public function invalidateBackupCode(string $code): bool
     {
         $codes = $this->getBackupCodes();
@@ -496,9 +567,80 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
         return false;
     }
 
+=======
+    /**
+     * CORRIGÉ: Invalide un code de secours après utilisation
+     * 
+     * @param string $code Le code de secours à invalider
+     * @return bool True si le code a été trouvé et invalidé, false sinon
+     */
+    public function invalidateBackupCode(string $code): bool
+    {
+        $codes = $this->getBackupCodes();
+        
+        if ($codes === null) {
+            return false;
+        }
+
+        $key = array_search($code, $codes, true);
+        if ($key !== false) {
+            unset($codes[$key]);
+            $this->setBackupCodes(array_values($codes)); // Réindexer et sauvegarder
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * CORRIGÉ: Compte le nombre de codes de secours restants
+     */
+>>>>>>> origin/gestion-planning/training-session
     public function getRemainingBackupCodesCount(): int
     {
         $codes = $this->getBackupCodes();
         return $codes ? count($codes) : 0;
     }
+<<<<<<< HEAD
+=======
+
+    // ===== FIN MÉTHODES 2FA =====
+    /**
+     * @return Collection<int, Video>
+     */
+    public function getVideos(): Collection
+    {
+        return $this->videos;
+    }
+
+    public function addVideo(Video $video): static
+    {
+        if (!$this->videos->contains($video)) {
+            $this->videos->add($video);
+            $video->setUploadedBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVideo(Video $video): static
+    {
+        if ($this->videos->removeElement($video)) {
+            // set the owning side to null (unless already changed)
+            if ($video->getUploadedBy() === $this) {
+                $video->setUploadedBy(null);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Review>
+     */
+    public function getReviews(): Collection
+    {
+        return $this->reviews;
+    }
+>>>>>>> Stashed changes
+>>>>>>> origin/gestion-planning/training-session
 }
