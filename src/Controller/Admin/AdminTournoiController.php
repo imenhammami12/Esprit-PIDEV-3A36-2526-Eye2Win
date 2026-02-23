@@ -93,6 +93,76 @@ class AdminTournoiController extends AbstractController
         ]);
     }
 
+    #[Route('/generate-description', name: 'admin_tournoi_generate_description', methods: ['POST'])]
+    public function generateDescription(Request $request): \Symfony\Component\HttpFoundation\JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $name = $data['name'] ?? '';
+        $type = $data['type'] ?? '';
+
+        if (empty($name)) {
+            return $this->json(['error' => 'Le nom du tournoi est requis.'], 400);
+        }
+
+        try {
+            $apiKey = $this->getParameter('gemini_api_key');
+            $prompt = "Tu es un expert passionné en eSport. Génère une description UNIQUE, professionnelle et engageante (3-4 phrases) en français pour ce tournoi. Sois créatif et varie le style à chaque fois.\n- Nom : {$name}\n- Type : {$type}\n- Graine de créativité : " . rand(1000, 9999) . "\n\nRéponds uniquement avec la description, sans titre ni préambule.";
+
+            // Using HuggingFace Router (free tier)
+            $url = "https://router.huggingface.co/v1/chat/completions";
+            $payload = json_encode([
+                'model' => 'Qwen/Qwen2.5-72B-Instruct',
+                'messages' => [
+                    ['role' => 'user', 'content' => $prompt]
+                ],
+                'max_tokens' => 350,
+                'temperature' => 1.1,
+                'top_p' => 0.95,
+            ]);
+
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $apiKey,
+            ]);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
+            curl_close($ch);
+
+            if ($curlError) {
+                return $this->json(['error' => 'Erreur de connexion (CURL): ' . $curlError], 500);
+            }
+
+            if ($httpCode !== 200) {
+                $errData = json_decode($response, true);
+                return $this->json(['error' => 'IA non disponible (' . $httpCode . '): ' . ($errData['error']['message'] ?? 'Erreur inconnue')], 500);
+            }
+
+            $decoded = json_decode($response, true);
+            // Check for potential nested structure or direct access
+            $text = $decoded['choices'][0]['message']['content'] ?? null;
+
+            if (!$text) {
+                return $this->json(['error' => 'Format de réponse IA invalide.'], 500);
+            }
+
+            return $this->json(['description' => trim($text)]);
+
+        } catch (\Throwable $e) {
+            return $this->json(['error' => 'Exception système: ' . $e->getMessage()], 500);
+        }
+    }
+
     #[Route('/{id}', name: 'admin_tournoi_show', methods: ['GET'])]
     public function show(Tournoi $tournoi): Response
     {

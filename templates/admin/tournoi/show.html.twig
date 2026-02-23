@@ -67,6 +67,14 @@
                         {{ tournoi.dateFin ? tournoi.dateFin|date('F d, Y') : 'N/A' }}
                     </div>
                 </div>
+                <div class="row mb-3">
+                    <div class="col-md-4 text-white-50">
+                        <i class="bi bi-gift me-2"></i>Prix
+                    </div>
+                    <div class="col-md-8 text-white">
+                        <span class="badge bg-primary">{{ tournoi.prix|number_format(2, '.', ',') }} TND</span>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-md-4 text-white-50">
                         <i class="bi bi-file-text me-2"></i>Description
@@ -78,6 +86,40 @@
             </div>
         </div>
         
+        {# Participants List #}
+        <div class="table-card fade-in mb-4" style="animation-delay: 0.4s;">
+            <div class="table-header">
+                <h5><i class="bi bi-people me-2"></i>Participants <span class="badge bg-light text-dark ms-2">{{ tournoi.participants|length }}</span></h5>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="custom-table table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Full Name</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for participant in tournoi.participants %}
+                            <tr>
+                                <td>
+                                    <span class="fw-bold">{{ participant.username }}</span>
+                                </td>
+                                <td>{{ participant.fullName }}</td>
+                                <td>{{ participant.email }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-4">No participants registered yet</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         {# Matchs #}
         <div class="table-card fade-in" style="animation-delay: 0.5s;">
             <div class="table-header">

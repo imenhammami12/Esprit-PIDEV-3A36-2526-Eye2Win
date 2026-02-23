@@ -50,25 +50,42 @@
                                     End Date
                                     <span class="text-white">{{ tournament.dateFin ? tournament.dateFin|date('M d, Y') : 'TBA' }}</span>
                                 </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: transparent; color: #aeb8c9; border-bottom: 1px solid #2d2d44;">
+                                    Entry Fee
+                                    <span class="text-white fw-bold">{{ tournament.prix|number_format(2, '.', ',') }} TND</span>
+                                </li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: transparent; color: #aeb8c9; border-bottom: none;">
                                     Total Matches
                                     <span class="badge rounded-pill" style="background-color: #0f3460; border: 1px solid #2d2d44;">{{ matches|length }}</span>
                                 </li>
                             </ul>
-                            </ul>
 
                             <div class="mt-4 text-center">
                                 {% if app.user %}
-                                    {% if tournament.participants.contains(app.user) %}
-                                        <button class="btn btn-success w-100" disabled>
-                                            <i class="fas fa-check-circle me-2"></i> Déjà à inscrit
+                                    {% set isRegistered = false %}
+                                    {% for p in tournament.participants %}
+                                        {% if p.id == app.user.id %}
+                                            {% set isRegistered = true %}
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    {% if isRegistered %}
+                                        <button class="btn btn-secondary w-100" disabled style="cursor: not-allowed; opacity: 0.7;">
+                                            <i class="fas fa-check-circle me-2"></i> Déjà inscrit
                                         </button>
                                     {% else %}
-                                        <form action="{{ path('app_tournoi_inscription', {'id': tournament.id}) }}" method="post">
-                                            <button type="submit" class="btn btn-primary w-100" style="background-color: #e94560; border-color: #e94560;">
-                                                <i class="fas fa-user-plus me-2"></i> S'inscrire
+                                        {% if tournament.prix > 0 %}
+                                            <button type="button" class="btn btn-primary w-100" style="background-color: #e94560; border-color: #e94560;" data-toggle="modal" data-target="#paymentConfirmationModal">
+                                                <i class="fas fa-user-plus me-2"></i> S'inscrire ({{ tournament.prix|number_format(2, '.', ',') }} USD)
                                             </button>
-                                        </form>
+                                        {% else %}
+                                            <form action="{{ path('app_tournoi_inscription', {'id': tournament.id}) }}" method="post">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('inscription' ~ tournament.id) }}">
+                                                <button type="submit" class="btn btn-primary w-100" style="background-color: #e94560; border-color: #e94560;">
+                                                    <i class="fas fa-user-plus me-2"></i> S'inscrire (Gratuit)
+                                                </button>
+                                            </form>
+                                        {% endif %}
                                     {% endif %}
                                 {% else %}
                                     <a href="{{ path('app_login') }}" class="btn btn-outline-light w-100">
@@ -106,18 +123,39 @@
                                             </div>
                                         </div>
 
-                                        {# Teams Column #}
-                                        <div class="match-teams flex-grow-1 text-center mb-3 mb-md-0">
-                                            <div class="d-flex align-items-center justify-content-center gap-3">
-                                                <div class="team-name text-end fw-bold text-white fs-5" style="width: 45%;">
+                                        {# Teams & Location Column #}
+                                        <div class="match-teams flex-grow-1 text-center mb-3 mb-md-0 px-3">
+                                            <div class="d-flex align-items-center justify-content-center gap-3 mb-2">
+                                                <div class="team-name text-end fw-bold text-white fs-5" style="width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                                     {{ match.equipe1 }}
                                                 </div>
                                                 
-                                                <div class="vs-badge px-2 py-1 rounded small fw-bold" style="background-color: #0f3460; color: #aeb8c9;">VS</div>
+                                                <div class="vs-badge px-2 py-1 rounded small fw-bold" style="background-color: #0f3460; color: #aeb8c9; flex-shrink: 0;">VS</div>
                                                 
-                                                <div class="team-name text-start fw-bold text-white fs-5" style="width: 45%;">
+                                                <div class="team-name text-start fw-bold text-white fs-5" style="width: 45%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                                     {{ match.equipe2 }}
                                                 </div>
+                                            </div>
+                                            
+                                            {# Play Mode & Location #}
+                                            <div class="d-flex justify-content-center">
+                                                {% if match.playMode and match.playMode.value == 'Sur Site' %}
+                                                    <div class="location-container">
+                                                        <button class="badge rounded-pill p-2 px-3 border-0" 
+                                                                style="background-color: #e94560; font-size: 0.75rem; cursor: pointer; transition: all 0.3s;"
+                                                                type="button"
+                                                                onclick="this.nextElementSibling.classList.toggle('d-none'); this.classList.toggle('active-location');">
+                                                            <i class="fas fa-map-marker-alt me-1"></i> Sur Site
+                                                        </button>
+                                                        <div class="mt-2 d-none text-muted small px-2" style="max-width: 300px; line-height: 1.4; animation: fadeIn 0.3s;">
+                                                            {{ match.localisation|default('Adresse non spécifiée') }}
+                                                        </div>
+                                                    </div>
+                                                {% else %}
+                                                    <span class="badge rounded-pill p-2 px-3" style="background-color: #0f3460; border: 1px solid #2d2d44; color: #aeb8c9; font-size: 0.75rem;">
+                                                        <i class="fas fa-globe me-1"></i> En Ligne
+                                                    </span>
+                                                {% endif %}
                                             </div>
                                         </div>
 
@@ -157,4 +195,52 @@
             </div>
         </div>
     </section>
+
+    <!-- Payment Confirmation Modal -->
+    <div class="modal fade" id="paymentConfirmationModal" tabindex="-1" aria-labelledby="paymentConfirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background-color: #1a1a2e; color: #fff; border: 2px solid #e94560; border-radius: 12px;">
+                <div class="modal-header border-bottom-0">
+                    <h5 class="modal-title fw-bold" id="paymentConfirmationModalLabel">Confirmation d'Inscription</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true" class="text-white">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-credit-card fa-3x" style="color: #e94560;"></i>
+                    </div>
+                    <h4 class="mb-3">Résumé du paiement</h4>
+                    <p class="mb-4" style="color: #aeb8c9;">
+                        Vous êtes sur le point de vous inscrire au tournoi <strong class="text-white">{{ tournament.nom }}</strong>. 
+                        Pour confirmer votre participation, un paiement de <strong class="text-white">{{ tournament.prix|number_format(2, '.', ',') }} USD</strong> est requis.
+                    </p>
+                    <div class="alert mt-3 p-3 text-start small" style="background-color: #16213e; border: 1px solid #2d2d44; color: #aeb8c9;">
+                        <i class="fas fa-shield-alt me-2" style="color: #43e97b;"></i>
+                        Paiement sécurisé via Stripe. Vos informations bancaires ne sont jamais stockées sur nos serveurs.
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-light px-4" data-dismiss="modal">Annuler</button>
+                    <form action="{{ path('app_tournoi_checkout', {'id': tournament.id}) }}" method="POST">
+                        <input type="hidden" name="_token" value="{{ csrf_token('checkout' ~ tournament.id) }}">
+                        <button type="submit" class="btn btn-primary px-4" style="background-color: #e94560; border: none;">
+                            <i class="fas fa-lock me-2"></i> Confirmer et Payer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <style>
+        .active-location {
+            box-shadow: 0 0 10px #e94560;
+            transform: scale(1.05);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 {% endblock %}

@@ -47,6 +47,9 @@ class Tournoi
 
     #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'tournaments')]
     private Collection $participants;
+    
+    #[ORM\Column(type: 'float', options: ["default" => 0.0])]
+    private ?float $prix = 0.0;
 
     public function __construct()
     {
@@ -181,6 +184,18 @@ class Tournoi
     public function removeParticipant(User $participant): static
     {
         $this->participants->removeElement($participant);
+
+        return $this;
+    }
+
+    public function getPrix(): ?float
+    {
+        return $this->prix;
+    }
+
+    public function setPrix(?float $prix): static
+    {
+        $this->prix = $prix;
 
         return $this;
     }

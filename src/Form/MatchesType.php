@@ -34,6 +34,17 @@ class MatchesType extends AbstractType
                 'class' => \App\Entity\Prix::class,
                 'label' => 'Prix',
             ])
+            ->add('playMode', \Symfony\Component\Form\Extension\Core\Type\EnumType::class, [
+                'class' => \App\Entity\PlayMode::class,
+                'label' => 'Mode de Jeu',
+                'attr' => ['class' => 'form-select', 'id' => 'playModeSelect'],
+                'choice_label' => fn($choice) => $choice->value,
+            ])
+            ->add('localisation', \Symfony\Component\Form\Extension\Core\Type\TextType::class, [
+                'label' => 'Localisation',
+                'required' => false,
+                'attr' => ['class' => 'form-control', 'id' => 'localisationInput', 'readonly' => true],
+            ])
         ;
     }
 

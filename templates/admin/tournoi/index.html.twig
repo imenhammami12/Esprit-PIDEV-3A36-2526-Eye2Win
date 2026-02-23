@@ -135,6 +135,8 @@
                     </th>
 
                     <th>Description</th>
+                    <th>Participants</th>
+                    <th>Prix</th>
                     <th>Matchs</th>
                     <th style="width: 180px;">Actions</th>
                 </tr>
@@ -173,6 +175,16 @@
                             </small>
                         </td>
                         <td>
+                            <span class="badge bg-info text-dark">
+                                {{ tournoi.participants|length }} participants
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary text-white">
+                                {{ tournoi.prix|number_format(2, '.', ',') }} TND
+                            </span>
+                        </td>
+                        <td>
                             <a href="{{ path('admin_tournoi_matches_index', {'id': tournoi.id}) }}" class="text-decoration-none">
                                 <span class="badge bg-light text-dark border hover-effect">
                                     {{ tournoi.matchs|length }} matchs
@@ -198,7 +210,7 @@
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="7" class="text-center text-muted py-5">
+                        <td colspan="9" class="text-center text-muted py-5">
                             <div class="empty-state">
                                 <i class="bi bi-trophy" style="font-size: 64px; opacity: 0.2;"></i>
                                 <h4 class="mt-3 mb-2">No Tournois Found</h4>
