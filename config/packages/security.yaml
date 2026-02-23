@@ -14,14 +14,14 @@ security:
             security: false
 
         admin:
-            pattern: ^/admin
+            pattern: ^/(admin|api/admin)
             lazy: true
             provider: app_user_provider
             user_checker: App\Security\AccountStatusChecker
             form_login:
                 login_path: admin_login
                 check_path: admin_login
-                default_target_path: admin_planning_index
+                default_target_path: admin_dashboard
                 enable_csrf: true
             logout:
                 path: admin_logout
@@ -61,32 +61,23 @@ security:
 
     access_control:
         - { path: ^/2fa,                   roles: IS_AUTHENTICATED_2FA_IN_PROGRESS }
-        # Face login (public)
         - { path: ^/admin/face-verify,     roles: PUBLIC_ACCESS }
         - { path: ^/admin/face-check,      roles: PUBLIC_ACCESS }
-        # Routes publiques
         - { path: ^/login,                 roles: PUBLIC_ACCESS }
         - { path: ^/register,              roles: PUBLIC_ACCESS }
         - { path: ^/admin/login,           roles: PUBLIC_ACCESS }
-        # Stripe webhook public
         - { path: ^/coins/webhook,         roles: PUBLIC_ACCESS }
-        # Back office
         - { path: ^/admin/audit,           roles: ROLE_SUPER_ADMIN }
         - { path: ^/admin/complaints,      roles: ROLE_ADMIN }
+        - { path: ^/api/admin,             roles: ROLE_ADMIN }
         - { path: ^/admin,                 roles: ROLE_ADMIN }
-        # Front office
         - { path: ^/profile,               roles: ROLE_USER }
         - { path: ^/upload,                roles: ROLE_USER }
         - { path: ^/video,                 roles: ROLE_USER }
         - { path: ^/dashboard,             roles: ROLE_USER }
         - { path: ^/complaints,            roles: ROLE_USER }
-        # Live streams et achat de coins
         - { path: ^/live,                  roles: ROLE_USER }
         - { path: ^/coins,                 roles: ROLE_USER }
-        # Sessions et planning
-        - { path: ^/my-sessions,           roles: ROLE_USER }
-        - { path: ^/planing,               roles: ROLE_USER }
-        - { path: ^/planning,              roles: ROLE_USER }  # ← ajoutez cette ligne
 
 when@test:
     security:

@@ -34,7 +34,8 @@ class NotificationApiController extends AbstractController
         
         return new JsonResponse([
             'success' => true,
-            'count' => count($unread),
+            'count' => count($unread),       // ✅ pour le JS frontend user
+            'unreadCount' => count($unread), // ✅ pour compatibilité admin
             'notifications' => array_map(fn($n) => $this->formatNotification($n), $unread)
         ]);
     }
@@ -57,9 +58,31 @@ class NotificationApiController extends AbstractController
         
         return new JsonResponse([
             'success' => true,
-            'unreadCount' => count($unread),
+            'count' => count($unread),       // ✅ pour le JS frontend user
+            'unreadCount' => count($unread), // ✅ pour compatibilité admin
             'notifications' => $formatted
         ]);
+    }
+
+    // ✅ IMPORTANT: mark-all-read DOIT être AVANT /{id}/mark-read
+    // sinon Symfony interprétera "mark-all-read" comme un {id}
+    #[Route('/mark-all-read', name: 'api_mark_all_read', methods: ['POST'])]
+    public function markAllRead(): JsonResponse
+    {
+        $user = $this->getUser();
+        
+        $this->notificationRepository->createQueryBuilder('n')
+            ->update()
+            ->set('n.isRead', ':true')
+            ->set('n.read', ':true')
+            ->where('n.user = :user')
+            ->andWhere('n.isRead = false')
+            ->setParameter('true', true)
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->execute();
+        
+        return new JsonResponse(['success' => true]);
     }
     
     #[Route('/{id}/mark-read', name: 'api_mark_notification_read', methods: ['POST'])]
@@ -74,24 +97,6 @@ class NotificationApiController extends AbstractController
         $notification->setIsRead(true);
         $notification->setRead(true);
         $this->em->flush();
-        
-        return new JsonResponse(['success' => true]);
-    }
-
-    #[Route('/mark-all-read', name: 'api_mark_all_read', methods: ['POST'])]
-    public function markAllRead(): JsonResponse
-    {
-        $user = $this->getUser();
-        
-        $this->notificationRepository->createQueryBuilder('n')
-            ->update()
-            ->set('n.isRead', 'true')
-            ->set('n.read', 'true')
-            ->where('n.user = :user')
-            ->andWhere('n.isRead = false')
-            ->setParameter('user', $user)
-            ->getQuery()
-            ->execute();
         
         return new JsonResponse(['success' => true]);
     }
