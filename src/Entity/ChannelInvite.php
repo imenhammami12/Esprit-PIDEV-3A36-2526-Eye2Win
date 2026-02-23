@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\ChannelInviteRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ChannelInviteRepository::class)]
 class ChannelInvite
@@ -17,7 +18,7 @@ class ChannelInvite
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Channel $channel = null;
 
-    #[ORM\Column(length: 64)]
+    #[ORM\Column(length: 64, unique: true)]
     private ?string $token = null;
 
     #[ORM\Column(length: 255)]
@@ -27,16 +28,17 @@ class ChannelInvite
     private ?\DateTimeImmutable $expiresAt = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\Choice(choices: ['request_only', 'auto_join'])]
     private ?string $mode = null;
 
     #[ORM\Column(nullable: true)]
     private ?int $maxUses = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $uses = null;
+    private ?int $uses = 0;
 
     #[ORM\Column]
-    private ?bool $isActive = null;
+    private ?bool $isActive = true;
 
     public function getId(): ?int
     {
