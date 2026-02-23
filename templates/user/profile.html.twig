@@ -791,7 +791,7 @@ let cyc_file = null;
 let cyc_result_url = null;
 
 
-const CYCLEGAN_API_URL = 'https://tired-gifts-judge.loca.lt/generate-avatar';
+const CYCLEGAN_API_URL = 'https://dermographic-shelba-nonresisting.ngrok-free.dev/transform';
 
 function openCycleGANModal() {
     document.getElementById('cycleGANModal').style.display = 'flex';
@@ -859,13 +859,13 @@ async function generateCycleGAN() {
 
     try {
         const formData = new FormData();
-        formData.append('file', cyc_file);
+        formData.append('image', cyc_file);
 
         const response = await fetch(CYCLEGAN_API_URL, {
             method: 'POST',
             headers: {
-                'Bypass-Tunnel-Reminder': 'true'
-            },
+    'ngrok-skip-browser-warning': 'true'
+},
             body: formData
         });
 
