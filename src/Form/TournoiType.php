@@ -72,6 +72,14 @@ class TournoiType extends AbstractType
                 ],
                 'attr' => ['class' => 'form-control'],
             ])
+            ->add('prix', \Symfony\Component\Form\Extension\Core\Type\NumberType::class, [
+                'label' => 'Prix de participation (TND)',
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => '0.00'
+                ],
+                'required' => true,
+            ])
         ;
     }
 

@@ -75,6 +75,12 @@ class Matches
     #[ORM\Column(enumType: Prix::class)]
     private ?Prix $prix = null;
 
+    #[ORM\Column(type: 'string', length: 20, enumType: PlayMode::class, options: ['default' => 'En Ligne'])]
+    private ?PlayMode $playMode = PlayMode::ONLINE;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $localisation = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -148,6 +154,30 @@ class Matches
     public function setPrix(Prix $prix): static
     {
         $this->prix = $prix;
+
+        return $this;
+    }
+
+    public function getPlayMode(): ?PlayMode
+    {
+        return $this->playMode;
+    }
+
+    public function setPlayMode(PlayMode $playMode): static
+    {
+        $this->playMode = $playMode;
+
+        return $this;
+    }
+
+    public function getLocalisation(): ?string
+    {
+        return $this->localisation;
+    }
+
+    public function setLocalisation(?string $localisation): static
+    {
+        $this->localisation = $localisation;
 
         return $this;
     }
