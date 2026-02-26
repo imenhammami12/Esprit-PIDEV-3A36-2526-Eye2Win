@@ -5,13 +5,12 @@ namespace App\Controller\Admin;
 use App\Entity\CoachApplication;
 use App\Entity\ApplicationStatus;
 use App\Entity\AuditLog;
-use App\Entity\Notification;
-use App\Entity\NotificationType;
 use App\Repository\CoachApplicationRepository;
 use App\Service\CoachApplicationEmailService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -23,192 +22,103 @@ use App\Service\NotificationService;
 class AdminCoachApplicationController extends AbstractController
 {
     public function __construct(
-        private NotificationService $notificationService,
+        private NotificationService          $notificationService,
         private CoachApplicationEmailService $emailService
-    ) {
-    }
-    
+    ) {}
+
+    // ──────────────────────────────────────────────────────────────
+    //  INDEX
+    // ──────────────────────────────────────────────────────────────
     #[Route('/', name: 'admin_coach_applications_index')]
     public function index(
-        Request $request,
+        Request                    $request,
         CoachApplicationRepository $repository,
-        PaginatorInterface $paginator
+        PaginatorInterface         $paginator
     ): Response {
-        // 🔍 FILTRES MULTIPLES
         $statusFilter = $request->query->get('status', '');
-        $search = $request->query->get('search', '');
-        $dateFrom = $request->query->get('date_from', '');
-        $dateTo = $request->query->get('date_to', '');
-        $sortBy = $request->query->get('sort_by', 'submittedAt');
-        $sortOrder = $request->query->get('sort_order', 'DESC');
-        
+        $search       = $request->query->get('search', '');
+        $dateFrom     = $request->query->get('date_from', '');
+        $dateTo       = $request->query->get('date_to', '');
+        $sortBy       = $request->query->get('sort_by', 'submittedAt');
+        $sortOrder    = $request->query->get('sort_order', 'DESC');
+
         $queryBuilder = $repository->createQueryBuilder('ca')
             ->leftJoin('ca.user', 'u')
             ->addSelect('u');
-        
-        // Filtre par statut
+
         if ($statusFilter) {
             $queryBuilder->andWhere('ca.status = :status')
                 ->setParameter('status', $statusFilter);
         }
-        
-        // Recherche par nom, username, email
+
         if ($search) {
             $queryBuilder->andWhere(
-                'u.username LIKE :search OR u.email LIKE :search OR u.fullName LIKE :search OR ca.certifications LIKE :search OR ca.experience LIKE :search'
-            )
-            ->setParameter('search', '%' . $search . '%');
+                'u.username LIKE :search OR u.email LIKE :search OR u.fullName LIKE :search
+                 OR ca.certifications LIKE :search OR ca.experience LIKE :search'
+            )->setParameter('search', '%' . $search . '%');
         }
-        
-        // Filtre par date de soumission (début)
+
         if ($dateFrom) {
             try {
-                $dateFromObj = new \DateTime($dateFrom . ' 00:00:00');
                 $queryBuilder->andWhere('ca.submittedAt >= :dateFrom')
-                    ->setParameter('dateFrom', $dateFromObj);
-            } catch (\Exception $e) {
-                // Date invalide, on ignore
-            }
+                    ->setParameter('dateFrom', new \DateTime($dateFrom . ' 00:00:00'));
+            } catch (\Exception) {}
         }
-        
-        // Filtre par date de soumission (fin)
+
         if ($dateTo) {
             try {
-                $dateToObj = new \DateTime($dateTo . ' 23:59:59');
                 $queryBuilder->andWhere('ca.submittedAt <= :dateTo')
-                    ->setParameter('dateTo', $dateToObj);
-            } catch (\Exception $e) {
-                // Date invalide, on ignore
-            }
+                    ->setParameter('dateTo', new \DateTime($dateTo . ' 23:59:59'));
+            } catch (\Exception) {}
         }
-        
-        // Tri
+
         $validSortFields = ['submittedAt', 'reviewedAt', 'status'];
+        $validSortOrder  = in_array(strtoupper($sortOrder), ['ASC', 'DESC']) ? strtoupper($sortOrder) : 'DESC';
         if (in_array($sortBy, $validSortFields)) {
-            $validSortOrder = in_array(strtoupper($sortOrder), ['ASC', 'DESC']) ? strtoupper($sortOrder) : 'DESC';
             $queryBuilder->orderBy('ca.' . $sortBy, $validSortOrder);
         } else {
             $queryBuilder->orderBy('ca.submittedAt', 'DESC');
         }
-        
-        // Tri secondaire par nom d'utilisateur
         $queryBuilder->addOrderBy('u.username', 'ASC');
-        
-        // Pagination
+
         $pagination = $paginator->paginate(
             $queryBuilder,
             $request->query->getInt('page', 1),
-            20 // Items per page
+            20
         );
-        
-        // Statistics
-        $stats = [
-            'pending' => $repository->count(['status' => ApplicationStatus::PENDING]),
-            'approved' => $repository->count(['status' => ApplicationStatus::APPROVED]),
-            'rejected' => $repository->count(['status' => ApplicationStatus::REJECTED]),
-            'total' => $repository->count([]),
-        ];
-        
+
+        $stats = $repository->getGlobalStats();
+
         return $this->render('admin/coach_applications/index.html.twig', [
-            'pagination' => $pagination,
-            'statusFilter' => $statusFilter,
-            'search' => $search,
-            'dateFrom' => $dateFrom,
-            'dateTo' => $dateTo,
-            'sortBy' => $sortBy,
-            'sortOrder' => $sortOrder,
-            'stats' => $stats,
+            'pagination'          => $pagination,
+            'statusFilter'        => $statusFilter,
+            'search'              => $search,
+            'dateFrom'            => $dateFrom,
+            'dateTo'              => $dateTo,
+            'sortBy'              => $sortBy,
+            'sortOrder'           => $sortOrder,
+            'stats'               => $stats,
             'applicationStatuses' => ApplicationStatus::cases(),
         ]);
     }
-    
-    #[Route('/{id}', name: 'admin_coach_applications_show', requirements: ['id' => '\d+'])]
-    public function show(CoachApplication $application): Response
+
+    // ──────────────────────────────────────────────────────────────
+    //  STATS AJAX
+    //  IMPORTANT: déclarée AVANT /{id} pour éviter le conflit de route
+    // ──────────────────────────────────────────────────────────────
+    #[Route('/stats', name: 'admin_coach_applications_stats', methods: ['GET'])]
+    public function statsJson(CoachApplicationRepository $repository): JsonResponse
     {
-        return $this->render('admin/coach_applications/show.html.twig', [
-            'application' => $application,
-        ]);
+        return $this->json($repository->getGlobalStats());
     }
-    
-    #[Route('/{id}/approve', name: 'admin_coach_applications_approve', methods: ['POST'])]
-    public function approve(
-        Request $request,
-        CoachApplication $application,
-        EntityManagerInterface $em
-    ): Response {
-        if (!$this->isCsrfTokenValid('approve-' . $application->getId(), $request->request->get('_token'))) {
-            throw $this->createAccessDeniedException('Invalid CSRF token');
-        }
-        
-        $comment = $request->request->get('comment', '');
-        
-        // Approve the application (automatically adds COACH role)
-        $application->approve($comment);
-        
-        $this->createAuditLog(
-            $em,
-            'COACH_APPLICATION_APPROVED',
-            'CoachApplication',
-            $application->getId(),
-            "Application from " . $application->getUser()->getUsername() . " approved"
-        );
-        
-        $em->flush();
-        
-        // Send notification AFTER flush
-        $this->notificationService->notifyCoachApplicationApproved($application);
-        
-        // Send approval email
-        $this->emailService->sendApprovalEmail($application);
-        
-        $this->addFlash('success', 'The application has been approved, the user is now a coach and has received a confirmation email');
-        return $this->redirectToRoute('admin_coach_applications_show', ['id' => $application->getId()]);
-    }
-    
-    #[Route('/{id}/reject', name: 'admin_coach_applications_reject', methods: ['POST'])]
-    public function reject(
-        Request $request,
-        CoachApplication $application,
-        EntityManagerInterface $em
-    ): Response {
-        if (!$this->isCsrfTokenValid('reject-' . $application->getId(), $request->request->get('_token'))) {
-            throw $this->createAccessDeniedException('Invalid CSRF token');
-        }
-        
-        $comment = $request->request->get('comment');
-        
-        if (!$comment) {
-            $this->addFlash('error', 'A comment is required to reject an application');
-            return $this->redirectToRoute('admin_coach_applications_show', ['id' => $application->getId()]);
-        }
-        
-        // Reject the application
-        $application->reject($comment);
-        
-        $this->createAuditLog(
-            $em,
-            'COACH_APPLICATION_REJECTED',
-            'CoachApplication',
-            $application->getId(),
-            "Application from " . $application->getUser()->getUsername() . " rejected: $comment"
-        );
-        
-        $em->flush();
-        
-        // Send notification AFTER flush
-        $this->notificationService->notifyCoachApplicationRejected($application);
-        
-        // Send rejection email
-        $this->emailService->sendRejectionEmail($application);
-        
-        $this->addFlash('warning', 'The application has been rejected and the user has been notified by email');
-        return $this->redirectToRoute('admin_coach_applications_show', ['id' => $application->getId()]);
-    }
-    
+
+    // ──────────────────────────────────────────────────────────────
+    //  COACHES LIST
+    //  Déclarée AVANT /{id} pour éviter le conflit de route
+    // ──────────────────────────────────────────────────────────────
     #[Route('/coaches', name: 'admin_coaches_list')]
     public function coachesList(EntityManagerInterface $em): Response
     {
-        // Get all users with COACH role
         $coaches = $em->createQueryBuilder()
             ->select('u')
             ->from('App\Entity\User', 'u')
@@ -217,18 +127,98 @@ class AdminCoachApplicationController extends AbstractController
             ->orderBy('u.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
-        
+
         return $this->render('admin/coach_applications/coaches_list.html.twig', [
             'coaches' => $coaches,
         ]);
     }
-    
+
+    // ──────────────────────────────────────────────────────────────
+    //  SHOW — requirements: id doit être un entier
+    // ──────────────────────────────────────────────────────────────
+    #[Route('/{id}', name: 'admin_coach_applications_show', requirements: ['id' => '\d+'])]
+    public function show(CoachApplication $application): Response
+    {
+        return $this->render('admin/coach_applications/show.html.twig', [
+            'application' => $application,
+        ]);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    //  APPROVE
+    // ──────────────────────────────────────────────────────────────
+    #[Route('/{id}/approve', name: 'admin_coach_applications_approve', methods: ['POST'])]
+    public function approve(
+        Request                $request,
+        CoachApplication       $application,
+        EntityManagerInterface $em
+    ): Response {
+        if (!$this->isCsrfTokenValid('approve-' . $application->getId(), $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Invalid CSRF token');
+        }
+
+        $application->approve($request->request->get('comment', ''));
+
+        $this->createAuditLog(
+            $em, 'COACH_APPLICATION_APPROVED', 'CoachApplication',
+            $application->getId(),
+            "Application from " . $application->getUser()->getUsername() . " approved"
+        );
+
+        $em->flush();
+
+        $this->notificationService->notifyCoachApplicationApproved($application);
+        $this->emailService->sendApprovalEmail($application);
+
+        $this->addFlash('success', 'The application has been approved, the user is now a coach and has received a confirmation email');
+        return $this->redirectToRoute('admin_coach_applications_show', ['id' => $application->getId()]);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    //  REJECT
+    // ──────────────────────────────────────────────────────────────
+    #[Route('/{id}/reject', name: 'admin_coach_applications_reject', methods: ['POST'])]
+    public function reject(
+        Request                $request,
+        CoachApplication       $application,
+        EntityManagerInterface $em
+    ): Response {
+        if (!$this->isCsrfTokenValid('reject-' . $application->getId(), $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Invalid CSRF token');
+        }
+
+        $comment = $request->request->get('comment');
+        if (!$comment) {
+            $this->addFlash('error', 'A comment is required to reject an application');
+            return $this->redirectToRoute('admin_coach_applications_show', ['id' => $application->getId()]);
+        }
+
+        $application->reject($comment);
+
+        $this->createAuditLog(
+            $em, 'COACH_APPLICATION_REJECTED', 'CoachApplication',
+            $application->getId(),
+            "Application from " . $application->getUser()->getUsername() . " rejected: $comment"
+        );
+
+        $em->flush();
+
+        $this->notificationService->notifyCoachApplicationRejected($application);
+        $this->emailService->sendRejectionEmail($application);
+
+        $this->addFlash('warning', 'The application has been rejected and the user has been notified by email');
+        return $this->redirectToRoute('admin_coach_applications_show', ['id' => $application->getId()]);
+    }
+
+    // ──────────────────────────────────────────────────────────────
+    //  HELPER — Audit log
+    // ──────────────────────────────────────────────────────────────
     private function createAuditLog(
         EntityManagerInterface $em,
-        string $action,
-        string $entityType,
-        ?int $entityId,
-        string $details
+        string                 $action,
+        string                 $entityType,
+        ?int                   $entityId,
+        string                 $details
     ): void {
         $auditLog = new AuditLog();
         $auditLog->setUser($this->getUser());
@@ -237,7 +227,7 @@ class AdminCoachApplicationController extends AbstractController
         $auditLog->setEntityId($entityId);
         $auditLog->setDetails($details);
         $auditLog->setIpAddress($_SERVER['REMOTE_ADDR'] ?? null);
-        
+
         $em->persist($auditLog);
     }
 }

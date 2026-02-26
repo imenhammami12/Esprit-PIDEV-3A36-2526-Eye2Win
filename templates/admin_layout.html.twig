@@ -5,321 +5,289 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>{% block title %}Admin Dashboard{% endblock %} - EyeTwin E-Sport</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    {#
+    ── AVANT (CDN — render-blocking) ───────────────────────────────────
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk..."> ← bloquant
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons..."> ← bloquant
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"> ← bloquant
     <link rel="stylesheet" href="{{ asset('assets/css/admincss.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/admin-notifications.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/admin-notification-toast.css') }}">
-    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+    ── APRÈS (Encore — 1 seul fichier, versionné, cacheable 1 an) ──────
+    #}
+    {{ encore_entry_link_tags('admin') }}
+
+    {# CSS locaux — chargés séparément pour garantir l'apparence correcte.
+       Encore bundle contient Bootstrap + Icons + Fonts.
+       Ces fichiers contiennent votre thème gaming spécifique. #}
+    <link rel="stylesheet" href="{{ asset('assets/css/admincss.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/admin-notifications.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/admin-notification-toast.css') }}">
+
     {% block stylesheets %}{% endblock %}
 
     <style>
-        :root {
-            --sidebar-w: 260px;
-            --topbar-h: 64px;
+    /* ── Variables ── */
+    :root {
+        --sw: 260px;
+        --th: 64px;
+    }
+
+    html, body { margin: 0; padding: 0; overflow-x: hidden; }
+
+    .sidebar {
+        position: fixed !important;
+        top: 0 !important; left: 0 !important;
+        width: var(--sw) !important;
+        height: 100vh !important;
+        z-index: 500 !important;
+        overflow-y: auto !important; overflow-x: hidden !important;
+        display: flex !important; flex-direction: column !important;
+        transform: none !important;
+        transition: transform 0.28s cubic-bezier(0.4,0,0.2,1) !important;
+    }
+
+    .top-bar {
+        position: fixed !important;
+        top: 0 !important;
+        left: var(--sw) !important;
+        right: 0 !important;
+        height: var(--th) !important;
+        z-index: 200 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 16px !important;
+        padding: 0 24px !important;
+        background: #0d0618 !important;
+        border-bottom: 1px solid rgba(255,60,100,0.25) !important;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.6) !important;
+        box-sizing: border-box !important;
+    }
+
+    .main-content {
+        position: static !important;
+        margin-left: var(--sw) !important;
+        margin-top: var(--th) !important;
+        width: calc(100% - var(--sw)) !important;
+        min-height: calc(100vh - var(--th)) !important;
+        padding: 24px !important;
+        box-sizing: border-box !important;
+    }
+
+    h1.page-title {
+        font-size: 19px !important; font-weight: 700 !important;
+        color: #fff !important; -webkit-text-fill-color: #fff !important;
+        background: none !important;
+        margin: 0 !important; padding-left: 14px !important;
+        position: relative !important;
+        white-space: nowrap !important; overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        flex: 1 1 auto !important; min-width: 0 !important;
+    }
+    h1.page-title::before {
+        content: '' !important; position: absolute !important;
+        left: 0 !important; top: 50% !important;
+        transform: translateY(-50%) !important;
+        width: 4px !important; height: 20px !important;
+        background: linear-gradient(135deg,#ff3c64,#ff1744) !important;
+        border-radius: 2px !important;
+    }
+
+    .header-actions {
+        display: flex !important; align-items: center !important;
+        gap: 10px !important; flex-shrink: 0 !important;
+    }
+
+    .mobile-menu-toggle {
+        position: fixed !important;
+        top: 13px !important; left: 13px !important;
+        z-index: 600 !important;
+        display: none !important;
+        align-items: center !important;
+        justify-content: center !important;
+        background: linear-gradient(135deg,#ff3c64,#ff1744) !important;
+        color: #fff !important;
+        border: none !important; border-radius: 10px !important;
+        width: 38px !important; height: 38px !important;
+        font-size: 20px !important;
+        cursor: pointer !important;
+        box-shadow: 0 4px 14px rgba(255,60,100,0.5) !important;
+        transition: transform 0.2s !important;
+    }
+
+    .sidebar-overlay {
+        position: fixed !important; inset: 0 !important;
+        background: rgba(0,0,0,0.65) !important;
+        backdrop-filter: blur(3px) !important;
+        z-index: 400 !important;
+        display: none !important;
+    }
+    .sidebar-overlay.show { display: block !important; }
+
+    @media (max-width: 991.98px) {
+        .mobile-menu-toggle { display: flex !important; }
+        .sidebar { transform: translateX(-100%) !important; }
+        .sidebar.show {
+            transform: translateX(0px) !important;
+            box-shadow: 10px 0 40px rgba(0,0,0,0.8) !important;
         }
+        .top-bar { left: 0 !important; width: 100% !important; padding: 0 16px 0 62px !important; }
+        .main-content { margin-left: 0 !important; width: 100% !important; padding: 20px 16px !important; }
+        h1.page-title { font-size: 16px !important; }
+    }
 
-        /* Reset du container Bootstrap qui casse le layout */
-        body > .container { all: unset; }
+    @media (max-width: 767.98px) {
+        :root { --th: 56px; }
+        .top-bar  { padding: 0 12px 0 58px !important; height: var(--th) !important; }
+        .main-content { margin-top: var(--th) !important; padding: 16px 12px !important; }
+        h1.page-title { font-size: 15px !important; }
+    }
 
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-            background: #0d0618;
-            font-family: 'Space Grotesk', sans-serif;
-            color: #f0eaf8;
-        }
-
-        /* ── TOPBAR FIXE ──────────────────────────────────── */
-        .top-bar {
-            position: fixed !important;
-            top: 0 !important;
-            left: var(--sidebar-w) !important;
-            right: 0 !important;
-            height: var(--topbar-h) !important;
-            z-index: 100 !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: space-between !important;
-            padding: 0 28px !important;
-            background: rgba(13, 6, 24, 0.95) !important;
-            backdrop-filter: blur(20px) !important;
-            -webkit-backdrop-filter: blur(20px) !important;
-            border-bottom: 1px solid rgba(255,255,255,0.08) !important;
-            box-shadow: 0 2px 24px rgba(0,0,0,0.4) !important;
-            box-sizing: border-box !important;
-        }
-
-        .page-title {
-            font-size: 20px !important;
-            font-weight: 700 !important;
-            color: #fff !important;
-            margin: 0 !important;
-        }
-
-        .header-actions {
-            display: flex !important;
-            align-items: center !important;
-            gap: 12px !important;
-        }
-
-        /* ── SIDEBAR FIXE ─────────────────────────────────── */
-        .sidebar {
-            position: fixed !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: var(--sidebar-w) !important;
-            height: 100vh !important;
-            z-index: 200 !important;
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-            display: flex !important;
-            flex-direction: column !important;
-        }
-
-        /* ── MAIN CONTENT décalé ──────────────────────────── */
-        .main-content {
-    position: static !important;
-    margin-left: var(--sidebar-w) !important;
-    margin-top: var(--topbar-h) !important;
-    width: calc(100% - var(--sidebar-w)) !important;
-}
-
-        .content-area { padding-top: 0 !important; }
-
-        /* ── User avatar ──────────────────────────────────── */
-        .user-avatar {
-            width: 36px !important;
-            height: 36px !important;
-            border-radius: 10px !important;
-            background: linear-gradient(135deg, #ff3c64, #7828c8) !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            font-size: 13px !important;
-            font-weight: 700 !important;
-            color: #fff !important;
-            cursor: pointer !important;
-        }
-
-        /* ── Dropdown ─────────────────────────────────────── */
-        .dropdown-menu {
-            background: rgba(18,10,30,0.98) !important;
-            border: 1px solid rgba(255,255,255,0.1) !important;
-            border-radius: 14px !important;
-            padding: 8px !important;
-            min-width: 200px !important;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5) !important;
-        }
-
-        .dropdown-item {
-            color: rgba(255,255,255,0.8) !important;
-            border-radius: 8px !important;
-            padding: 10px 14px !important;
-            font-size: 13px !important;
-            font-weight: 500 !important;
-            display: flex !important;
-            align-items: center !important;
-            gap: 10px !important;
-            transition: all 0.15s !important;
-        }
-
-        .dropdown-item:hover {
-            background: rgba(255,255,255,0.07) !important;
-            color: #fff !important;
-        }
-
-        .dropdown-item[href*="logout"] {
-            color: rgba(255,60,100,0.85) !important;
-        }
-
-        .dropdown-item[href*="logout"]:hover {
-            background: rgba(255,60,100,0.1) !important;
-            color: #ff3c64 !important;
-        }
-
-        .dropdown-divider {
-            border-color: rgba(255,255,255,0.08) !important;
-        }
-
-        /* ── Mobile ───────────────────────────────────────── */
-        .mobile-menu-toggle {
-            display: none;
-            position: fixed;
-            top: 14px; left: 14px;
-            z-index: 300;
-            background: #ff3c64;
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            width: 38px; height: 38px;
-            font-size: 20px;
-            cursor: pointer;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(255,60,100,0.4);
-        }
-
-        .sidebar-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.6);
-            z-index: 150;
-        }
-
-        @media (max-width: 991px) {
-            .mobile-menu-toggle { display: flex !important; }
-            .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
-            .sidebar.show { transform: translateX(0); }
-            .sidebar-overlay.show { display: block; }
-            .top-bar {
-                left: 0 !important;
-                padding: 0 16px 0 60px !important;
-            }
-            .main-content {
-                left: 0 !important;
-                padding: 20px 16px !important;
-            }
-        }
+    @media (max-width: 575.98px) {
+        :root { --sw: 240px; --th: 52px; }
+        .mobile-menu-toggle { top: 8px !important; left: 8px !important; width: 34px !important; height: 34px !important; font-size: 18px !important; }
+        .top-bar  { padding: 0 10px 0 50px !important; height: var(--th) !important; }
+        .main-content { margin-top: var(--th) !important; padding: 12px 10px !important; }
+        h1.page-title { font-size: 14px !important; }
+    }
     </style>
 </head>
 <body data-user-id="{{ app.user ? app.user.id : '' }}">
 
     <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Toggle menu">
-        <i class="bi bi-list"></i>
+        <i class="bi bi-list" id="mobileMenuIcon"></i>
     </button>
+
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-    <!-- ══ SIDEBAR ══════════════════════════════════════════ -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <a href="{{ path('admin_dashboard') }}" style="text-decoration: none;">
-                <img src="{{ asset('assets/img/eyetwin-logo.png') }}" alt="EyeTwin Logo"
-                     style="max-width: 160px; height: auto; display: block; margin: 0 auto 10px;">
+            <a href="{{ path('admin_dashboard') }}" style="text-decoration:none;">
+                <img src="{{ asset('assets/img/eyetwin-logo.png') }}"
+                     alt="EyeTwin Logo"
+                     width="160" height="40"
+                     style="max-width:160px; height:auto; display:block; margin:0 auto 10px;">
             </a>
         </div>
 
-        <nav class="sidebar-menu">
+        <nav class="sidebar-menu" aria-label="Admin navigation">
             <a href="{{ path('admin_dashboard') }}"
                class="{{ app.request.attributes.get('_route') starts with 'admin_dashboard' ? 'active' : '' }}">
-                <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+                <i class="bi bi-speedometer2" aria-hidden="true"></i><span>Dashboard</span>
             </a>
             <a href="{{ path('admin_users_index') }}"
                class="{{ app.request.attributes.get('_route') starts with 'admin_users' ? 'active' : '' }}">
-                <i class="bi bi-people"></i><span>Users</span>
+                <i class="bi bi-people" aria-hidden="true"></i><span>Users</span>
             </a>
             <a href="{{ path('admin_planning_index') }}"
                class="{{ app.request.attributes.get('_route') starts with 'admin_planning' ? 'active' : '' }}">
-                <i class="bi bi-calendar-event"></i><span>Planning</span>
+                <i class="bi bi-calendar-event" aria-hidden="true"></i><span>Planning</span>
             </a>
             <a href="{{ path('admin_tournoi_index') }}"
                class="{{ app.request.attributes.get('_route') starts with 'admin_tournoi' ? 'active' : '' }}">
-                <i class="bi bi-trophy"></i><span>Tournaments</span>
+                <i class="bi bi-trophy" aria-hidden="true"></i><span>Tournaments</span>
             </a>
             <a href="{{ path('admin_videos_index') }}"
                class="{{ app.request.attributes.get('_route') starts with 'admin_videos' or app.request.attributes.get('_route') starts with 'admin_video' ? 'active' : '' }}">
-                <i class="bi bi-camera-video"></i><span>Videos</span>
+                <i class="bi bi-camera-video" aria-hidden="true"></i><span>Videos</span>
             </a>
             <a href="{{ path('admin_coach_applications_index') }}"
                class="{{ app.request.attributes.get('_route') starts with 'admin_coach_applications' ? 'active' : '' }}">
-                <i class="bi bi-clipboard-check"></i><span>Coach Applications</span>
+                <i class="bi bi-clipboard-check" aria-hidden="true"></i><span>Coach Applications</span>
                 {% if pendingApplicationsCount|default(0) > 0 %}
                     <span class="badge bg-danger" style="margin-left:auto;">{{ pendingApplicationsCount }}</span>
                 {% endif %}
             </a>
             <a href="{{ path('admin_channels_index') }}"
                class="{{ app.request.attributes.get('_route') starts with 'admin_channels' ? 'active' : '' }}">
-                <i class="bi bi-chat-left-text"></i><span>Channels</span>
+                <i class="bi bi-chat-left-text" aria-hidden="true"></i><span>Channels</span>
             </a>
             <a href="{{ path('admin_complaints_index') }}"
                class="{{ app.request.attributes.get('_route') starts with 'admin_complaints' ? 'active' : '' }}">
-                <i class="bi bi-headset"></i><span>Complaints</span>
+                <i class="bi bi-headset" aria-hidden="true"></i><span>Complaints</span>
                 {% if pendingComplaintsCount|default(0) > 0 %}
                     <span class="badge bg-danger" style="margin-left:auto;">{{ pendingComplaintsCount }}</span>
                 {% endif %}
             </a>
             <a href="{{ path('admin_messages_index') }}"
                class="{{ app.request.attributes.get('_route') starts with 'admin_messages' ? 'active' : '' }}">
-                <i class="bi bi-chat-dots"></i><span>Messages</span>
+                <i class="bi bi-chat-dots" aria-hidden="true"></i><span>Messages</span>
             </a>
             <a href="{{ path('admin_teams_index') }}"
                class="{{ app.request.attributes.get('_route') starts with 'admin_teams' ? 'active' : '' }}">
-                <i class="bi bi-grid-3x3"></i><span>Teams</span>
+                <i class="bi bi-grid-3x3" aria-hidden="true"></i><span>Teams</span>
             </a>
             {% if is_granted('ROLE_SUPER_ADMIN') %}
                 <a href="{{ path('admin_audit_logs_index') }}"
                    class="{{ app.request.attributes.get('_route') starts with 'admin_audit_logs' ? 'active' : '' }}">
-                    <i class="bi bi-journal-text"></i><span>Audit Logs</span>
+                    <i class="bi bi-journal-text" aria-hidden="true"></i><span>Audit Logs</span>
                 </a>
             {% endif %}
             <div class="sidebar-divider"></div>
             <a href="{{ path('app_home') }}" target="_blank" rel="noopener noreferrer">
-                <i class="bi bi-globe"></i><span>View Site</span>
-                <i class="bi bi-box-arrow-up-right" style="margin-left:auto; font-size:12px; opacity:0.5;"></i>
+                <i class="bi bi-globe" aria-hidden="true"></i><span>View Site</span>
+                <i class="bi bi-box-arrow-up-right" aria-hidden="true" style="margin-left:auto;font-size:11px;opacity:0.5;"></i>
             </a>
         </nav>
 
         <a href="{{ path('admin_logout') }}" class="logout-btn">
-            <i class="bi bi-box-arrow-right"></i> Logout
+            <i class="bi bi-box-arrow-right" aria-hidden="true"></i> Logout
         </a>
     </aside>
 
-    <!-- ══ TOPBAR FIXE ══════════════════════════════════════ -->
     <header class="top-bar">
         <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
 
         <div class="header-actions">
-            <!-- Notification Bell -->
             <div class="notification-bell" id="adminNotificationBell">
-                <i class="bi bi-bell-fill"></i>
-                <span class="notification-badge" id="adminNotificationBadge" style="display:none;">0</span>
-                <div class="notification-dropdown" id="adminNotificationDropdown">
+                <i class="bi bi-bell-fill" aria-hidden="true"></i>
+                <span class="notification-badge" id="adminNotificationBadge" style="display:none;" aria-live="polite">0</span>
+                <div class="notification-dropdown" id="adminNotificationDropdown" role="dialog" aria-label="Notifications">
                     <div class="notification-header">
-                        <h3>Notifications</h3>
+                        <h2 style="font-size:1rem;margin:0">Notifications</h2>
                         <button class="mark-all-read" id="markAllRead">Mark all read</button>
                     </div>
                     <div class="notification-list" id="adminNotificationList">
                         <div class="empty-notifications">
-                            <i class="bi bi-bell-slash"></i>
+                            <i class="bi bi-bell-slash" aria-hidden="true"></i>
                             <p>No new notifications</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- User Dropdown -->
             <div class="user-info dropdown">
                 <div class="dropdown-toggle d-flex align-items-center gap-2"
                      id="userDropdown"
                      data-bs-toggle="dropdown"
                      aria-expanded="false"
-                     style="cursor:pointer; text-decoration:none; list-style:none;">
-                    <span class="d-none d-md-inline" style="color:rgba(255,255,255,0.6); font-size:13px; font-weight:500;">
+                     style="cursor:pointer;">
+                    <span class="d-none d-md-inline"
+                          style="color:rgba(255,255,255,0.6);font-size:13px;font-weight:500;">
                         {{ app.user.username|default('Admin') }}
                     </span>
                     <div class="user-avatar" title="{{ app.user.username|default('Admin') }}">
                         {{ app.user.username|default('AD')|slice(0,2)|upper }}
                     </div>
                 </div>
-
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                     <li>
                         <a class="dropdown-item" href="{{ path('app_profile') }}">
-                            <i class="bi bi-person-circle"></i> My Profile
+                            <i class="bi bi-person-circle" aria-hidden="true"></i> My Profile
                         </a>
                     </li>
                     <li>
                         <a class="dropdown-item" href="{{ path('app_profile_face_register') }}">
-                            <i class="bi bi-camera-fill"></i> Face Recognition
+                            <i class="bi bi-camera-fill" aria-hidden="true"></i> Face Recognition
                         </a>
                     </li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
                         <a class="dropdown-item" href="{{ path('admin_logout') }}">
-                            <i class="bi bi-box-arrow-right"></i> Logout
+                            <i class="bi bi-box-arrow-right" aria-hidden="true"></i> Logout
                         </a>
                     </li>
                 </ul>
@@ -327,13 +295,15 @@
         </div>
     </header>
 
-    <!-- ══ MAIN CONTENT ══════════════════════════════════════ -->
     <main class="main-content">
         <div class="content-area">
             {% for label, messages in app.flashes %}
                 {% for message in messages %}
                     <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
-                        <i class="bi bi-{{ label == 'success' ? 'check-circle' : (label == 'error' or label == 'danger' ? 'x-circle' : 'info-circle') }} me-2"></i>
+                        <i class="bi bi-{{
+                            label == 'success' ? 'check-circle' :
+                            (label == 'error' or label == 'danger' ? 'x-circle' : 'info-circle')
+                        }} me-2" aria-hidden="true"></i>
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
@@ -345,52 +315,63 @@
 
     {% block modal_container %}{% endblock %}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    {#
+    ── AVANT : <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/..."> ← CDN
+    ── APRÈS : Bootstrap JS est bundlé dans admin.js via Encore
+    #}
+    {{ encore_entry_script_tags('admin') }}
 
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const toggle  = document.getElementById('mobileMenuToggle');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
+    document.addEventListener('DOMContentLoaded', function () {
+        'use strict';
 
-            function closeSidebar() {
-                sidebar.classList.remove('show');
-                overlay.classList.remove('show');
-            }
+        const btn     = document.getElementById('mobileMenuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const icon    = document.getElementById('mobileMenuIcon');
 
-            if (toggle) toggle.addEventListener('click', () => {
-                sidebar.classList.toggle('show');
-                overlay.classList.toggle('show');
-            });
+        function openSidebar() {
+            sidebar.classList.add('show');
+            overlay.classList.add('show');
+            if (icon) icon.className = 'bi bi-x-lg';
+            document.body.style.overflow = 'hidden';
+        }
 
-            if (overlay) overlay.addEventListener('click', closeSidebar);
+        function closeSidebar() {
+            sidebar.classList.remove('show');
+            overlay.classList.remove('show');
+            if (icon) icon.className = 'bi bi-list';
+            document.body.style.overflow = '';
+        }
 
-            sidebar?.querySelectorAll('a').forEach(link => {
-                link.addEventListener('click', () => {
-                    if (window.innerWidth < 992) closeSidebar();
-                });
-            });
+        if (btn)     btn.addEventListener('click', () => sidebar.classList.contains('show') ? closeSidebar() : openSidebar());
+        if (overlay) overlay.addEventListener('click', closeSidebar);
 
-            document.querySelectorAll('.alert:not(.alert-permanent)').forEach(el => {
-                setTimeout(() => {
-                    try { new bootstrap.Alert(el).close(); } catch (_) {}
-                }, 6000);
-            });
+        sidebar?.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => { if (window.innerWidth < 992) closeSidebar(); });
         });
 
-        function confirmAction(url, token, message) {
-            if (confirm(message)) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = url;
-                const inp = document.createElement('input');
-                inp.type = 'hidden'; inp.name = '_token'; inp.value = token;
-                form.appendChild(inp);
-                document.body.appendChild(form);
-                form.submit();
-            }
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 992) { closeSidebar(); document.body.style.overflow = ''; }
+        });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
+
+        document.querySelectorAll('.alert:not(.alert-permanent)').forEach(el => {
+            setTimeout(() => {
+                try { bootstrap.Alert.getOrCreateInstance(el).close(); } catch(_) {}
+            }, 6000);
+        });
+    });
+
+    function confirmAction(url, token, message) {
+        if (confirm(message)) {
+            const form = document.createElement('form');
+            form.method = 'POST'; form.action = url;
+            const inp = document.createElement('input');
+            inp.type = 'hidden'; inp.name = '_token'; inp.value = token;
+            form.appendChild(inp); document.body.appendChild(form); form.submit();
         }
+    }
     </script>
 
     {% block javascripts %}{% endblock %}
@@ -398,7 +379,8 @@
 
     {% if app.user %}
         <script>window.MERCURE_HUB_URL = 'http://localhost:3000/.well-known/mercure';</script>
-        <script src="{{ asset('assets/js/admin-notifications.js') }}"></script>
+        <script defer src="{{ asset('assets/js/admin-notifications.js') }}"></script>
     {% endif %}
+
 </body>
 </html>

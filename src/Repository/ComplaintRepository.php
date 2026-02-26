@@ -86,29 +86,47 @@ class ComplaintRepository extends ServiceEntityRepository
     }
 
     /**
-     * Get statistics for dashboard
+     * Get statistics for dashboard.
+     *
+     * Uses a single DQL query that groups by status enum object.
+     * Doctrine handles all enum ↔ string mapping automatically.
      */
     public function getStatistics(): array
     {
-        $qb = $this->createQueryBuilder('c')
-            ->select('c.status, COUNT(c.id) as count')
-            ->groupBy('c.status');
-
-        $results = $qb->getQuery()->getResult();
-
         $stats = [
-            'total' => 0,
-            'pending' => 0,
+            'total'       => 0,
+            'pending'     => 0,
             'in_progress' => 0,
-            'resolved' => 0,
-            'closed' => 0,
-            'rejected' => 0,
+            'resolved'    => 0,
+            'closed'      => 0,
+            'rejected'    => 0,
         ];
 
-        foreach ($results as $result) {
-            $statusKey = strtolower($result['status']->value);
-            $stats[$statusKey] = (int) $result['count'];
-            $stats['total'] += (int) $result['count'];
+        // Map enum case name (lowercase) to stats key
+        $keyMap = [
+            'PENDING'     => 'pending',
+            'IN_PROGRESS' => 'in_progress',
+            'RESOLVED'    => 'resolved',
+            'CLOSED'      => 'closed',
+            'REJECTED'    => 'rejected',
+        ];
+
+        $results = $this->getEntityManager()
+            ->createQuery('SELECT c.status, COUNT(c.id) AS cnt FROM App\Entity\Complaint c GROUP BY c.status')
+            ->getResult();
+
+        foreach ($results as $row) {
+            // $row['status'] is a ComplaintStatus enum object
+            $statusValue = $row['status'] instanceof ComplaintStatus
+                ? $row['status']->value          // e.g. "PENDING"
+                : (string) $row['status'];        // fallback if string
+
+            $key = $keyMap[$statusValue] ?? strtolower(str_replace(' ', '_', $statusValue));
+
+            if (array_key_exists($key, $stats)) {
+                $stats[$key] = (int) $row['cnt'];
+            }
+            $stats['total'] += (int) $row['cnt'];
         }
 
         return $stats;
@@ -119,22 +137,21 @@ class ComplaintRepository extends ServiceEntityRepository
      */
     public function getPriorityStatistics(): array
     {
-        $qb = $this->createQueryBuilder('c')
-            ->select('c.priority, COUNT(c.id) as count')
-            ->groupBy('c.priority');
-
-        $results = $qb->getQuery()->getResult();
-
         $stats = [
-            'low' => 0,
+            'low'    => 0,
             'medium' => 0,
-            'high' => 0,
+            'high'   => 0,
             'urgent' => 0,
         ];
 
-        foreach ($results as $result) {
-            $priorityKey = strtolower($result['priority']->value);
-            $stats[$priorityKey] = (int) $result['count'];
+        $conn = $this->getEntityManager()->getConnection();
+        $sql  = 'SELECT priority, COUNT(id) AS cnt FROM complaint GROUP BY priority';
+
+        foreach ($conn->executeQuery($sql)->fetchAllAssociative() as $row) {
+            $key = strtolower($row['priority']);
+            if (array_key_exists($key, $stats)) {
+                $stats[$key] = (int) $row['cnt'];
+            }
         }
 
         return $stats;
@@ -145,17 +162,14 @@ class ComplaintRepository extends ServiceEntityRepository
      */
     public function getCategoryStatistics(): array
     {
-        $qb = $this->createQueryBuilder('c')
-            ->select('c.category, COUNT(c.id) as count')
-            ->groupBy('c.category');
-
-        $results = $qb->getQuery()->getResult();
-
         $stats = [];
 
-        foreach ($results as $result) {
-            $categoryKey = strtolower($result['category']->value);
-            $stats[$categoryKey] = (int) $result['count'];
+        $conn = $this->getEntityManager()->getConnection();
+        $sql  = 'SELECT category, COUNT(id) AS cnt FROM complaint GROUP BY category';
+
+        foreach ($conn->executeQuery($sql)->fetchAllAssociative() as $row) {
+            $key          = strtolower($row['category']);
+            $stats[$key]  = (int) $row['cnt'];
         }
 
         return $stats;
@@ -169,7 +183,7 @@ class ComplaintRepository extends ServiceEntityRepository
         $conn = $this->getEntityManager()->getConnection();
 
         $sql = '
-            SELECT AVG(TIMESTAMPDIFF(HOUR, created_at, resolved_at)) as avg_hours
+            SELECT AVG(TIMESTAMPDIFF(HOUR, created_at, resolved_at)) AS avg_hours
             FROM complaint
             WHERE resolved_at IS NOT NULL
         ';
@@ -185,7 +199,7 @@ class ComplaintRepository extends ServiceEntityRepository
     public function findRecent(int $limit = 10): array
     {
         $date = new \DateTime('-30 days');
-        
+
         return $this->createQueryBuilder('c')
             ->where('c.createdAt >= :date')
             ->setParameter('date', $date)
@@ -213,6 +227,21 @@ class ComplaintRepository extends ServiceEntityRepository
     }
 
     /**
+     * Count unassigned complaints (efficient — no full collection load)
+     */
+    public function countUnassigned(): int
+    {
+        return (int) $this->getEntityManager()
+            ->createQuery(
+                'SELECT COUNT(c.id) FROM App\Entity\Complaint c
+                 WHERE c.assignedTo IS NULL
+                 AND c.status NOT IN (:excludedStatuses)'
+            )
+            ->setParameter('excludedStatuses', [ComplaintStatus::RESOLVED, ComplaintStatus::CLOSED])
+            ->getSingleScalarResult();
+    }
+
+    /**
      * Find complaints assigned to a specific admin
      */
     public function findByAssignedAdmin(User $admin): array
@@ -232,7 +261,7 @@ class ComplaintRepository extends ServiceEntityRepository
     public function findOverdue(int $days = 7): array
     {
         $date = new \DateTime("-{$days} days");
-        
+
         return $this->createQueryBuilder('c')
             ->where('c.createdAt <= :date')
             ->andWhere('c.status = :pending OR c.status = :in_progress')
@@ -307,7 +336,7 @@ class ComplaintRepository extends ServiceEntityRepository
     public function countToday(): int
     {
         $today = new \DateTime('today');
-        
+
         return $this->createQueryBuilder('c')
             ->select('COUNT(c.id)')
             ->where('c.createdAt >= :today')
@@ -322,7 +351,7 @@ class ComplaintRepository extends ServiceEntityRepository
     public function countResolvedToday(): int
     {
         $today = new \DateTime('today');
-        
+
         return $this->createQueryBuilder('c')
             ->select('COUNT(c.id)')
             ->where('c.resolvedAt >= :today')
@@ -339,10 +368,10 @@ class ComplaintRepository extends ServiceEntityRepository
         $conn = $this->getEntityManager()->getConnection();
 
         $sql = '
-            SELECT 
-                DATE_FORMAT(created_at, "%Y-%m") as month,
-                COUNT(*) as total,
-                SUM(CASE WHEN status = "RESOLVED" THEN 1 ELSE 0 END) as resolved
+            SELECT
+                DATE_FORMAT(created_at, "%Y-%m") AS month,
+                COUNT(*)                          AS total,
+                SUM(CASE WHEN status = "RESOLVED" THEN 1 ELSE 0 END) AS resolved
             FROM complaint
             WHERE created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
             GROUP BY month

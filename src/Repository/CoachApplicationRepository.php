@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\CoachApplication;
+use App\Entity\ApplicationStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +17,37 @@ class CoachApplicationRepository extends ServiceEntityRepository
         parent::__construct($registry, CoachApplication::class);
     }
 
-    //    /**
-    //     * @return CoachApplication[] Returns an array of CoachApplication objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('c.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    // ══════════════════════════════════════════════════════════════
+    //  STATS GLOBALES — source unique de vérité
+    //  Calculées PHP-side pour éviter tout problème de mapping.
+    // ══════════════════════════════════════════════════════════════
 
-    //    public function findOneBySomeField($value): ?CoachApplication
-    //    {
-    //        return $this->createQueryBuilder('c')
-    //            ->andWhere('c.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+     * Retourne toutes les statistiques globales en un seul appel.
+     * Utilisé par le controller (rendu initial) et la route AJAX /stats.
+     */
+    public function getGlobalStats(): array
+    {
+        $all = $this->findAll();
+
+        $pending  = 0;
+        $approved = 0;
+        $rejected = 0;
+
+        foreach ($all as $application) {
+            $status = $application->getStatus();
+            if ($status === ApplicationStatus::PENDING)  $pending++;
+            if ($status === ApplicationStatus::APPROVED) $approved++;
+            if ($status === ApplicationStatus::REJECTED) $rejected++;
+        }
+
+        $total = count($all);
+
+        return [
+            'total'    => $total,
+            'pending'  => $pending,
+            'approved' => $approved,
+            'rejected' => $rejected,
+        ];
+    }
 }
