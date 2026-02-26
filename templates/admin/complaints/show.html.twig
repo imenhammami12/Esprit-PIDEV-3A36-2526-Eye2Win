@@ -1,33 +1,43 @@
 {% extends 'admin_layout.html.twig' %}
 
-{% block title %}Complaint #{{ complaint.id }}{% endblock %}
+{% block title %}Complaint #{{ complaint.id }} — {{ complaint.subject|u.truncate(60, '…') }}{% endblock %}
 {% block page_title %}Complaint Details{% endblock %}
 
+{# SEO: admin area must not be indexed #}
+{% block meta %}
+    <meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
 {% block body %}
+
+{# ── Back link ───────────────────────────────────────────────────────────── #}
 <div class="mb-4">
     <a href="{{ path('admin_complaints_index') }}" class="btn btn-outline-light">
-        <i class="bi bi-arrow-left"></i> Back to Complaints
+        <i class="bi bi-arrow-left me-1" aria-hidden="true"></i> Back to Complaints
     </a>
 </div>
 
 <div class="row">
+
+    {# ── Left column — details & forms ─────────────────────────────────── #}
     <div class="col-lg-8">
-        <!-- Complaint Details Card -->
-        <div class="table-card mb-4">
+
+        {# ── Complaint details ─────────────────────────────────────────── #}
+        <article class="table-card mb-4" aria-label="Complaint details">
             <div class="d-flex justify-content-between align-items-start mb-4">
                 <div>
-                    <h3 class="mb-2">{{ complaint.subject }}</h3>
-                    <div class="d-flex gap-2 flex-wrap">
+                    <h1 class="h3 mb-2">{{ complaint.subject }}</h1>
+                    <div class="d-flex gap-2 flex-wrap" aria-label="Complaint metadata">
                         <span class="badge bg-{{ complaint.status.badgeClass }}">
-                            <i class="{{ complaint.status.icon }}"></i>
+                            <i class="{{ complaint.status.icon }}" aria-hidden="true"></i>
                             {{ complaint.status.label }}
                         </span>
                         <span class="badge bg-{{ complaint.priority.badgeClass }}">
-                            <i class="{{ complaint.priority.icon }}"></i>
+                            <i class="{{ complaint.priority.icon }}" aria-hidden="true"></i>
                             {{ complaint.priority.label }}
                         </span>
                         <span class="badge bg-secondary">
-                            <i class="{{ complaint.category.icon }}"></i>
+                            <i class="{{ complaint.category.icon }}" aria-hidden="true"></i>
                             {{ complaint.category.label }}
                         </span>
                     </div>
@@ -37,152 +47,213 @@
                 </div>
             </div>
 
-            <div class="complaint-section">
-                <h5><i class="bi bi-file-text"></i> Description</h5>
+            {# Description #}
+            <section class="complaint-section">
+                <h2 class="h5">
+                    <i class="bi bi-file-text me-1" aria-hidden="true"></i> Description
+                </h2>
                 <p class="text-white-50">{{ complaint.description|nl2br }}</p>
-            </div>
+            </section>
 
+            {# Attachment #}
             {% if complaint.attachmentPath %}
-            <div class="complaint-section">
-                <h5><i class="bi bi-paperclip"></i> Attachment</h5>
-                <a href="{{ asset('uploads/complaints/' ~ complaint.attachmentPath) }}" 
-                   class="btn btn-sm btn-outline-light" 
-                   target="_blank">
-                    <i class="bi bi-download"></i> Download Attachment
+            <section class="complaint-section">
+                <h2 class="h5">
+                    <i class="bi bi-paperclip me-1" aria-hidden="true"></i> Attachment
+                </h2>
+                <a href="{{ asset('uploads/complaints/' ~ complaint.attachmentPath) }}"
+                   class="btn btn-sm btn-outline-light"
+                   target="_blank"
+                   rel="noopener noreferrer">
+                    <i class="bi bi-download me-1" aria-hidden="true"></i> Download Attachment
                 </a>
-            </div>
+            </section>
             {% endif %}
 
+            {# Admin response #}
             {% if complaint.adminResponse %}
-            <div class="complaint-section">
-                <h5><i class="bi bi-reply"></i> Admin Response</h5>
-                <div class="alert alert-info">
+            <section class="complaint-section">
+                <h2 class="h5">
+                    <i class="bi bi-reply me-1" aria-hidden="true"></i> Admin Response
+                </h2>
+                <div class="alert alert-info" role="note">
                     {{ complaint.adminResponse|nl2br }}
                 </div>
-            </div>
+            </section>
             {% endif %}
 
+            {# Resolution notes #}
             {% if complaint.resolutionNotes %}
-            <div class="complaint-section">
-                <h5><i class="bi bi-check-circle"></i> Resolution Notes</h5>
-                <div class="alert alert-success">
+            <section class="complaint-section">
+                <h2 class="h5">
+                    <i class="bi bi-check-circle me-1" aria-hidden="true"></i> Resolution Notes
+                </h2>
+                <div class="alert alert-success" role="note">
                     {{ complaint.resolutionNotes|nl2br }}
                 </div>
-            </div>
+            </section>
             {% endif %}
-        </div>
+        </article>
 
-        <!-- Admin Response Form -->
+        {# ── Forms — only when complaint is still open ─────────────────── #}
         {% if not complaint.isResolved %}
-        <div class="table-card mb-4">
-            <h5 class="mb-3"><i class="bi bi-reply"></i> Add Response</h5>
-            <form method="post" action="{{ path('admin_complaints_respond', {id: complaint.id}) }}">
-                <input type="hidden" name="_token" value="{{ csrf_token('respond-' ~ complaint.id) }}">
-                
-                <div class="mb-3">
-                    <textarea class="form-control" 
-                              name="response" 
-                              rows="4" 
-                              placeholder="Type your response to the user..."
-                              required></textarea>
-                </div>
-                
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-send"></i> Send Response
-                </button>
-            </form>
-        </div>
 
-        <!-- Resolve Form -->
-        <div class="table-card">
-            <h5 class="mb-3"><i class="bi bi-check-circle"></i> Resolve Complaint</h5>
-            <form method="post" action="{{ path('admin_complaints_resolve', {id: complaint.id}) }}">
-                <input type="hidden" name="_token" value="{{ csrf_token('resolve-' ~ complaint.id) }}">
-                
-                <div class="mb-3">
-                    <label class="form-label">Resolution Notes</label>
-                    <textarea class="form-control" 
-                              name="resolution_notes" 
-                              rows="3" 
-                              placeholder="Describe how this complaint was resolved..."
-                              required></textarea>
-                </div>
-                
-                <button type="submit" class="btn btn-success">
-                    <i class="bi bi-check-circle"></i> Mark as Resolved
-                </button>
-            </form>
-        </div>
-        {% endif %}
-    </div>
+            {# Add response #}
+            <div class="table-card mb-4">
+                <h2 class="h5 mb-3">
+                    <i class="bi bi-reply me-1" aria-hidden="true"></i> Add Response
+                </h2>
+                <form method="post"
+                      action="{{ path('admin_complaints_respond', {id: complaint.id}) }}"
+                      novalidate>
+                    <input type="hidden" name="_token"
+                           value="{{ csrf_token('respond-' ~ complaint.id) }}">
 
+                    <div class="mb-3">
+                        <label class="visually-hidden" for="admin-response-text">
+                            Response to the user
+                        </label>
+                        <textarea id="admin-response-text"
+                                  class="form-control"
+                                  name="response"
+                                  rows="4"
+                                  placeholder="Type your response to the user…"
+                                  required
+                                  minlength="10"
+                                  maxlength="5000"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send me-1" aria-hidden="true"></i> Send Response
+                    </button>
+                </form>
+            </div>
+
+            {# Resolve complaint #}
+            <div class="table-card mb-4">
+                <h2 class="h5 mb-3">
+                    <i class="bi bi-check-circle me-1" aria-hidden="true"></i> Resolve Complaint
+                </h2>
+                <form method="post"
+                      action="{{ path('admin_complaints_resolve', {id: complaint.id}) }}"
+                      novalidate>
+                    <input type="hidden" name="_token"
+                           value="{{ csrf_token('resolve-' ~ complaint.id) }}">
+
+                    <div class="mb-3">
+                        <label class="form-label" for="resolution-notes">Resolution Notes</label>
+                        <textarea id="resolution-notes"
+                                  class="form-control"
+                                  name="resolution_notes"
+                                  rows="3"
+                                  placeholder="Describe how this complaint was resolved…"
+                                  required
+                                  minlength="10"
+                                  maxlength="5000"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle me-1" aria-hidden="true"></i> Mark as Resolved
+                    </button>
+                </form>
+            </div>
+
+        {% endif %}{# end not complaint.isResolved #}
+
+    </div>{# end col-lg-8 #}
+
+    {# ── Right column — info sidebar & actions ─────────────────────────── #}
     <div class="col-lg-4">
-        <!-- Info Sidebar -->
-        <div class="table-card mb-4">
-            <h5 class="mb-3"><i class="bi bi-info-circle"></i> Information</h5>
-            
-            <div class="info-item">
-                <strong>Submitted By:</strong>
-                <div>
-                    <a href="{{ path('admin_users_show', {id: complaint.submittedBy.id}) }}" 
-                       class="text-decoration-none">
-                        <i class="bi bi-person"></i> {{ complaint.submittedBy.username }}
-                    </a>
+
+        {# Info #}
+        <aside class="table-card mb-4" aria-label="Complaint information">
+            <h2 class="h5 mb-3">
+                <i class="bi bi-info-circle me-1" aria-hidden="true"></i> Information
+            </h2>
+
+            <dl class="mb-0">
+                <div class="info-item">
+                    <dt>Submitted By</dt>
+                    <dd>
+                        <a href="{{ path('admin_users_show', {id: complaint.submittedBy.id}) }}"
+                           class="text-decoration-none">
+                            <i class="bi bi-person me-1" aria-hidden="true"></i>
+                            {{ complaint.submittedBy.username }}
+                        </a>
+                    </dd>
                 </div>
-            </div>
 
-            <div class="info-item">
-                <strong>Assigned To:</strong>
-                <div>
-                    {% if complaint.assignedTo %}
-                        <i class="bi bi-person-check text-success"></i>
-                        {{ complaint.assignedTo.username }}
-                    {% else %}
-                        <span class="text-muted">
-                            <i class="bi bi-person-x"></i> Not assigned
-                        </span>
-                    {% endif %}
+                <div class="info-item">
+                    <dt>Assigned To</dt>
+                    <dd>
+                        {% if complaint.assignedTo %}
+                            <i class="bi bi-person-check text-success me-1" aria-hidden="true"></i>
+                            {{ complaint.assignedTo.username }}
+                        {% else %}
+                            <span class="text-muted">
+                                <i class="bi bi-person-x me-1" aria-hidden="true"></i>
+                                Not assigned
+                            </span>
+                        {% endif %}
+                    </dd>
                 </div>
-            </div>
 
-            <div class="info-item">
-                <strong>Created:</strong>
-                <div>{{ complaint.createdAt|date('d/m/Y H:i') }}</div>
-            </div>
+                <div class="info-item">
+                    <dt>Created</dt>
+                    <dd>
+                        <time datetime="{{ complaint.createdAt|date('c') }}">
+                            {{ complaint.createdAt|date('d/m/Y H:i') }}
+                        </time>
+                    </dd>
+                </div>
 
-            {% if complaint.updatedAt %}
-            <div class="info-item">
-                <strong>Last Updated:</strong>
-                <div>{{ complaint.updatedAt|date('d/m/Y H:i') }}</div>
-            </div>
-            {% endif %}
+                {% if complaint.updatedAt %}
+                <div class="info-item">
+                    <dt>Last Updated</dt>
+                    <dd>
+                        <time datetime="{{ complaint.updatedAt|date('c') }}">
+                            {{ complaint.updatedAt|date('d/m/Y H:i') }}
+                        </time>
+                    </dd>
+                </div>
+                {% endif %}
 
-            {% if complaint.resolvedAt %}
-            <div class="info-item">
-                <strong>Resolved:</strong>
-                <div>{{ complaint.resolvedAt|date('d/m/Y H:i') }}</div>
-            </div>
-            {% endif %}
-        </div>
+                {% if complaint.resolvedAt %}
+                <div class="info-item">
+                    <dt>Resolved</dt>
+                    <dd>
+                        <time datetime="{{ complaint.resolvedAt|date('c') }}">
+                            {{ complaint.resolvedAt|date('d/m/Y H:i') }}
+                        </time>
+                    </dd>
+                </div>
+                {% endif %}
+            </dl>
+        </aside>
 
-        <!-- Actions -->
-        <div class="table-card mb-4">
-            <h5 class="mb-3"><i class="bi bi-gear"></i> Actions</h5>
-            
-            <!-- Assign -->
-            <form method="post" action="{{ path('admin_complaints_assign', {id: complaint.id}) }}" class="mb-3">
-                <input type="hidden" name="_token" value="{{ csrf_token('assign-complaint-' ~ complaint.id) }}">
-                <label class="form-label">Assign to Admin:</label>
+        {# Actions #}
+        <aside class="table-card mb-4" aria-label="Admin actions">
+            <h2 class="h5 mb-3">
+                <i class="bi bi-gear me-1" aria-hidden="true"></i> Actions
+            </h2>
+
+            {# ── Assign ─────────────────────────────────────────────────── #}
+            <form method="post"
+                  action="{{ path('admin_complaints_assign', {id: complaint.id}) }}"
+                  class="mb-3">
+                <input type="hidden" name="_token"
+                       value="{{ csrf_token('assign-complaint-' ~ complaint.id) }}">
+
+                <label class="form-label" for="assign-admin-select">Assign to Admin</label>
                 <div class="input-group">
-                    <select class="form-select" name="admin_id" required>
-                        <option value="">Select Admin...</option>
-                        <option value="unassign">Unassign</option>
+                    <select class="form-select" id="assign-admin-select" name="admin_id" required>
+                        <option value="">Select Admin…</option>
+                        <option value="unassign">— Unassign —</option>
                         {% if admins is defined and admins is not empty %}
                             {% for admin in admins %}
-                            <option value="{{ admin.id }}" 
+                            <option value="{{ admin.id }}"
                                     {% if complaint.assignedTo and complaint.assignedTo.id == admin.id %}selected{% endif %}>
-                                {{ admin.username }}
-                                {% if admin.email %}({{ admin.email }}){% endif %}
+                                {{ admin.username }}{% if admin.email %} ({{ admin.email }}){% endif %}
                             </option>
                             {% endfor %}
                         {% else %}
@@ -191,39 +262,48 @@
                     </select>
                     <button type="submit" class="btn btn-primary">Assign</button>
                 </div>
+
                 {% if admins is not defined or admins is empty %}
-                    <small class="text-warning d-block mt-1">
-                        <i class="bi bi-exclamation-triangle"></i> 
+                    <p class="text-warning mt-1 mb-0" role="alert">
+                        <i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>
                         No administrators available. Please create admin users first.
-                    </small>
+                    </p>
                 {% endif %}
             </form>
 
-            <!-- Change Status -->
-            <form method="post" action="{{ path('admin_complaints_update_status', {id: complaint.id}) }}" class="mb-3">
-                <input type="hidden" name="_token" value="{{ csrf_token('update-status-' ~ complaint.id) }}">
-                <label class="form-label">Change Status:</label>
+            {# ── Change Status ──────────────────────────────────────────── #}
+            <form method="post"
+                  action="{{ path('admin_complaints_update_status', {id: complaint.id}) }}"
+                  class="mb-3">
+                <input type="hidden" name="_token"
+                       value="{{ csrf_token('update-status-' ~ complaint.id) }}">
+
+                <label class="form-label" for="change-status-select">Change Status</label>
                 <div class="input-group">
-                    <select class="form-select" name="status" required>
-                        <option value="PENDING" {% if complaint.status.value == 'PENDING' %}selected{% endif %}>Pending</option>
+                    <select class="form-select" id="change-status-select" name="status" required>
+                        <option value="PENDING"     {% if complaint.status.value == 'PENDING'     %}selected{% endif %}>Pending</option>
                         <option value="IN_PROGRESS" {% if complaint.status.value == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
-                        <option value="RESOLVED" {% if complaint.status.value == 'RESOLVED' %}selected{% endif %}>Resolved</option>
-                        <option value="CLOSED" {% if complaint.status.value == 'CLOSED' %}selected{% endif %}>Closed</option>
-                        <option value="REJECTED" {% if complaint.status.value == 'REJECTED' %}selected{% endif %}>Rejected</option>
+                        <option value="RESOLVED"    {% if complaint.status.value == 'RESOLVED'    %}selected{% endif %}>Resolved</option>
+                        <option value="CLOSED"      {% if complaint.status.value == 'CLOSED'      %}selected{% endif %}>Closed</option>
+                        <option value="REJECTED"    {% if complaint.status.value == 'REJECTED'    %}selected{% endif %}>Rejected</option>
                     </select>
                     <button type="submit" class="btn btn-primary">Update</button>
                 </div>
             </form>
 
-            <!-- Change Priority -->
-            <form method="post" action="{{ path('admin_complaints_update_priority', {id: complaint.id}) }}" class="mb-3">
-                <input type="hidden" name="_token" value="{{ csrf_token('update-priority-' ~ complaint.id) }}">
-                <label class="form-label">Change Priority:</label>
+            {# ── Change Priority ────────────────────────────────────────── #}
+            <form method="post"
+                  action="{{ path('admin_complaints_update_priority', {id: complaint.id}) }}"
+                  class="mb-3">
+                <input type="hidden" name="_token"
+                       value="{{ csrf_token('update-priority-' ~ complaint.id) }}">
+
+                <label class="form-label" for="change-priority-select">Change Priority</label>
                 <div class="input-group">
-                    <select class="form-select" name="priority" required>
-                        <option value="LOW" {% if complaint.priority.value == 'LOW' %}selected{% endif %}>Low</option>
+                    <select class="form-select" id="change-priority-select" name="priority" required>
+                        <option value="LOW"    {% if complaint.priority.value == 'LOW'    %}selected{% endif %}>Low</option>
                         <option value="MEDIUM" {% if complaint.priority.value == 'MEDIUM' %}selected{% endif %}>Medium</option>
-                        <option value="HIGH" {% if complaint.priority.value == 'HIGH' %}selected{% endif %}>High</option>
+                        <option value="HIGH"   {% if complaint.priority.value == 'HIGH'   %}selected{% endif %}>High</option>
                         <option value="URGENT" {% if complaint.priority.value == 'URGENT' %}selected{% endif %}>Urgent</option>
                     </select>
                     <button type="submit" class="btn btn-primary">Update</button>
@@ -232,49 +312,70 @@
 
             <hr>
 
-            <!-- Delete -->
-            <form method="post" action="{{ path('admin_complaints_delete', {id: complaint.id}) }}" 
-                  onsubmit="return confirm('Are you sure you want to delete this complaint? This action cannot be undone.');">
-                <input type="hidden" name="_token" value="{{ csrf_token('delete-' ~ complaint.id) }}">
-                <button type="submit" class="btn btn-danger w-100">
-                    <i class="bi bi-trash"></i> Delete Complaint
+            {# ── Delete ─────────────────────────────────────────────────── #}
+            <form method="post"
+                  action="{{ path('admin_complaints_delete', {id: complaint.id}) }}"
+                  id="delete-complaint-form">
+                <input type="hidden" name="_token"
+                       value="{{ csrf_token('delete-' ~ complaint.id) }}">
+                <button type="button"
+                        class="btn btn-danger w-100"
+                        data-confirm="Are you sure you want to permanently delete this complaint? This action cannot be undone."
+                        data-form="delete-complaint-form">
+                    <i class="bi bi-trash me-1" aria-hidden="true"></i> Delete Complaint
                 </button>
             </form>
-        </div>
-    </div>
+
+        </aside>
+
+    </div>{# end col-lg-4 #}
+
 </div>
 
+{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
 <style>
 .complaint-section {
     margin-bottom: 2rem;
     padding-bottom: 2rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255,255,255,.1);
 }
+.complaint-section:last-child { border-bottom: none; }
+.complaint-section h2         { color: rgba(255,255,255,.9); font-weight: 600; }
 
-.complaint-section:last-child {
-    border-bottom: none;
-}
-
-.complaint-section h5 {
-    margin-bottom: 1rem;
-    color: rgba(255, 255, 255, 0.9);
-    font-weight: 600;
-}
-
+/* Definition list as info grid */
 .info-item {
-    padding: 0.75rem 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: .75rem 0;
+    border-bottom: 1px solid rgba(255,255,255,.05);
 }
-
-.info-item:last-child {
-    border-bottom: none;
+.info-item:last-child { border-bottom: none; }
+.info-item dt {
+    color: rgba(255,255,255,.7);
+    font-size: .875rem;
+    font-weight: 600;
+    margin-bottom: .25rem;
 }
-
-.info-item strong {
-    display: block;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.875rem;
-    margin-bottom: 0.25rem;
-}
+.info-item dd { margin: 0; }
 </style>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    /**
+     * Generic confirm-before-submit for danger buttons.
+     * Usage: add data-confirm="message" and data-form="form-id" to any button.
+     */
+    document.querySelectorAll('[data-confirm]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (window.confirm(btn.dataset.confirm)) {
+                document.getElementById(btn.dataset.form)?.submit();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

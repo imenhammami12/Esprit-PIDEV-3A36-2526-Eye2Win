@@ -4,8 +4,9 @@
 {% block page_title %}Complaints Management{% endblock %}
 
 {% block body %}
-{# Statistics Cards #}
-<div class="row g-3 mb-4 fade-in">
+
+{# ── Statistics — Row 1 ──────────────────────────────────────────────────── #}
+<div class="row g-3 mb-4 stats-fade">
     <div class="col-xl-3 col-lg-6 col-md-6">
         <div class="stat-card">
             <div class="stat-card-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
@@ -15,7 +16,7 @@
             <div class="stat-card-value">{{ stats.total }}</div>
         </div>
     </div>
-    
+
     <div class="col-xl-3 col-lg-6 col-md-6">
         <div class="stat-card">
             <div class="stat-card-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
@@ -25,7 +26,7 @@
             <div class="stat-card-value">{{ stats.pending }}</div>
         </div>
     </div>
-    
+
     <div class="col-xl-3 col-lg-6 col-md-6">
         <div class="stat-card">
             <div class="stat-card-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
@@ -35,7 +36,7 @@
             <div class="stat-card-value">{{ stats.in_progress }}</div>
         </div>
     </div>
-    
+
     <div class="col-xl-3 col-lg-6 col-md-6">
         <div class="stat-card">
             <div class="stat-card-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
@@ -47,8 +48,8 @@
     </div>
 </div>
 
-{# Additional Stats Row #}
-<div class="row g-3 mb-4 fade-in" style="animation-delay: 0.05s;">
+{# ── Statistics — Row 2 ──────────────────────────────────────────────────── #}
+<div class="row g-3 mb-4 stats-fade">
     <div class="col-md-4">
         <div class="stat-card">
             <div class="stat-card-icon" style="background: linear-gradient(135deg, #fa709a, #fee140);">
@@ -73,183 +74,211 @@
                 <i class="bi bi-clock text-white"></i>
             </div>
             <div class="stat-card-title">Avg Resolution Time</div>
-            <div class="stat-card-value">{{ stats.avg_resolution_hours ? (stats.avg_resolution_hours|round(1)) ~ 'h' : 'N/A' }}</div>
+            <div class="stat-card-value">
+                {{ stats.avg_resolution_hours ? (stats.avg_resolution_hours|round(1)) ~ 'h' : 'N/A' }}
+            </div>
         </div>
     </div>
 </div>
 
-{# Filters and Search #}
-<div class="table-card mb-4 fade-in" style="animation-delay: 0.1s;">
+{# ── Filters ─────────────────────────────────────────────────────────────── #}
+<div class="table-card mb-4">
     <div class="table-header">
-        <h5><i class="bi bi-funnel me-2"></i>Filters & Search</h5>
+        <h5><i class="bi bi-funnel me-2"></i>Filters &amp; Search</h5>
     </div>
-    
+
     <form method="get" class="p-3">
         <div class="row g-3">
+
+            {# Search #}
             <div class="col-md-3">
-                <label class="form-label">
+                <label class="form-label" for="filter-search">
                     <i class="bi bi-search me-1"></i>Search
                 </label>
                 <div class="search-bar">
-                    <i class="search-icon bi bi-search"></i>
-                    <input type="text" 
-                           name="search" 
-                           class="form-control" 
-                           placeholder="Search complaints..." 
+                    <i class="search-icon bi bi-search" aria-hidden="true"></i>
+                    <input type="text"
+                           id="filter-search"
+                           name="search"
+                           class="form-control"
+                           placeholder="Search complaints…"
                            value="{{ search }}"
                            autocomplete="off">
                 </div>
             </div>
-            
+
+            {# Status #}
             <div class="col-md-2">
-                <label class="form-label">
+                <label class="form-label" for="filter-status">
                     <i class="bi bi-toggle-on me-1"></i>Status
                 </label>
-                <select class="form-select" name="status">
+                <select id="filter-status" class="form-select" name="status">
                     <option value="">All Statuses</option>
-                    <option value="PENDING" {% if statusFilter == 'PENDING' %}selected{% endif %}>Pending</option>
+                    <option value="PENDING"     {% if statusFilter == 'PENDING'     %}selected{% endif %}>Pending</option>
                     <option value="IN_PROGRESS" {% if statusFilter == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
-                    <option value="RESOLVED" {% if statusFilter == 'RESOLVED' %}selected{% endif %}>Resolved</option>
-                    <option value="CLOSED" {% if statusFilter == 'CLOSED' %}selected{% endif %}>Closed</option>
-                    <option value="REJECTED" {% if statusFilter == 'REJECTED' %}selected{% endif %}>Rejected</option>
+                    <option value="RESOLVED"    {% if statusFilter == 'RESOLVED'    %}selected{% endif %}>Resolved</option>
+                    <option value="CLOSED"      {% if statusFilter == 'CLOSED'      %}selected{% endif %}>Closed</option>
+                    <option value="REJECTED"    {% if statusFilter == 'REJECTED'    %}selected{% endif %}>Rejected</option>
                 </select>
             </div>
-            
+
+            {# Priority #}
             <div class="col-md-2">
-                <label class="form-label">
+                <label class="form-label" for="filter-priority">
                     <i class="bi bi-flag me-1"></i>Priority
                 </label>
-                <select class="form-select" name="priority">
+                <select id="filter-priority" class="form-select" name="priority">
                     <option value="">All Priorities</option>
-                    <option value="LOW" {% if priorityFilter == 'LOW' %}selected{% endif %}>Low</option>
+                    <option value="LOW"    {% if priorityFilter == 'LOW'    %}selected{% endif %}>Low</option>
                     <option value="MEDIUM" {% if priorityFilter == 'MEDIUM' %}selected{% endif %}>Medium</option>
-                    <option value="HIGH" {% if priorityFilter == 'HIGH' %}selected{% endif %}>High</option>
+                    <option value="HIGH"   {% if priorityFilter == 'HIGH'   %}selected{% endif %}>High</option>
                     <option value="URGENT" {% if priorityFilter == 'URGENT' %}selected{% endif %}>Urgent</option>
                 </select>
             </div>
-            
+
+            {# Category #}
             <div class="col-md-3">
-                <label class="form-label">
+                <label class="form-label" for="filter-category">
                     <i class="bi bi-tag me-1"></i>Category
                 </label>
-                <select class="form-select" name="category">
+                <select id="filter-category" class="form-select" name="category">
                     <option value="">All Categories</option>
-                    <option value="TECHNICAL" {% if categoryFilter == 'TECHNICAL' %}selected{% endif %}>Technical</option>
-                    <option value="ACCOUNT" {% if categoryFilter == 'ACCOUNT' %}selected{% endif %}>Account</option>
+                    <option value="TECHNICAL"  {% if categoryFilter == 'TECHNICAL'  %}selected{% endif %}>Technical</option>
+                    <option value="ACCOUNT"    {% if categoryFilter == 'ACCOUNT'    %}selected{% endif %}>Account</option>
                     <option value="TOURNAMENT" {% if categoryFilter == 'TOURNAMENT' %}selected{% endif %}>Tournament</option>
-                    <option value="TEAM" {% if categoryFilter == 'TEAM' %}selected{% endif %}>Team</option>
-                    <option value="PAYMENT" {% if categoryFilter == 'PAYMENT' %}selected{% endif %}>Payment</option>
-                    <option value="CONTENT" {% if categoryFilter == 'CONTENT' %}selected{% endif %}>Content</option>
+                    <option value="TEAM"       {% if categoryFilter == 'TEAM'       %}selected{% endif %}>Team</option>
+                    <option value="PAYMENT"    {% if categoryFilter == 'PAYMENT'    %}selected{% endif %}>Payment</option>
+                    <option value="CONTENT"    {% if categoryFilter == 'CONTENT'    %}selected{% endif %}>Content</option>
                     <option value="HARASSMENT" {% if categoryFilter == 'HARASSMENT' %}selected{% endif %}>Harassment</option>
-                    <option value="BUG" {% if categoryFilter == 'BUG' %}selected{% endif %}>Bug</option>
-                    <option value="OTHER" {% if categoryFilter == 'OTHER' %}selected{% endif %}>Other</option>
+                    <option value="BUG"        {% if categoryFilter == 'BUG'        %}selected{% endif %}>Bug</option>
+                    <option value="OTHER"      {% if categoryFilter == 'OTHER'      %}selected{% endif %}>Other</option>
                 </select>
             </div>
-            
+
+            {# Actions #}
             <div class="col-md-2 d-flex align-items-end gap-2">
                 <button type="submit" class="btn btn-primary flex-grow-1">
                     <i class="bi bi-search me-1"></i>Filter
                 </button>
                 {% if search or statusFilter or priorityFilter or categoryFilter %}
-                    <a href="{{ path('admin_complaints_index') }}" class="btn btn-outline-secondary" title="Clear filters">
-                        <i class="bi bi-x-lg"></i>
+                    <a href="{{ path('admin_complaints_index') }}"
+                       class="btn btn-outline-secondary"
+                       aria-label="Clear filters">
+                        <i class="bi bi-x-lg" aria-hidden="true"></i>
                     </a>
                 {% endif %}
             </div>
+
         </div>
     </form>
 </div>
 
-{# Results Summary #}
-<div class="mb-3 fade-in" style="animation-delay: 0.15s;">
+{# ── Results summary ─────────────────────────────────────────────────────── #}
+<div class="mb-3">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <h6 class="text-muted mb-0">
             <i class="bi bi-info-circle me-2"></i>
-            Found <strong>{{ pagination.getTotalItemCount }}</strong> complaint{{ pagination.getTotalItemCount != 1 ? 's' : '' }}
+            Found <strong>{{ pagination.getTotalItemCount }}</strong>
+            complaint{{ pagination.getTotalItemCount != 1 ? 's' : '' }}
         </h6>
     </div>
 </div>
 
-{# Complaints Table #}
-<div class="table-card fade-in" style="animation-delay: 0.2s;">
+{# ── Complaints table ────────────────────────────────────────────────────── #}
+<div class="table-card">
     <div class="table-header">
-        <h5><i class="bi bi-headset me-2"></i>Complaints List ({{ pagination.getTotalItemCount }})</h5>
+        <h2 class="h5 mb-0"><i class="bi bi-headset me-2"></i>Complaints List ({{ pagination.getTotalItemCount }})</h2>
     </div>
-    
+
     <div class="table-responsive">
-        <table class="custom-table table">
+        <table class="custom-table table" aria-label="Complaints list">
             <thead>
                 <tr>
-                    <th style="width: 150px;">User</th>
-                    <th style="width: 280px;">Subject</th>
-                    <th style="width: 130px;">Category</th>
-                    <th style="width: 110px;">Priority</th>
-                    <th style="width: 120px;">Status</th>
-                    <th style="width: 150px;">Assigned To</th>
-                    <th style="width: 130px;">Created</th>
-                    <th style="width: 100px;">Actions</th>
+                    <th scope="col" style="width:150px">User</th>
+                    <th scope="col" style="width:280px">Subject</th>
+                    <th scope="col" style="width:130px">Category</th>
+                    <th scope="col" style="width:110px">Priority</th>
+                    <th scope="col" style="width:120px">Status</th>
+                    <th scope="col" style="width:150px">Assigned To</th>
+                    <th scope="col" style="width:130px">Created</th>
+                    <th scope="col" style="width:100px">Actions</th>
                 </tr>
             </thead>
-            <tbody>
+            {#
+              FIX: removed per-row fade-in with loop.index delay.
+              Animating 15 rows individually causes ~15 forced reflows and
+              directly inflates Total Blocking Time. One CSS animation on
+              the tbody is enough (see the <style> block below).
+            #}
+            <tbody class="table-body-fade">
                 {% for complaint in pagination %}
-                <tr class="fade-in" style="animation-delay: {{ loop.index * 0.05 }}s;">
-                    <td style="width: 150px; vertical-align: middle;">
-                        <a href="{{ path('admin_users_show', {id: complaint.submittedBy.id}) }}" class="text-decoration-none" style="color: #43e97b;">
-                            <i class="bi bi-person me-1"></i>
+                <tr>
+                    <td style="width:150px; vertical-align:middle">
+                        <a href="{{ path('admin_users_show', {id: complaint.submittedBy.id}) }}"
+                           class="text-decoration-none"
+                           style="color:#43e97b">
+                            <i class="bi bi-person me-1" aria-hidden="true"></i>
                             <strong>{{ complaint.submittedBy.username }}</strong>
                         </a>
                     </td>
-                    <td style="width: 280px; vertical-align: middle;">
-                        <div style="max-width: 270px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ complaint.subject }}">
+
+                    <td style="width:280px; vertical-align:middle">
+                        <div class="text-truncate" style="max-width:270px" title="{{ complaint.subject }}">
                             {{ complaint.subject }}
                         </div>
                     </td>
-                    <td style="width: 130px; vertical-align: middle;">
+
+                    <td style="width:130px; vertical-align:middle">
                         <span class="badge bg-secondary">
-                            <i class="{{ complaint.category.icon }} me-1"></i>
+                            <i class="{{ complaint.category.icon }} me-1" aria-hidden="true"></i>
                             {{ complaint.category.label }}
                         </span>
                     </td>
-                    <td style="width: 110px; vertical-align: middle;">
+
+                    <td style="width:110px; vertical-align:middle">
                         <span class="badge bg-{{ complaint.priority.badgeClass }}">
-                            <i class="{{ complaint.priority.icon }} me-1"></i>
+                            <i class="{{ complaint.priority.icon }} me-1" aria-hidden="true"></i>
                             {{ complaint.priority.label }}
                         </span>
                     </td>
-                    <td style="width: 120px; vertical-align: middle;">
+
+                    <td style="width:120px; vertical-align:middle">
                         <span class="badge bg-{{ complaint.status.badgeClass }}">
-                            <i class="{{ complaint.status.icon }} me-1"></i>
+                            <i class="{{ complaint.status.icon }} me-1" aria-hidden="true"></i>
                             {{ complaint.status.label }}
                         </span>
                     </td>
-                    <td style="width: 150px; vertical-align: middle;">
+
+                    <td style="width:150px; vertical-align:middle">
                         {% if complaint.assignedTo %}
-                            <span style="color: #4facfe;">
-                                <i class="bi bi-person-check me-1"></i>
+                            <span style="color:#4facfe">
+                                <i class="bi bi-person-check me-1" aria-hidden="true"></i>
                                 {{ complaint.assignedTo.username }}
                             </span>
                         {% else %}
                             <span class="text-muted">
-                                <i class="bi bi-person-x me-1"></i>
+                                <i class="bi bi-person-x me-1" aria-hidden="true"></i>
                                 Unassigned
                             </span>
                         {% endif %}
                     </td>
-                    <td style="width: 130px; vertical-align: middle;">
+
+                    <td style="width:130px; vertical-align:middle">
+                        {#
+                          FIX: use the `date` filter once per cell instead of twice,
+                          and combine into one format call to reduce Twig overhead.
+                        #}
                         <small class="text-muted">
-                            <i class="bi bi-calendar3 me-1"></i>
-                            {{ complaint.createdAt|date('M d, Y') }}
-                            <br>
-                            <i class="bi bi-clock me-1"></i>
-                            {{ complaint.createdAt|date('H:i') }}
+                            <i class="bi bi-calendar3 me-1" aria-hidden="true"></i>
+                            {{ complaint.createdAt|date('M d, Y · H:i') }}
                         </small>
                     </td>
-                    <td style="width: 100px; vertical-align: middle;">
-                        <a href="{{ path('admin_complaints_show', {id: complaint.id}) }}" 
+
+                    <td style="width:100px; vertical-align:middle">
+                        <a href="{{ path('admin_complaints_show', {id: complaint.id}) }}"
                            class="btn btn-sm btn-info"
-                           title="View Details"
-                           data-bs-toggle="tooltip">
-                            <i class="bi bi-eye"></i>
+                           aria-label="View complaint #{{ complaint.id }}">
+                            <i class="bi bi-eye" aria-hidden="true"></i>
                         </a>
                     </td>
                 </tr>
@@ -257,8 +286,8 @@
                 <tr>
                     <td colspan="8" class="text-center text-muted py-5">
                         <div class="empty-state">
-                            <i class="bi bi-inbox" style="font-size: 64px; opacity: 0.2;"></i>
-                            <h4 class="mt-3 mb-2">No Complaints Found</h4>
+                            <i class="bi bi-inbox" style="font-size:64px;opacity:.2" aria-hidden="true"></i>
+                            <h3 class="h4 mt-3 mb-2">No Complaints Found</h3>
                             <p class="text-muted">Try adjusting your search criteria</p>
                         </div>
                     </td>
@@ -269,63 +298,77 @@
     </div>
 </div>
 
-{# Pagination #}
+{# ── Pagination ──────────────────────────────────────────────────────────── #}
 {% if pagination.pageCount > 1 %}
-<div class="d-flex justify-content-between align-items-center mt-4 fade-in" style="animation-delay: 0.3s;">
+<div class="d-flex justify-content-between align-items-center mt-4">
     <div class="text-muted">
-        Showing {{ ((pagination.currentPageNumber - 1) * pagination.itemNumberPerPage) + 1 }} 
-        to {{ min(pagination.currentPageNumber * pagination.itemNumberPerPage, pagination.getTotalItemCount) }} 
+        Showing
+        {{ ((pagination.currentPageNumber - 1) * pagination.itemNumberPerPage) + 1 }}
+        to
+        {{ min(pagination.currentPageNumber * pagination.itemNumberPerPage, pagination.getTotalItemCount) }}
         of {{ pagination.getTotalItemCount }} entries
     </div>
-    
-    <div class="pagination-wrapper">
+
+    <nav aria-label="Complaints pagination" class="pagination-wrapper">
         {{ knp_pagination_render(pagination, '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig', {}, {
-            'search': search,
-            'status': statusFilter,
+            'search':   search,
+            'status':   statusFilter,
             'priority': priorityFilter,
             'category': categoryFilter
         }) }}
-    </div>
+    </nav>
 </div>
 {% endif %}
+
+{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+/*
+ * FIX: Single tbody animation instead of 15 individual row animations.
+ * This cuts forced reflows from N to 1 and eliminates the main-thread
+ * blocking that was inflating TBT.
+ */
+.stats-fade {
+    animation: fadeInUp 0.3s ease-out both;
+}
+.table-body-fade {
+    animation: fadeInUp 0.25s ease-out both;
+}
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0);   }
+}
+
+/* Row hover via pure CSS — no JS reflow */
+.custom-table tbody tr {
+    transition: transform 0.1s ease;
+}
+.custom-table tbody tr:hover {
+    transform: translateX(2px);
+}
+</style>
 {% endblock %}
 
 {% block javascripts %}
+{{ parent() }}
 <script>
-// Initialize Bootstrap tooltips
-document.addEventListener('DOMContentLoaded', function() {
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl, {
-            delay: { show: 300, hide: 100 }
-        });
-    });
-    
-    // Enhanced search with live feedback
-    const searchInput = document.querySelector('input[name="search"]');
+document.addEventListener('DOMContentLoaded', function () {
+    'use strict';
+
+    // Bootstrap tooltips — only needed for elements that actually use them
+    // FIX: removed data-bs-toggle="tooltip" from every row; a single View
+    //       button per page doesn't need tooltips — removed to cut JS work.
+
+    // Search input highlight
+    const searchInput = document.getElementById('filter-search');
     if (searchInput) {
-        searchInput.addEventListener('input', function(e) {
-            const value = e.target.value;
-            const parent = e.target.closest('.search-bar');
-            
-            if (value.length > 0) {
-                parent.style.borderColor = 'rgba(102, 126, 234, 0.5)';
-            } else {
-                parent.style.borderColor = '';
-            }
+        searchInput.addEventListener('input', function () {
+            this.closest('.search-bar').style.borderColor =
+                this.value.length ? 'rgba(102,126,234,.5)' : '';
         });
     }
-    
-    // Row highlight on hover
-    document.querySelectorAll('.custom-table tbody tr').forEach(row => {
-        row.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateX(2px)';
-        });
-        
-        row.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateX(0)';
-        });
-    });
 });
 </script>
 {% endblock %}

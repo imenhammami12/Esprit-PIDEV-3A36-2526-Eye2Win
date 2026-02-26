@@ -9,6 +9,17 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ComplaintRepository::class)]
 #[ORM\Table(name: 'complaint')]
+// Existing indexes
+#[ORM\Index(columns: ['status'],     name: 'idx_complaint_status')]
+#[ORM\Index(columns: ['priority'],   name: 'idx_complaint_priority')]
+#[ORM\Index(columns: ['created_at'], name: 'idx_complaint_created_at')]
+// NEW: index on FK used in joins/filters
+#[ORM\Index(columns: ['assigned_to_id'], name: 'idx_complaint_assigned_to')]
+// NEW: composite index for the admin list query (ORDER BY priority DESC, created_at DESC)
+#[ORM\Index(columns: ['status', 'priority', 'created_at'], name: 'idx_complaint_list_sort')]
+// NEW: index for AVG(resolved_at) query
+#[ORM\Index(columns: ['resolved_at'], name: 'idx_complaint_resolved_at')]
+#[ORM\HasLifecycleCallbacks]
 class Complaint
 {
     #[ORM\Id]
@@ -39,10 +50,10 @@ class Complaint
     private ?ComplaintCategory $category = null;
 
     #[ORM\Column(length: 20, enumType: ComplaintStatus::class)]
-    private ?ComplaintStatus $status = ComplaintStatus::PENDING;
+    private ComplaintStatus $status = ComplaintStatus::PENDING;
 
     #[ORM\Column(length: 20, enumType: ComplaintPriority::class)]
-    private ?ComplaintPriority $priority = ComplaintPriority::MEDIUM;
+    private ComplaintPriority $priority = ComplaintPriority::MEDIUM;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
@@ -52,14 +63,14 @@ class Complaint
     #[ORM\JoinColumn(nullable: true)]
     private ?User $assignedTo = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $createdAt = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private \DateTimeImmutable $createdAt;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $updatedAt = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $updatedAt = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $resolvedAt = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $resolvedAt = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $adminResponse = null;
@@ -67,15 +78,38 @@ class Complaint
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $resolutionNotes = null;
 
+    // Store only the filename — never a full path with user-controlled segments.
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Regex(
+        pattern: '/^[\w\-]+\.[a-zA-Z0-9]{1,10}$/',
+        message: 'Invalid attachment filename'
+    )]
     private ?string $attachmentPath = null;
+
+    // -------------------------------------------------------------------------
+    // Constructor
+    // -------------------------------------------------------------------------
 
     public function __construct()
     {
-        $this->createdAt = new \DateTime();
-        $this->status = ComplaintStatus::PENDING;
-        $this->priority = ComplaintPriority::MEDIUM;
+        $this->createdAt = new \DateTimeImmutable();
+        $this->status    = ComplaintStatus::PENDING;
+        $this->priority  = ComplaintPriority::MEDIUM;
     }
+
+    // -------------------------------------------------------------------------
+    // Lifecycle callbacks
+    // -------------------------------------------------------------------------
+
+    #[ORM\PreUpdate]
+    public function onPreUpdate(): void
+    {
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    // -------------------------------------------------------------------------
+    // Getters / setters
+    // -------------------------------------------------------------------------
 
     public function getId(): ?int
     {
@@ -112,36 +146,71 @@ class Complaint
     public function setCategory(ComplaintCategory $category): static
     {
         $this->category = $category;
+
+        // Auto-suggest priority based on category only when still at default.
+        if ($this->priority === ComplaintPriority::MEDIUM) {
+            $this->priority = $category->getDefaultPriority();
+        }
+
         return $this;
     }
 
-    public function getStatus(): ?ComplaintStatus
+    public function getStatus(): ComplaintStatus
     {
         return $this->status;
     }
 
+    /**
+     * @throws \LogicException when the transition is not allowed.
+     */
     public function setStatus(ComplaintStatus $status): static
     {
-        $this->status = $status;
-        $this->updatedAt = new \DateTime();
-        
-        // Set resolved date when status changes to RESOLVED or CLOSED
-        if (in_array($status, [ComplaintStatus::RESOLVED, ComplaintStatus::CLOSED]) && $this->resolvedAt === null) {
-            $this->resolvedAt = new \DateTime();
+        if ($this->status !== $status) {
+            $allowed = $this->status->allowedTransitions();
+
+            if (!in_array($status, $allowed, true)) {
+                throw new \LogicException(sprintf(
+                    'Cannot transition complaint from "%s" to "%s".',
+                    $this->status->value,
+                    $status->value
+                ));
+            }
+
+            $this->status    = $status;
+            $this->updatedAt = new \DateTimeImmutable();
+
+            if ($status->isFinal() && $this->resolvedAt === null) {
+                $this->resolvedAt = new \DateTimeImmutable();
+            }
         }
-        
+
         return $this;
     }
 
-    public function getPriority(): ?ComplaintPriority
+    /**
+     * Force-set status without transition checks (admin override / data migrations).
+     */
+    public function forceStatus(ComplaintStatus $status): static
+    {
+        $this->status    = $status;
+        $this->updatedAt = new \DateTimeImmutable();
+
+        if ($status->isFinal() && $this->resolvedAt === null) {
+            $this->resolvedAt = new \DateTimeImmutable();
+        }
+
+        return $this;
+    }
+
+    public function getPriority(): ComplaintPriority
     {
         return $this->priority;
     }
 
     public function setPriority(ComplaintPriority $priority): static
     {
-        $this->priority = $priority;
-        $this->updatedAt = new \DateTime();
+        $this->priority  = $priority;
+        $this->updatedAt = new \DateTimeImmutable();
         return $this;
     }
 
@@ -164,41 +233,23 @@ class Complaint
     public function setAssignedTo(?User $assignedTo): static
     {
         $this->assignedTo = $assignedTo;
-        $this->updatedAt = new \DateTime();
+        $this->updatedAt  = new \DateTimeImmutable();
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-        return $this;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeInterface
+    public function getUpdatedAt(): ?\DateTimeImmutable
     {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(?\DateTimeInterface $updatedAt): static
-    {
-        $this->updatedAt = $updatedAt;
-        return $this;
-    }
-
-    public function getResolvedAt(): ?\DateTimeInterface
+    public function getResolvedAt(): ?\DateTimeImmutable
     {
         return $this->resolvedAt;
-    }
-
-    public function setResolvedAt(?\DateTimeInterface $resolvedAt): static
-    {
-        $this->resolvedAt = $resolvedAt;
-        return $this;
     }
 
     public function getAdminResponse(): ?string
@@ -209,7 +260,7 @@ class Complaint
     public function setAdminResponse(?string $adminResponse): static
     {
         $this->adminResponse = $adminResponse;
-        $this->updatedAt = new \DateTime();
+        $this->updatedAt     = new \DateTimeImmutable();
         return $this;
     }
 
@@ -235,9 +286,13 @@ class Complaint
         return $this;
     }
 
+    // -------------------------------------------------------------------------
+    // Convenience status helpers
+    // -------------------------------------------------------------------------
+
     public function isResolved(): bool
     {
-        return in_array($this->status, [ComplaintStatus::RESOLVED, ComplaintStatus::CLOSED]);
+        return $this->status->isFinal();
     }
 
     public function isPending(): bool
@@ -248,5 +303,10 @@ class Complaint
     public function isInProgress(): bool
     {
         return $this->status === ComplaintStatus::IN_PROGRESS;
+    }
+
+    public function isUnassigned(): bool
+    {
+        return $this->assignedTo === null;
     }
 }

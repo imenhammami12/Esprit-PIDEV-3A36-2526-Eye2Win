@@ -5,24 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>{% block title %}Admin Dashboard{% endblock %} - EyeTwin E-Sport</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    {#
+    ── AVANT (CDN — render-blocking) ───────────────────────────────────
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk..."> ← bloquant
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons..."> ← bloquant
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"> ← bloquant
     <link rel="stylesheet" href="{{ asset('assets/css/admincss.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/admin-notifications.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/admin-notification-toast.css') }}">
-    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+
+    ── APRÈS (Encore — 1 seul fichier, versionné, cacheable 1 an) ──────
+    #}
+    {{ encore_entry_link_tags('admin') }}
+
+    {# CSS locaux — chargés séparément pour garantir l'apparence correcte.
+       Encore bundle contient Bootstrap + Icons + Fonts.
+       Ces fichiers contiennent votre thème gaming spécifique. #}
+    <link rel="stylesheet" href="{{ asset('assets/css/admincss.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/admin-notifications.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/admin-notification-toast.css') }}">
+
     {% block stylesheets %}{% endblock %}
 
-    {#
-    =====================================================================
-      CE BLOC <style> EST INTENTIONNELLEMENT APRÈS TOUS LES <link> CSS
-      Ainsi il écrase admincss.css, admin-notifications.css, Bootstrap,
-      etc. grâce à la cascade CSS (même spécificité = dernier gagne).
-      Les !important garantissent qu'aucun fichier externe ne peut
-      écraser ces règles structurelles critiques.
-    =====================================================================
-    #}
     <style>
     /* ── Variables ── */
     :root {
@@ -32,10 +37,6 @@
 
     html, body { margin: 0; padding: 0; overflow-x: hidden; }
 
-    /* ══════════════════════════════════════════
-       DESKTOP (> 991px) : sidebar visible, topbar décalée
-    ══════════════════════════════════════════ */
-
     .sidebar {
         position: fixed !important;
         top: 0 !important; left: 0 !important;
@@ -44,7 +45,6 @@
         z-index: 500 !important;
         overflow-y: auto !important; overflow-x: hidden !important;
         display: flex !important; flex-direction: column !important;
-        /* PAS de transform ici sur desktop = sidebar visible */
         transform: none !important;
         transition: transform 0.28s cubic-bezier(0.4,0,0.2,1) !important;
     }
@@ -52,7 +52,7 @@
     .top-bar {
         position: fixed !important;
         top: 0 !important;
-        left: var(--sw) !important;   /* commence après la sidebar */
+        left: var(--sw) !important;
         right: 0 !important;
         height: var(--th) !important;
         z-index: 200 !important;
@@ -77,7 +77,6 @@
         box-sizing: border-box !important;
     }
 
-    /* Titre */
     h1.page-title {
         font-size: 19px !important; font-weight: 700 !important;
         color: #fff !important; -webkit-text-fill-color: #fff !important;
@@ -102,12 +101,11 @@
         gap: 10px !important; flex-shrink: 0 !important;
     }
 
-    /* Hamburger — caché sur desktop */
     .mobile-menu-toggle {
         position: fixed !important;
         top: 13px !important; left: 13px !important;
         z-index: 600 !important;
-        display: none !important;   /* CACHÉ sur desktop */
+        display: none !important;
         align-items: center !important;
         justify-content: center !important;
         background: linear-gradient(135deg,#ff3c64,#ff1744) !important;
@@ -120,55 +118,24 @@
         transition: transform 0.2s !important;
     }
 
-    /* Overlay — caché par défaut */
     .sidebar-overlay {
         position: fixed !important; inset: 0 !important;
         background: rgba(0,0,0,0.65) !important;
         backdrop-filter: blur(3px) !important;
         z-index: 400 !important;
-        display: none !important;   /* CACHÉ par défaut */
-        opacity: 1 !important;
+        display: none !important;
     }
-    /* Quand .show est ajouté par JS */
-    .sidebar-overlay.show {
-        display: block !important;
-    }
+    .sidebar-overlay.show { display: block !important; }
 
-    /* ══════════════════════════════════════════
-       MOBILE (≤ 991px) : sidebar off-canvas
-    ══════════════════════════════════════════ */
     @media (max-width: 991.98px) {
-
-        /* Hamburger visible */
-        .mobile-menu-toggle {
-            display: flex !important;
-        }
-
-        /* Sidebar CACHÉE hors écran par défaut */
-        .sidebar {
-            transform: translateX(-100%) !important;
-        }
-
-        /* Sidebar VISIBLE quand .show est ajouté */
+        .mobile-menu-toggle { display: flex !important; }
+        .sidebar { transform: translateX(-100%) !important; }
         .sidebar.show {
             transform: translateX(0px) !important;
             box-shadow: 10px 0 40px rgba(0,0,0,0.8) !important;
         }
-
-        /* Topbar pleine largeur */
-        .top-bar {
-            left: 0 !important;
-            width: 100% !important;
-            padding: 0 16px 0 62px !important;
-        }
-
-        /* Main pleine largeur */
-        .main-content {
-            margin-left: 0 !important;
-            width: 100% !important;
-            padding: 20px 16px !important;
-        }
-
+        .top-bar { left: 0 !important; width: 100% !important; padding: 0 16px 0 62px !important; }
+        .main-content { margin-left: 0 !important; width: 100% !important; padding: 20px 16px !important; }
         h1.page-title { font-size: 16px !important; }
     }
 
@@ -190,112 +157,108 @@
 </head>
 <body data-user-id="{{ app.user ? app.user.id : '' }}">
 
-    {# ── Bouton hamburger ── #}
     <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Toggle menu">
         <i class="bi bi-list" id="mobileMenuIcon"></i>
     </button>
 
-    {# ── Overlay ── #}
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-    {# ══════════ SIDEBAR ══════════ #}
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <a href="{{ path('admin_dashboard') }}" style="text-decoration:none;">
-                <img src="{{ asset('assets/img/eyetwin-logo.png') }}" alt="EyeTwin Logo"
+                <img src="{{ asset('assets/img/eyetwin-logo.png') }}"
+                     alt="EyeTwin Logo"
+                     width="160" height="40"
                      style="max-width:160px; height:auto; display:block; margin:0 auto 10px;">
             </a>
         </div>
 
-        <nav class="sidebar-menu">
+        <nav class="sidebar-menu" aria-label="Admin navigation">
             <a href="{{ path('admin_dashboard') }}"
                class="{{ app.request.attributes.get('_route') starts with 'admin_dashboard' ? 'active' : '' }}">
-                <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+                <i class="bi bi-speedometer2" aria-hidden="true"></i><span>Dashboard</span>
             </a>
             <a href="{{ path('admin_users_index') }}"
                class="{{ app.request.attributes.get('_route') starts with 'admin_users' ? 'active' : '' }}">
-                <i class="bi bi-people"></i><span>Users</span>
+                <i class="bi bi-people" aria-hidden="true"></i><span>Users</span>
             </a>
             <a href="{{ path('admin_planning_index') }}"
                class="{{ app.request.attributes.get('_route') starts with 'admin_planning' ? 'active' : '' }}">
-                <i class="bi bi-calendar-event"></i><span>Planning</span>
+                <i class="bi bi-calendar-event" aria-hidden="true"></i><span>Planning</span>
             </a>
             <a href="{{ path('admin_tournoi_index') }}"
                class="{{ app.request.attributes.get('_route') starts with 'admin_tournoi' ? 'active' : '' }}">
-                <i class="bi bi-trophy"></i><span>Tournaments</span>
+                <i class="bi bi-trophy" aria-hidden="true"></i><span>Tournaments</span>
             </a>
             <a href="{{ path('admin_videos_index') }}"
                class="{{ app.request.attributes.get('_route') starts with 'admin_videos' or app.request.attributes.get('_route') starts with 'admin_video' ? 'active' : '' }}">
-                <i class="bi bi-camera-video"></i><span>Videos</span>
+                <i class="bi bi-camera-video" aria-hidden="true"></i><span>Videos</span>
             </a>
             <a href="{{ path('admin_coach_applications_index') }}"
                class="{{ app.request.attributes.get('_route') starts with 'admin_coach_applications' ? 'active' : '' }}">
-                <i class="bi bi-clipboard-check"></i><span>Coach Applications</span>
+                <i class="bi bi-clipboard-check" aria-hidden="true"></i><span>Coach Applications</span>
                 {% if pendingApplicationsCount|default(0) > 0 %}
                     <span class="badge bg-danger" style="margin-left:auto;">{{ pendingApplicationsCount }}</span>
                 {% endif %}
             </a>
             <a href="{{ path('admin_channels_index') }}"
                class="{{ app.request.attributes.get('_route') starts with 'admin_channels' ? 'active' : '' }}">
-                <i class="bi bi-chat-left-text"></i><span>Channels</span>
+                <i class="bi bi-chat-left-text" aria-hidden="true"></i><span>Channels</span>
             </a>
             <a href="{{ path('admin_complaints_index') }}"
                class="{{ app.request.attributes.get('_route') starts with 'admin_complaints' ? 'active' : '' }}">
-                <i class="bi bi-headset"></i><span>Complaints</span>
+                <i class="bi bi-headset" aria-hidden="true"></i><span>Complaints</span>
                 {% if pendingComplaintsCount|default(0) > 0 %}
                     <span class="badge bg-danger" style="margin-left:auto;">{{ pendingComplaintsCount }}</span>
                 {% endif %}
             </a>
             <a href="{{ path('admin_messages_index') }}"
                class="{{ app.request.attributes.get('_route') starts with 'admin_messages' ? 'active' : '' }}">
-                <i class="bi bi-chat-dots"></i><span>Messages</span>
+                <i class="bi bi-chat-dots" aria-hidden="true"></i><span>Messages</span>
             </a>
             <a href="{{ path('admin_teams_index') }}"
                class="{{ app.request.attributes.get('_route') starts with 'admin_teams' ? 'active' : '' }}">
-                <i class="bi bi-grid-3x3"></i><span>Teams</span>
+                <i class="bi bi-grid-3x3" aria-hidden="true"></i><span>Teams</span>
             </a>
             {% if is_granted('ROLE_SUPER_ADMIN') %}
                 <a href="{{ path('admin_audit_logs_index') }}"
                    class="{{ app.request.attributes.get('_route') starts with 'admin_audit_logs' ? 'active' : '' }}">
-                    <i class="bi bi-journal-text"></i><span>Audit Logs</span>
+                    <i class="bi bi-journal-text" aria-hidden="true"></i><span>Audit Logs</span>
                 </a>
             {% endif %}
             <div class="sidebar-divider"></div>
             <a href="{{ path('app_home') }}" target="_blank" rel="noopener noreferrer">
-                <i class="bi bi-globe"></i><span>View Site</span>
-                <i class="bi bi-box-arrow-up-right" style="margin-left:auto; font-size:11px; opacity:0.5;"></i>
+                <i class="bi bi-globe" aria-hidden="true"></i><span>View Site</span>
+                <i class="bi bi-box-arrow-up-right" aria-hidden="true" style="margin-left:auto;font-size:11px;opacity:0.5;"></i>
             </a>
         </nav>
 
         <a href="{{ path('admin_logout') }}" class="logout-btn">
-            <i class="bi bi-box-arrow-right"></i> Logout
+            <i class="bi bi-box-arrow-right" aria-hidden="true"></i> Logout
         </a>
     </aside>
 
-    {# ══════════ TOPBAR ══════════ #}
     <header class="top-bar">
         <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
 
         <div class="header-actions">
-            {# Cloche notifications #}
             <div class="notification-bell" id="adminNotificationBell">
-                <i class="bi bi-bell-fill"></i>
-                <span class="notification-badge" id="adminNotificationBadge" style="display:none;">0</span>
-                <div class="notification-dropdown" id="adminNotificationDropdown">
+                <i class="bi bi-bell-fill" aria-hidden="true"></i>
+                <span class="notification-badge" id="adminNotificationBadge" style="display:none;" aria-live="polite">0</span>
+                <div class="notification-dropdown" id="adminNotificationDropdown" role="dialog" aria-label="Notifications">
                     <div class="notification-header">
-                        <h3>Notifications</h3>
+                        <h2 style="font-size:1rem;margin:0">Notifications</h2>
                         <button class="mark-all-read" id="markAllRead">Mark all read</button>
                     </div>
                     <div class="notification-list" id="adminNotificationList">
                         <div class="empty-notifications">
-                            <i class="bi bi-bell-slash"></i>
+                            <i class="bi bi-bell-slash" aria-hidden="true"></i>
                             <p>No new notifications</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {# Dropdown utilisateur #}
             <div class="user-info dropdown">
                 <div class="dropdown-toggle d-flex align-items-center gap-2"
                      id="userDropdown"
@@ -303,7 +266,7 @@
                      aria-expanded="false"
                      style="cursor:pointer;">
                     <span class="d-none d-md-inline"
-                          style="color:rgba(255,255,255,0.6); font-size:13px; font-weight:500;">
+                          style="color:rgba(255,255,255,0.6);font-size:13px;font-weight:500;">
                         {{ app.user.username|default('Admin') }}
                     </span>
                     <div class="user-avatar" title="{{ app.user.username|default('Admin') }}">
@@ -313,18 +276,18 @@
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                     <li>
                         <a class="dropdown-item" href="{{ path('app_profile') }}">
-                            <i class="bi bi-person-circle"></i> My Profile
+                            <i class="bi bi-person-circle" aria-hidden="true"></i> My Profile
                         </a>
                     </li>
                     <li>
                         <a class="dropdown-item" href="{{ path('app_profile_face_register') }}">
-                            <i class="bi bi-camera-fill"></i> Face Recognition
+                            <i class="bi bi-camera-fill" aria-hidden="true"></i> Face Recognition
                         </a>
                     </li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
                         <a class="dropdown-item" href="{{ path('admin_logout') }}">
-                            <i class="bi bi-box-arrow-right"></i> Logout
+                            <i class="bi bi-box-arrow-right" aria-hidden="true"></i> Logout
                         </a>
                     </li>
                 </ul>
@@ -332,7 +295,6 @@
         </div>
     </header>
 
-    {# ══════════ MAIN CONTENT ══════════ #}
     <main class="main-content">
         <div class="content-area">
             {% for label, messages in app.flashes %}
@@ -341,7 +303,7 @@
                         <i class="bi bi-{{
                             label == 'success' ? 'check-circle' :
                             (label == 'error' or label == 'danger' ? 'x-circle' : 'info-circle')
-                        }} me-2"></i>
+                        }} me-2" aria-hidden="true"></i>
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
@@ -353,11 +315,16 @@
 
     {% block modal_container %}{% endblock %}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    {#
+    ── AVANT : <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/..."> ← CDN
+    ── APRÈS : Bootstrap JS est bundlé dans admin.js via Encore
+    #}
+    {{ encore_entry_script_tags('admin') }}
 
     <script>
     document.addEventListener('DOMContentLoaded', function () {
+        'use strict';
+
         const btn     = document.getElementById('mobileMenuToggle');
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
@@ -384,11 +351,15 @@
             link.addEventListener('click', () => { if (window.innerWidth < 992) closeSidebar(); });
         });
 
-        window.addEventListener('resize', () => { if (window.innerWidth >= 992) { closeSidebar(); document.body.style.overflow = ''; } });
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 992) { closeSidebar(); document.body.style.overflow = ''; }
+        });
         document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSidebar(); });
 
         document.querySelectorAll('.alert:not(.alert-permanent)').forEach(el => {
-            setTimeout(() => { try { new bootstrap.Alert(el).close(); } catch(_) {} }, 6000);
+            setTimeout(() => {
+                try { bootstrap.Alert.getOrCreateInstance(el).close(); } catch(_) {}
+            }, 6000);
         });
     });
 
@@ -408,7 +379,8 @@
 
     {% if app.user %}
         <script>window.MERCURE_HUB_URL = 'http://localhost:3000/.well-known/mercure';</script>
-        <script src="{{ asset('assets/js/admin-notifications.js') }}"></script>
+        <script defer src="{{ asset('assets/js/admin-notifications.js') }}"></script>
     {% endif %}
+
 </body>
 </html>
