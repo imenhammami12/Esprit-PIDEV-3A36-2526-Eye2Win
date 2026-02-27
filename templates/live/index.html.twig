@@ -4,97 +4,643 @@
 {% block title %}Live Streams - EyeTwin{% endblock %}
 
 {% block body %}
-<section class="profile_section section_padding">
-    <div class="container">
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="statistics_title mb-0">🔴 LIVE STREAMS</h2>
+{# ── HERO ── #}
+<div class="live-hero">
+    <canvas id="heroCanvas"></canvas>
+
+    {# ── BACKGROUND IMAGE ── #}
+    <div class="hero-bg-image"
+         style="background-image: url('{{ asset('assets/img/live_stareams_bg.png') }}')">
+    </div>
+
+    <div class="hero-grid-overlay"></div>
+    <div class="hero-scanline"></div>
+    <div class="hero-vignette"></div>
+    <div class="hero-vignette-bottom"></div>
+
+    <div class="container position-relative">
+        <div class="hero-inner">
+            <span class="hero-tag">
+                <span class="hero-tag-dot"></span>
+                <i class="fas fa-broadcast-tower"></i> Broadcast Center
+            </span>
+            <h1 class="hero-title">
+                <span class="title-row1">Live</span>
+                <span class="title-row2">Streams</span>
+            </h1>
+            <p class="hero-sub">Watch coaches live, learn in real time and level up your game.</p>
+
             {% if isCoach %}
-                <div class="d-flex gap-2">
-                    <a href="{{ path('live_my_streams') }}" class="btn_profile btn_edit" style="text-decoration:none;">
-                        <i class="fas fa-list"></i> My Streams
-                    </a>
-                    <a href="{{ path('live_create') }}" class="btn_profile btn_apply" style="text-decoration:none;">
-                        <i class="fas fa-video"></i> Create Live
-                    </a>
+            <div class="hero-actions mt-3">
+                <a href="{{ path('live_create') }}" class="btn-fire btn-fire-sm">
+                    <span class="btn-fire-bg"></span>
+                    <i class="fas fa-video"></i>
+                    <span>Go Live</span>
+                </a>
+                <a href="{{ path('live_my_streams') }}" class="btn-ghost-sm">
+                    <i class="fas fa-list"></i> My Streams
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Stat bar #}
+    <div class="hero-stats">
+        <div class="container">
+            <div class="hstat-row">
+                <div class="hstat">
+                    <span class="hstat-val">{{ lives|length }}</span>
+                    <span class="hstat-lbl">Total Streams</span>
                 </div>
+                <div class="hstat-divider"></div>
+                <div class="hstat">
+                    <span class="hstat-val live-count">{{ lives|filter(l => l.status == 'live')|length }}</span>
+                    <span class="hstat-lbl">Live Now</span>
+                </div>
+                <div class="hstat-divider"></div>
+                <div class="hstat">
+                    <span class="hstat-val">{{ lives|filter(l => l.status != 'live')|length }}</span>
+                    <span class="hstat-lbl">Coming Soon</span>
+                </div>
+                <div class="hstat-divider"></div>
+                <div class="hstat">
+                    <span class="hstat-val free-count">{{ lives|filter(l => l.coinPrice == 0)|length }}</span>
+                    <span class="hstat-lbl">Free Streams</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── SECTION ── #}
+<section class="live-section">
+    <div class="live-section-bg" style="background-image: url('{{ asset('assets/img/live_stareams_bg.png') }}')"></div>
+    <div class="container position-relative" style="z-index:1;">
+
+        {# Flash messages #}
+        {% for flash in app.flashes('success') %}
+        <div class="flash-msg flash-success mb-3">
+            <i class="fas fa-check-circle"></i> {{ flash }}
+        </div>
+        {% endfor %}
+        {% for flash in app.flashes('error') %}
+        <div class="flash-msg flash-error mb-3">
+            <i class="fas fa-exclamation-circle"></i> {{ flash }}
+        </div>
+        {% endfor %}
+        {% for flash in app.flashes('info') %}
+        <div class="flash-msg flash-info mb-3">
+            <i class="fas fa-info-circle"></i> {{ flash }}
+        </div>
+        {% endfor %}
+
+        {# ── EMPTY STATE ── #}
+        {% if lives is empty %}
+        <div class="t-empty-hero">
+            <div class="t-empty-hero-glow"></div>
+            <div class="t-empty-hero-icon">
+                <i class="fas fa-broadcast-tower"></i>
+            </div>
+            <h3>No Live Streams Right Now</h3>
+            <p>Check back later or follow coaches to get notified when they go live.</p>
+            {% if isCoach %}
+            <a href="{{ path('live_create') }}" class="btn-fire mt-2">
+                <span class="btn-fire-bg"></span>
+                <i class="fas fa-video"></i>
+                <span>Start a Stream</span>
+            </a>
             {% endif %}
         </div>
 
-        {% for flash in app.flashes('success') %}
-            <div class="alert alert-success">{{ flash }}</div>
-        {% endfor %}
-        {% for flash in app.flashes('error') %}
-            <div class="alert alert-danger">{{ flash }}</div>
-        {% endfor %}
-        {% for flash in app.flashes('info') %}
-            <div class="alert alert-info">{{ flash }}</div>
-        {% endfor %}
-
-        {% if lives is empty %}
-            <div class="profile_card text-center py-5">
-                <i class="fas fa-video" style="font-size: 64px; color: #667eea; margin-bottom: 20px; display:block;"></i>
-                <h4 style="color: #fff;">No live streams available right now</h4>
-                <p style="color: #a0a0b0;">Check back later or follow coaches to get notified when they go live.</p>
-            </div>
+        {# ── LIVE GRID ── #}
         {% else %}
-            <div class="row g-4">
-                {% for live in lives %}
-                <div class="col-lg-4 col-md-6">
-                    <div class="profile_card h-100" style="position: relative; overflow: hidden;">
-                        
-                        {% if live.status == 'live' %}
-                            <div style="position: absolute; top: 15px; right: 15px; background: #e53e3e; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 6px;">
-                                <span style="width: 8px; height: 8px; background: white; border-radius: 50%; animation: pulse 1.5s infinite;"></span>
-                                LIVE
-                            </div>
-                        {% else %}
-                            <div style="position: absolute; top: 15px; right: 15px; background: #667eea; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;">
-                                SOON
-                            </div>
-                        {% endif %}
+        <div class="live-grid">
+            {% for live in lives %}
+            <div class="live-card {% if live.status == 'live' %}live-card-on{% else %}live-card-soon{% endif %}">
 
-                        <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 8px; padding: 40px 20px; text-align: center; margin-bottom: 15px;">
-                            <i class="fas fa-video" style="font-size: 48px; color: {% if live.status == 'live' %}#e53e3e{% else %}#667eea{% endif %};"></i>
-                        </div>
+                {# Glow + corners #}
+                <div class="lc-glow"></div>
+                <div class="lc-corner tl"></div>
+                <div class="lc-corner tr"></div>
+                <div class="lc-corner bl"></div>
+                <div class="lc-corner br"></div>
 
-                        <h5 style="color: #fff; font-weight: bold; margin-bottom: 8px;">{{ live.title }}</h5>
-                        <p style="color: #a0a0b0; font-size: 13px; margin-bottom: 10px;">
-                            <i class="fas fa-user-graduate"></i> {{ live.coach.username }}
-                        </p>
-                        {% if live.description %}
-                            <p style="color: #c0c0d0; font-size: 13px; margin-bottom: 15px;">{{ live.description|slice(0, 100) }}{% if live.description|length > 100 %}...{% endif %}</p>
-                        {% endif %}
+                {# Status pill #}
+                <div class="lc-status {% if live.status == 'live' %}lcs-live{% else %}lcs-soon{% endif %}">
+                    <span class="lcs-dot"></span>
+                    {{ live.status == 'live' ? 'LIVE' : 'SOON' }}
+                </div>
 
-                        <div class="d-flex justify-content-between align-items-center mt-auto">
-                            <span style="color: #f6d860; font-weight: bold;">
-                                <i class="fas fa-coins"></i>
-                                {% if live.coinPrice == 0 %}
-                                    FREE
-                                {% else %}
-                                    {{ live.coinPrice }} coins
-                                {% endif %}
-                            </span>
-                            <a href="{{ path('live_watch', {id: live.id}) }}" class="btn_profile btn_apply" style="text-decoration:none; padding: 8px 16px; font-size: 13px;">
-                                {% if live.status == 'live' %}
-                                    <i class="fas fa-play"></i> Watch Now
-                                {% else %}
-                                    <i class="fas fa-eye"></i> Preview
-                                {% endif %}
-                            </a>
-                        </div>
+                {# Thumbnail #}
+                <div class="lc-thumb {% if live.status == 'live' %}lc-thumb-live{% endif %}">
+                    <div class="lc-thumb-grid"></div>
+                    <div class="lc-thumb-scan"></div>
+                    <i class="fas fa-video lc-thumb-icon"></i>
+                    {% if live.status == 'live' %}
+                    <div class="lc-live-ring"></div>
+                    {% endif %}
+                </div>
+
+                {# Body #}
+                <div class="lc-body">
+                    <h5 class="lc-title">{{ live.title }}</h5>
+
+                    <div class="lc-meta">
+                        <i class="fas fa-user-graduate"></i>
+                        <span>{{ live.coach.username }}</span>
+                    </div>
+
+                    {% if live.description %}
+                    <p class="lc-desc">
+                        {{ live.description|slice(0, 90) }}{% if live.description|length > 90 %}…{% endif %}
+                    </p>
+                    {% endif %}
+
+                    <div class="lc-footer">
+                        <span class="lc-price {% if live.coinPrice == 0 %}lc-price-free{% endif %}">
+                            <i class="fas fa-coins"></i>
+                            {{ live.coinPrice == 0 ? 'FREE' : live.coinPrice ~ ' coins' }}
+                        </span>
+                        <a href="{{ path('live_watch', {id: live.id}) }}" class="lc-watch-btn {% if live.status == 'live' %}lc-watch-live{% endif %}">
+                            <i class="fas fa-{% if live.status == 'live' %}play{% else %}eye{% endif %}"></i>
+                            {{ live.status == 'live' ? 'Watch Now' : 'Preview' }}
+                        </a>
                     </div>
                 </div>
-                {% endfor %}
+
             </div>
+            {% endfor %}
+        </div>
         {% endif %}
+
     </div>
 </section>
 
 <style>
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+/* ═══════════════════════════════════════════
+   EYE2WIN — LIVE STREAMS [FULL RED]
+═══════════════════════════════════════════ */
+:root {
+    --red:       #e8372a;
+    --red-hot:   #ff4d3d;
+    --red-deep:  #b02b20;
+    --red-dim:   rgba(232,55,42,0.12);
+    --orange:    #ff6b2b;
+    --pink:      #ff2060;
+    --green:     #00e676;
+    --green-dim: rgba(0,230,118,0.1);
+    --dark:      #080810;
+    --border-r:  rgba(232,55,42,0.3);
+    --text:      rgba(255,255,255,0.93);
+    --muted:     rgba(255,255,255,0.38);
+    --font-hud:  'Orbitron', sans-serif;
+    --font-body: 'Rajdhani', sans-serif;
+    --font-mono: 'Share Tech Mono', monospace;
+}
+* { box-sizing: border-box; }
+body { background: var(--dark); font-family: var(--font-body); }
+
+/* ══ HERO ══ */
+.live-hero {
+    position: relative;
+    background: linear-gradient(165deg, #1a0308 0%, #0c0b18 50%, #080810 100%);
+    padding: 4rem 0 0;
+    overflow: hidden;
+    min-height: 360px;
+}
+.live-hero::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--red), var(--orange), var(--pink), transparent);
+    background-size: 300% 100%;
+    animation: border-shimmer 4s linear infinite;
+}
+@keyframes border-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+/* ── BACKGROUND IMAGE HERO ── */
+.hero-bg-image {
+    position: absolute; inset: 0;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    opacity: 0.12;
+    filter: blur(1px) saturate(0.7);
+    transform: scale(1.04);
+    z-index: 0;
+    transition: opacity .3s;
+}
+
+#heroCanvas { position: absolute; inset: 0; pointer-events: none; z-index: 2; width: 100%; height: 100%; }
+.hero-grid-overlay {
+    position: absolute; inset: 0; z-index: 1;
+    background-image:
+        linear-gradient(rgba(232,55,42,0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,55,42,0.055) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: grid-pulse 6s ease-in-out infinite;
+}
+@keyframes grid-pulse { 0%,100%{opacity:1} 50%{opacity:.45} }
+.hero-scanline {
+    position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.055) 2px, rgba(0,0,0,.055) 4px);
+    animation: scanline-move 8s linear infinite;
+}
+@keyframes scanline-move { from{background-position:0 0} to{background-position:0 100px} }
+.hero-vignette {
+    position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,.75) 100%);
+}
+.hero-vignette-bottom {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 120px; pointer-events: none; z-index: 1;
+    background: linear-gradient(to bottom, transparent, #080810);
+}
+.hero-inner { position: relative; z-index: 3; padding-bottom: 2rem; }
+
+.hero-tag {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: rgba(232,55,42,.09); border: 1px solid rgba(232,55,42,.28);
+    color: var(--red-hot); font-family: var(--font-hud);
+    font-size: .62rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+    padding: .32rem .9rem; border-radius: 3px; margin-bottom: 1.4rem;
+    animation: badge-in .5s .1s both;
+}
+@keyframes badge-in { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:none} }
+.hero-tag-dot { width:6px;height:6px;border-radius:50%;background:#3dff8a;box-shadow:0 0 8px #3dff8a;animation:blink 1s step-end infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.hero-title {
+    font-family: var(--font-hud); font-weight: 900;
+    font-size: clamp(2.6rem, 5.5vw, 4.5rem);
+    line-height: .95; letter-spacing: .05em; margin-bottom: 1rem;
+    animation: title-in .6s .2s both cubic-bezier(.22,1,.36,1);
+}
+@keyframes title-in { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
+.title-row1 { display: block; color: var(--text); }
+.title-row2 {
+    display: block;
+    background: linear-gradient(90deg, var(--red) 0%, var(--orange) 50%, var(--pink) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    background-size: 200% 100%;
+    animation: gradient-pan 5s ease-in-out infinite alternate, title-in .6s .2s both cubic-bezier(.22,1,.36,1);
+    filter: drop-shadow(0 0 30px rgba(232,55,42,.4));
+}
+@keyframes gradient-pan { from{background-position:0%} to{background-position:100%} }
+
+.hero-sub {
+    color: var(--muted); font-size: 1rem; max-width: 480px; line-height: 1.65; margin-bottom: 0;
+    animation: sub-in .5s .4s both;
+}
+@keyframes sub-in { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+
+/* ── HERO BUTTONS ── */
+.hero-actions { display: flex; flex-wrap: wrap; gap: .6rem; animation: sub-in .5s .5s both; }
+.btn-fire {
+    position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: .6rem;
+    padding: .72rem 2rem;
+    background: linear-gradient(135deg, var(--red-deep), var(--red), var(--red-hot));
+    border: none; border-radius: 9px; color: #fff;
+    font-family: var(--font-hud); font-size: .8rem; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; cursor: pointer; text-decoration: none;
+    box-shadow: 0 4px 24px rgba(232,55,42,.45);
+    transition: transform .18s, box-shadow .18s;
+}
+.btn-fire:hover { transform: translateY(-3px); box-shadow: 0 10px 36px rgba(232,55,42,.6); color: #fff; }
+.btn-fire-sm { padding: .55rem 1.3rem; font-size: .72rem; }
+.btn-fire-bg { position: absolute; inset: 0; background: linear-gradient(135deg,rgba(255,255,255,.15),transparent); pointer-events: none; }
+.btn-ghost-sm {
+    display: inline-flex; align-items: center; gap: .4rem; padding: .55rem 1.2rem;
+    background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); border-radius: 9px;
+    color: rgba(255,255,255,.55); font-family: var(--font-hud); font-size: .72rem; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase; text-decoration: none; transition: all .2s;
+}
+.btn-ghost-sm:hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.2); color: var(--text); }
+
+/* ── STAT BAR ── */
+.hero-stats {
+    position: relative; z-index: 3;
+    background: rgba(0,0,0,.4); border-top: 1px solid rgba(232,55,42,.12);
+    padding: .85rem 0; backdrop-filter: blur(8px);
+}
+.hstat-row { display: flex; align-items: center; flex-wrap: wrap; }
+.hstat { display: flex; flex-direction: column; align-items: center; padding: .4rem 2rem; }
+.hstat-val {
+    font-family: var(--font-hud); font-size: 1.5rem; font-weight: 900;
+    color: var(--red-hot); line-height: 1;
+    text-shadow: 0 0 20px rgba(232,55,42,.6);
+}
+.hstat-val.live-count { color: #ff4d4d; animation: live-pulse 1.5s ease-in-out infinite; }
+@keyframes live-pulse { 0%,100%{text-shadow:0 0 20px rgba(255,77,77,.6)} 50%{text-shadow:0 0 35px rgba(255,77,77,.9),0 0 60px rgba(255,77,77,.3)} }
+.hstat-val.free-count { color: var(--green); text-shadow: 0 0 20px rgba(0,230,118,.5); }
+.hstat-lbl { font-family: var(--font-mono); font-size: .6rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-top: .15rem; }
+.hstat-divider { width: 1px; height: 32px; background: linear-gradient(180deg,transparent,rgba(232,55,42,.2),transparent); }
+
+/* ══ SECTION ══ */
+.live-section {
+    position: relative;
+    background: var(--dark);
+    padding: 2.5rem 0 4rem;
+    overflow: hidden;
+}
+
+/* ── BACKGROUND IMAGE SECTION ── */
+.live-section-bg {
+    position: absolute; inset: 0;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    opacity: 0.07;
+    filter: blur(2px) saturate(0.6);
+    transform: scale(1.04);
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* ══ FLASH MESSAGES ══ */
+.flash-msg {
+    display: flex; align-items: center; gap: .6rem;
+    padding: .75rem 1.1rem; border-radius: 9px;
+    font-family: var(--font-mono); font-size: .72rem;
+}
+.flash-success { background: rgba(0,230,118,.08); border: 1px solid rgba(0,230,118,.25); color: var(--green); }
+.flash-error   { background: rgba(232,55,42,.08); border: 1px solid rgba(232,55,42,.25); color: var(--red-hot); }
+.flash-info    { background: rgba(0,229,255,.06); border: 1px solid rgba(0,229,255,.2);  color: #00e5ff; }
+
+/* ══ LIVE GRID ══ */
+.live-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.2rem;
+}
+
+/* ══ LIVE CARD ══ */
+.live-card {
+    background: rgba(6,5,16,.88);
+    border-radius: 14px; overflow: hidden;
+    position: relative; display: flex; flex-direction: column;
+    transition: transform .22s, box-shadow .22s, border-color .22s;
+    opacity: 0; transform: translateY(16px);
+    animation: card-in .5s forwards cubic-bezier(.22,1,.36,1);
+}
+.live-card:nth-child(1) { animation-delay: .05s }
+.live-card:nth-child(2) { animation-delay: .12s }
+.live-card:nth-child(3) { animation-delay: .19s }
+.live-card:nth-child(4) { animation-delay: .26s }
+.live-card:nth-child(5) { animation-delay: .33s }
+.live-card:nth-child(6) { animation-delay: .40s }
+@keyframes card-in { to{opacity:1;transform:none} }
+
+.live-card-on  { border: 1px solid rgba(232,55,42,.25); }
+.live-card-soon{ border: 1px solid rgba(255,255,255,.07); }
+
+.live-card:hover { transform: translateY(-4px); }
+.live-card-on:hover  { box-shadow: 0 12px 40px rgba(232,55,42,.2); border-color: rgba(232,55,42,.5); }
+.live-card-soon:hover{ box-shadow: 0 12px 40px rgba(255,255,255,.06); border-color: rgba(255,255,255,.15); }
+
+/* Corners */
+.lc-corner {
+    position: absolute; width: 8px; height: 8px;
+    border-color: var(--red); border-style: solid;
+    opacity: 0; transform: scale(1.5);
+    transition: opacity .22s, transform .28s cubic-bezier(.34,1.56,.64,1);
+    z-index: 5;
+}
+.lc-corner.tl { top:5px;left:5px;   border-width:1.5px 0 0 1.5px }
+.lc-corner.tr { top:5px;right:5px;  border-width:1.5px 1.5px 0 0 }
+.lc-corner.bl { bottom:5px;left:5px; border-width:0 0 1.5px 1.5px }
+.lc-corner.br { bottom:5px;right:5px;border-width:0 1.5px 1.5px 0 }
+.live-card:hover .lc-corner { opacity:1;transform:scale(1); }
+
+/* Glow */
+.lc-glow {
+    position: absolute; width: 140px; height: 140px; border-radius: 50%;
+    top: -40px; right: -30px; pointer-events: none; z-index: 0;
+    opacity: 0; transition: opacity .3s;
+}
+.live-card-on  .lc-glow { background: radial-gradient(circle, rgba(232,55,42,.22), transparent 65%); }
+.live-card-soon .lc-glow{ background: radial-gradient(circle, rgba(255,107,43,.12), transparent 65%); }
+.live-card:hover .lc-glow { opacity: 1; }
+
+/* Status pill */
+.lc-status {
+    position: absolute; top: 12px; right: 12px; z-index: 6;
+    display: inline-flex; align-items: center; gap: .35rem;
+    font-family: var(--font-hud); font-size: .58rem; font-weight: 800; letter-spacing: .12em;
+    padding: .22rem .65rem; border-radius: 5px; backdrop-filter: blur(4px);
+}
+.lcs-live { background: rgba(232,55,42,.85); border: 1px solid rgba(255,107,107,.5); color: #fff; }
+.lcs-soon { background: rgba(255,107,43,.15); border: 1px solid rgba(255,107,43,.35); color: var(--orange); }
+.lcs-dot  { width:6px;height:6px;border-radius:50%;background:currentColor; }
+.lcs-live .lcs-dot { background:#fff;animation:live-dot 1.2s ease-in-out infinite; }
+@keyframes live-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.3;transform:scale(.7)} }
+
+/* Thumbnail */
+.lc-thumb {
+    height: 150px; position: relative; overflow: hidden;
+    background: linear-gradient(135deg, #12040a 0%, #0d0818 100%);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.lc-thumb-live { background: linear-gradient(135deg, #1a0308 0%, #0f0414 100%); }
+.lc-thumb-grid {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image:
+        linear-gradient(rgba(232,55,42,.06) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(232,55,42,.06) 1px,transparent 1px);
+    background-size: 28px 28px;
+}
+.lc-thumb-scan {
+    position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 4px);
+}
+.lc-thumb-icon {
+    position: relative; z-index: 2; font-size: 2.8rem;
+    transition: transform .3s, color .3s;
+}
+.live-card-on  .lc-thumb-icon { color: rgba(232,55,42,.6); }
+.live-card-soon .lc-thumb-icon{ color: rgba(255,107,43,.4); }
+.live-card:hover .lc-thumb-icon { transform: scale(1.15); }
+.live-card-on:hover  .lc-thumb-icon { color: var(--red-hot); }
+.live-card-soon:hover .lc-thumb-icon{ color: var(--orange); }
+
+/* Live ring animation */
+.lc-live-ring {
+    position: absolute; width: 90px; height: 90px; border-radius: 50%;
+    border: 2px solid rgba(232,55,42,.4);
+    animation: ring-expand 2s ease-out infinite;
+    z-index: 1;
+}
+@keyframes ring-expand {
+    0%   { transform:scale(.6);opacity:1; }
+    100% { transform:scale(2.2);opacity:0; }
+}
+
+/* Card body */
+.lc-body {
+    padding: 1rem 1.1rem 1.1rem;
+    display: flex; flex-direction: column; gap: .55rem;
+    flex: 1; position: relative; z-index: 1;
+}
+.lc-title {
+    font-family: var(--font-hud); font-size: .88rem; font-weight: 700;
+    color: var(--text); margin: 0; letter-spacing: .03em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.lc-meta {
+    font-family: var(--font-mono); font-size: .67rem; color: var(--muted);
+    display: flex; align-items: center; gap: .35rem;
+}
+.lc-meta i { color: rgba(232,55,42,.5); }
+.lc-desc {
+    font-family: var(--font-body); font-size: .8rem;
+    color: rgba(255,255,255,.45); line-height: 1.5; margin: 0;
+    flex: 1;
+}
+
+/* Footer */
+.lc-footer {
+    display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+    margin-top: auto; padding-top: .5rem;
+    border-top: 1px solid rgba(255,255,255,.05);
+}
+.lc-price {
+    font-family: var(--font-hud); font-size: .72rem; font-weight: 800;
+    color: rgba(255,255,255,.5); display: flex; align-items: center; gap: .3rem;
+}
+.lc-price i { color: rgba(255,200,50,.5); }
+.lc-price-free { color: var(--green); }
+.lc-price-free i { color: var(--green); }
+
+.lc-watch-btn {
+    display: inline-flex; align-items: center; gap: .4rem;
+    padding: .42rem 1rem; border-radius: 7px; text-decoration: none;
+    font-family: var(--font-hud); font-size: .62rem; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase;
+    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); color: var(--muted);
+    transition: all .18s;
+}
+.lc-watch-btn:hover { background: rgba(255,107,43,.12); border-color: rgba(255,107,43,.35); color: var(--orange); }
+.lc-watch-live {
+    background: rgba(232,55,42,.1); border-color: rgba(232,55,42,.35); color: var(--red-hot);
+}
+.lc-watch-live:hover {
+    background: rgba(232,55,42,.22); border-color: var(--red);
+    box-shadow: 0 4px 16px rgba(232,55,42,.2); color: #fff;
+}
+
+/* ══ EMPTY STATE ══ */
+.t-empty-hero {
+    text-align: center; padding: 4rem 2rem; position: relative;
+    background: rgba(6,5,16,.6); border: 1px solid rgba(255,255,255,.06);
+    border-radius: 16px; overflow: hidden; margin-top: 1rem;
+}
+.t-empty-hero-glow {
+    position: absolute; width: 300px; height: 300px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,55,42,.1), transparent 65%);
+    top: 50%; left: 50%; transform: translate(-50%,-50%);
+    pointer-events: none;
+}
+.t-empty-hero-icon {
+    width: 70px; height: 70px; border-radius: 18px; margin: 0 auto 1.5rem;
+    background: rgba(232,55,42,.1); border: 1px solid rgba(232,55,42,.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; color: var(--red-hot);
+}
+.t-empty-hero h3 { font-family: var(--font-hud); color: var(--text); margin-bottom: .5rem; }
+.t-empty-hero p  { font-family: var(--font-body); color: var(--muted); margin-bottom: 1.5rem; }
+
+/* ══ RESPONSIVE ══ */
+@media (max-width:640px) {
+    .live-hero  { padding:2.5rem 0 0; min-height:280px; }
+    .hero-title { font-size:2.4rem; }
+    .live-grid  { grid-template-columns:1fr; }
+    .hstat      { padding:.4rem 1rem; }
+    .hero-bg-image { opacity:.08; }
+    .live-section-bg { background-attachment: scroll; }
 }
 </style>
+
+<script>
+(function () {
+    'use strict';
+
+    /* ── HERO CANVAS ── */
+    const canvas = document.getElementById('heroCanvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let W, H, particles = [];
+        function resize() {
+            W = canvas.width  = canvas.parentElement.offsetWidth;
+            H = canvas.height = canvas.parentElement.offsetHeight;
+        }
+        resize();
+        window.addEventListener('resize', () => { resize(); spawnAll(); });
+
+        const COLORS = ['rgba(232,55,42,','rgba(255,77,61,','rgba(255,107,43,','rgba(255,32,96,'];
+        function mkParticle() {
+            const c = COLORS[Math.floor(Math.random()*COLORS.length)];
+            return { x:Math.random()*W, y:H+Math.random()*60, vx:(Math.random()-.5)*.55, vy:-(0.3+Math.random()*1.0), r:0.8+Math.random()*1.5, alpha:0, maxAlpha:0.25+Math.random()*0.45, phase:Math.random()*Math.PI*2, color:c, life:0, maxLife:130+Math.random()*160 };
+        }
+        function spawnAll() { particles = Array.from({length:40},mkParticle); }
+        spawnAll();
+
+        (function tick() {
+            ctx.clearRect(0,0,W,H);
+            particles.forEach((p,i) => {
+                p.life++; p.x += p.vx+Math.sin(p.phase+p.life*.02)*.25; p.y += p.vy;
+                const t=p.life/p.maxLife;
+                p.alpha = t<0.15?(t/.15)*p.maxAlpha:t>.75?((1-t)/.25)*p.maxAlpha:p.maxAlpha;
+                if(p.life>=p.maxLife||p.y<-10) particles[i]=mkParticle();
+                ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+                ctx.fillStyle=p.color+p.alpha+')'; ctx.shadowColor=p.color+'0.5)'; ctx.shadowBlur=7; ctx.fill();
+            });
+            requestAnimationFrame(tick);
+        })();
+
+        /* Glitch */
+        const accent = document.querySelector('.title-row2');
+        if (accent) {
+            setInterval(() => {
+                if (Math.random() > .82) {
+                    accent.animate([
+                        { transform:'none', filter:'none' },
+                        { transform:'skewX(-3deg) translateX(-2px)', filter:'hue-rotate(30deg) brightness(1.4)' },
+                        { transform:'skewX(2deg) translateX(3px)',   filter:'hue-rotate(-20deg)' },
+                        { transform:'none', filter:'none' },
+                    ], { duration:160, easing:'steps(3)' });
+                }
+            }, 3000);
+        }
+    }
+
+    /* ── STAT COUNTER ── */
+    document.querySelectorAll('.hstat-val').forEach(el => {
+        const target = parseInt(el.textContent.trim(), 10);
+        if (isNaN(target) || target === 0) return;
+        let current = 0;
+        const step = Math.ceil(target/18);
+        const timer = setInterval(() => {
+            current = Math.min(current+step, target);
+            el.textContent = current;
+            if (current >= target) clearInterval(timer);
+        }, 45);
+    });
+
+    /* ── SCROLL REVEAL ── */
+    if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) { e.target.style.animationPlayState='running'; io.unobserve(e.target); }
+            });
+        }, {threshold:.05});
+        document.querySelectorAll('.live-card').forEach(c => { c.style.animationPlayState='paused'; io.observe(c); });
+    }
+
+})();
+</script>
+
 {% endblock %}

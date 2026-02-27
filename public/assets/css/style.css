@@ -6532,3 +6532,256 @@ h1, h2, h3, h4, h5, h6 {
 .border:hover {
     border-color: #667eea !important;
 }
+/* ═══════════════════════════════════════════════════════════════
+   NAVBAR RESPONSIVE FIXES — EyeTwin eSport Platform
+   Override complet du style.css template pour mobile/tablette
+═══════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════
+   1. FIXES GLOBAUX (desktop + mobile)
+══════════════════════════════════════════ */
+
+/* Fix overflow qui coupe les dropdowns */
+.main_menu,
+.main_menu .container,
+.main_menu .row,
+.main_menu .col-lg-12,
+.navbar {
+    overflow: visible !important;
+}
+
+/* Z-index global dropdowns */
+.navbar .dropdown-menu {
+    z-index: 99999 !important;
+}
+
+/* ══════════════════════════════════════════
+   2. DESKTOP — notification dropdown width
+══════════════════════════════════════════ */
+@media (min-width: 992px) {
+    .dropdown-menu[aria-labelledby="notifDropdown"] {
+        width: 360px !important;
+        right: 0 !important;
+        left: auto !important;
+    }
+
+    .dropdown-menu[aria-labelledby="navbarDropdown"] {
+        min-width: 200px;
+        right: 0;
+        left: auto;
+    }
+}
+
+/* ══════════════════════════════════════════
+   3. MOBILE & TABLETTE < 992px
+══════════════════════════════════════════ */
+@media (max-width: 991px) {
+
+    /* ── Menu collapse : override complet du template ── */
+    .navbar-collapse {
+        position: absolute !important;
+        left: 0 !important;
+        top: 60px !important;
+        width: 100% !important;
+        background: rgba(8, 5, 18, 0.98) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 0 0 12px 12px !important;
+        padding: 8px 0 16px !important;
+        margin-top: 0 !important;
+        max-height: 80vh !important;
+        overflow-y: auto !important;
+        z-index: 9999 !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6) !important;
+    }
+
+    /* ── Nav items en colonne ── */
+    .navbar-collapse .navbar-nav {
+        flex-direction: column !important;
+        width: 100% !important;
+        padding: 0 !important;
+    }
+
+    .navbar-collapse .nav-item {
+        width: 100% !important;
+        padding: 0 !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+    }
+
+    .navbar-collapse .nav-item:last-child {
+        border-bottom: none !important;
+    }
+
+    /* ── Nav links ── */
+    .navbar-collapse .nav-item .nav-link {
+        padding: 13px 20px !important;
+        color: rgba(255, 255, 255, 0.85) !important;
+        font-size: 14px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        line-height: 1.4 !important;
+        transition: background 0.2s ease !important;
+    }
+
+    .navbar-collapse .nav-item .nav-link:hover,
+    .navbar-collapse .nav-item .nav-link:focus {
+        color: #fff !important;
+        background: rgba(255, 255, 255, 0.07) !important;
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       CORRECTION CLEF : dropdown mobile via click (.show)
+       Le template utilise :hover → impossible sur mobile (tactile).
+       Bootstrap 4 ajoute la classe .show au clic → on l'exploite.
+       On annule le transform:scale() du template sur mobile.
+    ══════════════════════════════════════════════════════════ */
+
+    /* Reset le transform:scale du template + caché par défaut */
+    .navbar-collapse .dropdown .dropdown-menu {
+        transform: none !important;
+        transition: none !important;
+        position: static !important;
+        float: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        background: rgba(15, 10, 30, 0.97) !important;
+        border: none !important;
+        border-left: 3px solid rgba(198, 1, 154, 0.5) !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+        padding: 4px 0 8px !important;
+        box-shadow: none !important;
+        display: none !important;
+    }
+
+    /* Ouvert quand Bootstrap 4 ajoute .show au clic */
+    .navbar-collapse .dropdown.show .dropdown-menu,
+    .navbar-collapse .dropdown-menu.show {
+        display: block !important;
+    }
+
+    /* Désactiver le hover du template sur mobile */
+    .navbar-collapse .dropdown:hover .dropdown-menu {
+        display: none !important;
+    }
+    /* ... sauf si .show est actif (Bootstrap a géré le clic) */
+    .navbar-collapse .dropdown.show:hover .dropdown-menu {
+        display: block !important;
+    }
+
+    /* ── Dropdown items ── */
+    .navbar-collapse .dropdown-item {
+        color: rgba(255, 255, 255, 0.75) !important;
+        background-color: transparent !important;
+        padding: 10px 28px !important;
+        font-size: 13px !important;
+        white-space: normal !important;
+        line-height: 1.4 !important;
+        text-transform: none !important;
+    }
+
+    .navbar-collapse .dropdown-item:hover,
+    .navbar-collapse .dropdown-item:focus {
+        color: #fff !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    .navbar-collapse .dropdown-item i {
+        width: 18px;
+        opacity: 0.7;
+    }
+
+    .navbar-collapse .dropdown-divider {
+        border-color: rgba(255, 255, 255, 0.08) !important;
+        margin: 4px 16px !important;
+    }
+
+    /* ── Flèche dropdown-toggle alignée à droite ── */
+    .navbar-collapse .nav-link.dropdown-toggle {
+        justify-content: space-between !important;
+    }
+
+    .navbar-collapse .nav-link.dropdown-toggle::after {
+        margin-left: auto !important;
+        flex-shrink: 0;
+        opacity: 0.5;
+    }
+
+    /* ── Notification dropdown : pleine largeur + scroll ── */
+    .navbar-collapse .dropdown-menu[aria-labelledby="notifDropdown"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-left: 3px solid rgba(255, 167, 81, 0.5) !important;
+        max-height: 320px !important;
+        overflow-y: auto !important;
+    }
+
+    .navbar-collapse .dropdown-menu[aria-labelledby="notifDropdown"] * {
+        color: rgba(255, 255, 255, 0.85) !important;
+    }
+
+    /* ── Badge notification ── */
+    .nav-item .badge-danger {
+        position: absolute !important;
+        top: 6px !important;
+        right: 6px !important;
+        font-size: 9px !important;
+        min-width: 15px !important;
+        height: 15px !important;
+        line-height: 15px !important;
+        padding: 0 3px !important;
+        border-radius: 8px !important;
+        z-index: 2 !important;
+    }
+
+    /* ── Coins pill ── */
+    .navbar-collapse .nav-link span[style*="linear-gradient(90deg"] {
+        font-size: 12px !important;
+    }
+
+    /* ── Bouton hamburger ── */
+    .navbar-toggler {
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        padding: 6px 10px !important;
+        border-radius: 6px !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    .navbar-toggler:focus {
+        box-shadow: 0 0 0 2px rgba(198, 1, 154, 0.5) !important;
+    }
+
+    .menu_icon i {
+        color: #fff !important;
+        font-size: 20px !important;
+    }
+
+    /* ── Bouton Sign Up masqué ── */
+    .btn_1.d-none.d-sm-block {
+        display: none !important;
+    }
+
+    /* ── Padding navbar ── */
+    .main_menu {
+        padding: 20px 0 !important;
+    }
+}
+
+/* ══════════════════════════════════════════
+   4. TRÈS PETITS ÉCRANS < 400px
+══════════════════════════════════════════ */
+@media (max-width: 400px) {
+    .navbar-collapse {
+        top: 55px !important;
+    }
+
+    .navbar-collapse .nav-item .nav-link {
+        font-size: 13px !important;
+        padding: 11px 16px !important;
+    }
+
+    .navbar-brand img {
+        max-width: 90px !important;
+    }
+}

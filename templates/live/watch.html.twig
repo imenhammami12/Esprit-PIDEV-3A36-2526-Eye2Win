@@ -4,179 +4,615 @@
 {% block title %}{{ live.title }} - EyeTwin Live{% endblock %}
 
 {% block body %}
-<section class="profile_section section_padding">
+
+{# ── BACKGROUND IMAGE ── #}
+<div class="watch-bg" style="background-image: url('{{ asset('assets/img/live_stareams_bg.png') }}')"></div>
+
+<div class="watch-grid-overlay"></div>
+<div class="watch-scanline"></div>
+
+<section class="watch-section">
     <div class="container">
 
+        {# Flash messages #}
         {% for flash in app.flashes('success') %}
-            <div class="alert alert-success">{{ flash }}</div>
+        <div class="flash-msg flash-success mb-3">
+            <i class="fas fa-check-circle"></i> {{ flash }}
+        </div>
         {% endfor %}
         {% for flash in app.flashes('error') %}
-            <div class="alert alert-danger">{{ flash }}</div>
+        <div class="flash-msg flash-error mb-3">
+            <i class="fas fa-exclamation-circle"></i> {{ flash }}
+        </div>
         {% endfor %}
 
-        <div class="row">
-            <div class="col-lg-8">
+        {# ── BREADCRUMB ── #}
+        <div class="watch-breadcrumb">
+            <a href="{{ path('live_index') }}" class="breadcrumb-back">
+                <i class="fas fa-arrow-left"></i>
+                <span>Live Streams</span>
+            </a>
+            <span class="breadcrumb-sep">/</span>
+            <span class="breadcrumb-current">{{ live.title|slice(0,40) }}{% if live.title|length > 40 %}…{% endif %}</span>
+        </div>
+
+        <div class="watch-layout">
+
+            {# ══ LEFT : PLAYER / PAYWALL ══ #}
+            <div class="watch-main">
 
                 {% if hasAccess %}
-                    {# === LIVE PLAYER === #}
-                    <div class="profile_card mb-4 p-0" style="overflow: hidden;">
-                        <div style="background: #000; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; position: relative;">
+
+                    {# ── PLAYER ── #}
+                    <div class="player-wrap">
+                        <div class="player-inner">
                             {% if live.isLive %}
-                                <video id="liveVideo" controls autoplay muted style="width:100%; height:100%; display: block;">
-                                </video>
-                                <div style="position:absolute; top:12px; left:12px; background:#e53e3e; color:white; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:bold; display:flex; align-items:center; gap:6px;">
-                                    <span style="width:8px;height:8px;background:white;border-radius:50%;animation:pulse 1.5s infinite;display:inline-block;"></span>
+                                <video id="liveVideo" controls autoplay muted class="player-video"></video>
+                                <div class="player-live-badge">
+                                    <span class="player-live-dot"></span>
                                     LIVE
                                 </div>
                             {% else %}
-                                <div class="text-center" style="color: #666; padding: 60px;">
-                                    <i class="fas fa-clock" style="font-size: 64px; margin-bottom: 20px; display:block; color: #667eea;"></i>
-                                    <h4 style="color: #fff;">Stream has not started yet</h4>
-                                    <p>The coach will go live soon. This page will update automatically.</p>
+                                <div class="player-waiting">
+                                    <div class="player-waiting-icon">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <h4>Stream hasn't started yet</h4>
+                                    <p>The coach will go live soon. This page refreshes automatically.</p>
+                                    <div class="player-waiting-bar">
+                                        <div class="player-waiting-bar-inner"></div>
+                                    </div>
                                 </div>
                             {% endif %}
                         </div>
+                        {# Corner decorations #}
+                        <div class="pc tl"></div>
+                        <div class="pc tr"></div>
+                        <div class="pc bl"></div>
+                        <div class="pc br"></div>
                     </div>
 
-                    <div class="profile_card">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <h3 style="color: #fff; font-weight: bold;">{{ live.title }}</h3>
-                                <p style="color: #a0a0b0; margin-bottom: 0;">
-                                    <i class="fas fa-user-graduate"></i> {{ live.coach.username }}
-                                    {% if live.startedAt %}
-                                        · Started {{ live.startedAt|date('H:i') }}
-                                    {% endif %}
-                                </p>
-                            </div>
-                            {% if live.coinPrice > 0 and not isOwner %}
-                                <span style="color: #f6d860; font-size: 13px;">
-                                    <i class="fas fa-check-circle" style="color: #48bb78;"></i> Access granted
+                    {# ── STREAM INFO ── #}
+                    <div class="stream-info-card">
+                        <div class="sic-left">
+                            <div class="sic-status-row">
+                                {% if live.isLive %}
+                                <span class="sic-badge sic-badge-live">
+                                    <span class="sic-badge-dot"></span> LIVE
                                 </span>
-                            {% endif %}
+                                {% elseif live.isEnded %}
+                                <span class="sic-badge sic-badge-ended">ENDED</span>
+                                {% else %}
+                                <span class="sic-badge sic-badge-soon">SOON</span>
+                                {% endif %}
+                                {% if live.coinPrice > 0 and not isOwner %}
+                                <span class="sic-access-granted">
+                                    <i class="fas fa-check-circle"></i> Access granted
+                                </span>
+                                {% endif %}
+                            </div>
+                            <h2 class="sic-title">{{ live.title }}</h2>
+                            <div class="sic-meta">
+                                <span><i class="fas fa-user-graduate"></i> {{ live.coach.username }}</span>
+                                {% if live.startedAt %}
+                                <span class="sic-meta-sep">·</span>
+                                <span><i class="fas fa-clock"></i> Started {{ live.startedAt|date('H:i') }}</span>
+                                {% endif %}
+                            </div>
                         </div>
-                        {% if live.description %}
-                            <hr style="border-color: #3a3a5a;">
-                            <p style="color: #c0c0d0;">{{ live.description }}</p>
-                        {% endif %}
                     </div>
+
+                    {% if live.description %}
+                    <div class="stream-desc-card">
+                        <div class="sdc-label"><i class="fas fa-align-left"></i> Description</div>
+                        <p class="sdc-text">{{ live.description }}</p>
+                    </div>
+                    {% endif %}
 
                 {% else %}
-                    {# === PAYWALL === #}
-                    <div class="profile_card text-center py-5">
-                        <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 12px; padding: 40px 20px; margin-bottom: 30px;">
-                            <i class="fas fa-lock" style="font-size: 64px; color: #667eea; display: block; margin-bottom: 15px;"></i>
-                            {% if live.isLive %}
-                                <div style="display:inline-flex; align-items:center; gap:8px; background:#e53e3e; color:white; padding:6px 16px; border-radius:20px; font-size:13px; font-weight:bold; margin-bottom:15px;">
-                                    <span style="width:8px;height:8px;background:white;border-radius:50%;animation:pulse 1.5s infinite;display:inline-block;"></span>
-                                    LIVE NOW
-                                </div>
-                            {% endif %}
-                            <h3 style="color: #fff; font-weight: bold;">{{ live.title }}</h3>
-                            <p style="color: #a0a0b0;"><i class="fas fa-user-graduate"></i> {{ live.coach.username }}</p>
+
+                    {# ── PAYWALL ── #}
+                    <div class="paywall-wrap">
+                        <div class="pw-corner tl"></div>
+                        <div class="pw-corner tr"></div>
+                        <div class="pw-corner bl"></div>
+                        <div class="pw-corner br"></div>
+
+                        <div class="pw-glow"></div>
+
+                        <div class="pw-lock-icon">
+                            <i class="fas fa-lock"></i>
                         </div>
 
-                        {% if live.description %}
-                            <p style="color: #c0c0d0; margin-bottom: 25px;">{{ live.description }}</p>
+                        {% if live.isLive %}
+                        <div class="pw-live-badge">
+                            <span class="pw-live-dot"></span>
+                            LIVE NOW
+                        </div>
                         {% endif %}
 
-                        <div style="background: #1e1e3a; border: 1px solid #4a4a6a; border-radius: 12px; padding: 30px; margin-bottom: 25px; display: inline-block; min-width: 280px;">
-                            <p style="color: #888; margin-bottom: 8px; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Access Price</p>
-                            <div style="font-size: 42px; font-weight: bold; color: #f6d860;">
-                                <i class="fas fa-coins" style="font-size: 32px;"></i>
-                                {{ live.coinPrice }}
+                        <h2 class="pw-title">{{ live.title }}</h2>
+                        <p class="pw-coach"><i class="fas fa-user-graduate"></i> {{ live.coach.username }}</p>
+
+                        {% if live.description %}
+                        <p class="pw-desc">{{ live.description }}</p>
+                        {% endif %}
+
+                        <div class="pw-price-box">
+                            <div class="pw-price-label">Access Price</div>
+                            <div class="pw-price-value">
+                                <i class="fas fa-coins"></i>
+                                <span>{{ live.coinPrice }}</span>
                             </div>
-                            <p style="color: #888; margin-top: 4px; font-size: 13px;">EyeTwin Coins</p>
+                            <div class="pw-price-sub">EyeTwin Coins</div>
                         </div>
 
                         {% set userCoins = app.user.coinBalance %}
-                        <div class="mb-4">
-                            <span style="color: #a0a0b0; font-size: 14px;">
-                                Your balance: <strong style="color: #f6d860;"><i class="fas fa-coins"></i> {{ userCoins }} coins</strong>
-                            </span>
+                        <div class="pw-balance">
+                            Your balance:
+                            <span class="pw-balance-val"><i class="fas fa-coins"></i> {{ userCoins }} coins</span>
                         </div>
 
                         {% if userCoins >= live.coinPrice %}
-                            <form method="POST">
-                                <input type="hidden" name="_token" value="{{ csrf_token('live_join_' ~ live.id) }}">
-                                <button type="submit" class="btn_profile btn_apply" style="font-size: 16px; padding: 14px 32px;">
-                                    <i class="fas fa-play-circle"></i> Join for {{ live.coinPrice }} Coins
-                                </button>
-                            </form>
+                        <form method="POST" class="pw-form">
+                            <input type="hidden" name="_token" value="{{ csrf_token('live_join_' ~ live.id) }}">
+                            <button type="submit" class="btn-fire btn-fire-lg">
+                                <span class="btn-fire-bg"></span>
+                                <i class="fas fa-play-circle"></i>
+                                <span>Join for {{ live.coinPrice }} Coins</span>
+                            </button>
+                        </form>
                         {% else %}
-                            <div class="alert alert-warning d-inline-block mb-3" style="background: rgba(246, 173, 85, 0.15); border: 1px solid #f6ad55; color: #f6d860;">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                Not enough coins — you need {{ live.coinPrice - userCoins }} more.
-                            </div>
-                            <br>
-                            <a href="{{ path('coins_index') }}" class="btn_profile btn_apply" style="text-decoration:none; font-size: 15px; padding: 12px 28px;">
-                                <i class="fas fa-shopping-cart"></i> Buy EyeTwin Coins
-                            </a>
+                        <div class="pw-insufficient">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Not enough coins — you need {{ live.coinPrice - userCoins }} more.
+                        </div>
+                        <a href="{{ path('coins_index') }}" class="btn-fire btn-fire-lg" style="text-decoration:none;">
+                            <span class="btn-fire-bg"></span>
+                            <i class="fas fa-shopping-cart"></i>
+                            <span>Buy EyeTwin Coins</span>
+                        </a>
                         {% endif %}
                     </div>
-                {% endif %}
 
+                {% endif %}
             </div>
 
-            <div class="col-lg-4">
-                <div class="profile_card">
-                    <h4 class="card_title"><i class="fas fa-info-circle"></i> Stream Info</h4>
-                    <div class="account_info">
-                        <div class="info_row">
-                            <span class="info_label">Coach</span>
-                            <span class="info_value">{{ live.coach.username }}</span>
+            {# ══ RIGHT : SIDEBAR ══ #}
+            <aside class="watch-sidebar">
+
+                {# Stream Info Card #}
+                <div class="sidebar-card">
+                    <div class="sc-header">
+                        <div class="sc-header-dot"></div>
+                        <span>Stream Info</span>
+                    </div>
+                    <div class="sc-rows">
+                        <div class="sc-row">
+                            <span class="sc-label">Coach</span>
+                            <span class="sc-value">{{ live.coach.username }}</span>
                         </div>
-                        <div class="info_row">
-                            <span class="info_label">Status</span>
-                            <span class="info_value">
+                        <div class="sc-row">
+                            <span class="sc-label">Status</span>
+                            <span class="sc-value">
                                 {% if live.isLive %}
-                                    <span style="color: #e53e3e; font-weight: bold;">🔴 Live</span>
+                                <span class="sc-status-live">● Live</span>
                                 {% elseif live.isEnded %}
-                                    <span style="color: #888;">Ended</span>
+                                <span class="sc-status-ended">Ended</span>
                                 {% else %}
-                                    <span style="color: #667eea;">Upcoming</span>
+                                <span class="sc-status-soon">Upcoming</span>
                                 {% endif %}
                             </span>
                         </div>
-                        <div class="info_row">
-                            <span class="info_label">Price</span>
-                            <span class="info_value" style="color: #f6d860;">
-                                {{ live.coinPrice == 0 ? 'Free' : live.coinPrice ~ ' coins' }}
+                        <div class="sc-row">
+                            <span class="sc-label">Price</span>
+                            <span class="sc-value sc-price">
+                                {% if live.coinPrice == 0 %}
+                                <span class="sc-free">FREE</span>
+                                {% else %}
+                                <i class="fas fa-coins"></i> {{ live.coinPrice }} coins
+                                {% endif %}
                             </span>
                         </div>
                         {% if live.startedAt %}
-                        <div class="info_row">
-                            <span class="info_label">Started</span>
-                            <span class="info_value">{{ live.startedAt|date('H:i') }}</span>
+                        <div class="sc-row">
+                            <span class="sc-label">Started</span>
+                            <span class="sc-value">{{ live.startedAt|date('H:i') }}</span>
                         </div>
                         {% endif %}
                     </div>
                 </div>
 
+                {# Coins Card (only if no access) #}
                 {% if not hasAccess %}
-                <div class="profile_card mt-4" style="background: linear-gradient(135deg, rgba(102,126,234,0.15) 0%, rgba(118,75,162,0.15) 100%); border: 1px solid #667eea;">
-                    <h4 class="card_title" style="color: #a78bfa;"><i class="fas fa-coins"></i> Need Coins?</h4>
-                    <p style="color: #a0a0b0; font-size: 13px;">Purchase EyeTwin Coins to access exclusive coaching live streams.</p>
-                    <a href="{{ path('coins_index') }}" class="btn_profile btn_apply" style="text-decoration:none; display:block; text-align:center;">
-                        <i class="fas fa-shopping-cart"></i> Buy Coins
+                <div class="sidebar-card sidebar-card-coins">
+                    <div class="sc-coins-glow"></div>
+                    <div class="sc-header">
+                        <i class="fas fa-coins" style="color: var(--gold);"></i>
+                        <span>Need Coins?</span>
+                    </div>
+                    <p class="sc-coins-text">Purchase EyeTwin Coins to access exclusive coaching live streams.</p>
+                    <a href="{{ path('coins_index') }}" class="btn-fire btn-fire-sm" style="text-decoration:none; display:flex; justify-content:center;">
+                        <span class="btn-fire-bg"></span>
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>Buy Coins</span>
                     </a>
                 </div>
                 {% endif %}
 
-                <div class="mt-4">
-                    <a href="{{ path('live_index') }}" style="color: #667eea; text-decoration: none; font-size: 14px;">
-                        <i class="fas fa-arrow-left"></i> Back to Live Streams
+                {# Back link #}
+                <div class="sidebar-back">
+                    <a href="{{ path('live_index') }}" class="back-link">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>All Live Streams</span>
                     </a>
                 </div>
-            </div>
+
+            </aside>
         </div>
     </div>
 </section>
 
 <style>
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+/* ═══════════════════════════════════════════
+   EYE2WIN — WATCH PAGE [FULL RED HUD]
+═══════════════════════════════════════════ */
+:root {
+    --red:       #e8372a;
+    --red-hot:   #ff4d3d;
+    --red-deep:  #b02b20;
+    --orange:    #ff6b2b;
+    --pink:      #ff2060;
+    --green:     #00e676;
+    --gold:      #f6d860;
+    --dark:      #080810;
+    --dark2:     #0d0c1a;
+    --border-r:  rgba(232,55,42,0.3);
+    --text:      rgba(255,255,255,0.93);
+    --muted:     rgba(255,255,255,0.38);
+    --font-hud:  'Orbitron', sans-serif;
+    --font-body: 'Rajdhani', sans-serif;
+    --font-mono: 'Share Tech Mono', monospace;
+}
+* { box-sizing: border-box; }
+body { background: var(--dark); font-family: var(--font-body); min-height: 100vh; }
+
+/* ── GLOBAL BACKGROUND ── */
+.watch-bg {
+    position: fixed; inset: 0;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    opacity: 0.07;
+    filter: blur(2px) saturate(0.55);
+    transform: scale(1.05);
+    z-index: 0;
+    pointer-events: none;
+}
+.watch-grid-overlay {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+        linear-gradient(rgba(232,55,42,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,55,42,0.04) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: grid-pulse 6s ease-in-out infinite;
+}
+@keyframes grid-pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.watch-scanline {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.04) 2px, rgba(0,0,0,.04) 4px);
+    animation: scanline-move 10s linear infinite;
+}
+@keyframes scanline-move { from{background-position:0 0} to{background-position:0 100px} }
+
+/* ── SECTION ── */
+.watch-section {
+    position: relative; z-index: 1;
+    padding: 2rem 0 4rem;
+    min-height: 100vh;
+}
+
+/* ── BREADCRUMB ── */
+.watch-breadcrumb {
+    display: flex; align-items: center; gap: .6rem;
+    font-family: var(--font-mono); font-size: .65rem;
+    color: var(--muted); margin-bottom: 1.5rem;
+    letter-spacing: .05em;
+}
+.breadcrumb-back {
+    display: inline-flex; align-items: center; gap: .4rem;
+    color: var(--red-hot); text-decoration: none;
+    transition: color .2s, gap .2s;
+}
+.breadcrumb-back:hover { color: var(--orange); gap: .6rem; }
+.breadcrumb-sep { color: rgba(255,255,255,.15); }
+.breadcrumb-current { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 400px; }
+
+/* ── LAYOUT ── */
+.watch-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 1.4rem;
+    align-items: start;
+}
+
+/* ══════════════════════════
+   PLAYER
+══════════════════════════ */
+.player-wrap {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(232,55,42,.2);
+    background: #000;
+    box-shadow: 0 0 60px rgba(232,55,42,.08);
+    margin-bottom: 1rem;
+}
+.player-inner {
+    aspect-ratio: 16/9;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #0e0005 0%, #08050f 100%);
+}
+.player-video { width: 100%; height: 100%; display: block; object-fit: cover; }
+
+/* Corner brackets */
+.pc {
+    position: absolute; width: 12px; height: 12px;
+    border-color: var(--red-hot); border-style: solid;
+    z-index: 5; pointer-events: none;
+    opacity: .6;
+}
+.pc.tl { top:8px;left:8px;   border-width:2px 0 0 2px }
+.pc.tr { top:8px;right:8px;  border-width:2px 2px 0 0 }
+.pc.bl { bottom:8px;left:8px; border-width:0 0 2px 2px }
+.pc.br { bottom:8px;right:8px;border-width:0 2px 2px 0 }
+
+/* Live badge */
+.player-live-badge {
+    position: absolute; top: 14px; left: 14px; z-index: 6;
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: rgba(232,55,42,.9); color: #fff;
+    font-family: var(--font-hud); font-size: .58rem; font-weight: 800;
+    letter-spacing: .14em; padding: .25rem .75rem; border-radius: 5px;
+    border: 1px solid rgba(255,100,100,.5); backdrop-filter: blur(4px);
+}
+.player-live-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: #fff;
+    animation: live-dot 1.2s ease-in-out infinite;
+}
+@keyframes live-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.25;transform:scale(.65)} }
+
+/* Waiting state */
+.player-waiting {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 1rem; padding: 3rem 2rem;
+    text-align: center; width: 100%;
+}
+.player-waiting-icon {
+    width: 72px; height: 72px; border-radius: 18px;
+    background: rgba(232,55,42,.1); border: 1px solid rgba(232,55,42,.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; color: var(--red-hot);
+    animation: icon-pulse 2s ease-in-out infinite;
+}
+@keyframes icon-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(232,55,42,.3)} 50%{box-shadow:0 0 0 14px rgba(232,55,42,0)} }
+.player-waiting h4 { font-family: var(--font-hud); color: var(--text); font-size: .95rem; margin: 0; }
+.player-waiting p  { font-family: var(--font-body); color: var(--muted); font-size: .85rem; margin: 0; }
+.player-waiting-bar {
+    width: 180px; height: 3px; background: rgba(255,255,255,.07); border-radius: 2px; overflow: hidden;
+}
+.player-waiting-bar-inner {
+    height: 100%; width: 40%; border-radius: 2px;
+    background: linear-gradient(90deg, var(--red), var(--orange));
+    animation: bar-slide 2.2s ease-in-out infinite;
+}
+@keyframes bar-slide { 0%{transform:translateX(-100%)} 100%{transform:translateX(350%)} }
+
+/* ── STREAM INFO ── */
+.stream-info-card {
+    background: rgba(6,5,16,.88); border: 1px solid rgba(232,55,42,.12);
+    border-radius: 14px; padding: 1.2rem 1.4rem; margin-bottom: 1rem;
+    display: flex; align-items: flex-start; justify-content: space-between;
+}
+.sic-left { flex: 1; }
+.sic-status-row { display: flex; align-items: center; gap: .8rem; margin-bottom: .6rem; }
+.sic-badge {
+    display: inline-flex; align-items: center; gap: .3rem;
+    font-family: var(--font-hud); font-size: .58rem; font-weight: 800;
+    letter-spacing: .12em; padding: .2rem .65rem; border-radius: 5px;
+}
+.sic-badge-live  { background: rgba(232,55,42,.85); border: 1px solid rgba(255,100,100,.4); color: #fff; }
+.sic-badge-ended { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1); color: var(--muted); }
+.sic-badge-soon  { background: rgba(255,107,43,.15); border: 1px solid rgba(255,107,43,.35); color: var(--orange); }
+.sic-badge-dot   { width:6px;height:6px;border-radius:50%;background:#fff;animation:live-dot 1.2s ease-in-out infinite; }
+.sic-access-granted { font-family: var(--font-mono); font-size: .62rem; color: var(--green); display: flex; align-items: center; gap: .3rem; }
+.sic-title {
+    font-family: var(--font-hud); font-size: 1.15rem; font-weight: 800;
+    color: var(--text); margin: 0 0 .5rem; letter-spacing: .03em;
+}
+.sic-meta {
+    font-family: var(--font-mono); font-size: .65rem; color: var(--muted);
+    display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+}
+.sic-meta i { color: rgba(232,55,42,.5); }
+.sic-meta-sep { color: rgba(255,255,255,.15); }
+
+.stream-desc-card {
+    background: rgba(6,5,16,.6); border: 1px solid rgba(255,255,255,.06);
+    border-radius: 14px; padding: 1.1rem 1.4rem;
+}
+.sdc-label {
+    font-family: var(--font-hud); font-size: .62rem; font-weight: 700;
+    color: rgba(232,55,42,.7); letter-spacing: .1em; text-transform: uppercase;
+    margin-bottom: .6rem; display: flex; align-items: center; gap: .4rem;
+}
+.sdc-text { font-family: var(--font-body); font-size: .9rem; color: rgba(255,255,255,.55); line-height: 1.65; margin: 0; }
+
+/* ══════════════════════════
+   PAYWALL
+══════════════════════════ */
+.paywall-wrap {
+    position: relative; overflow: hidden;
+    background: rgba(6,5,16,.92); border: 1px solid rgba(232,55,42,.2);
+    border-radius: 16px; padding: 3rem 2.5rem;
+    text-align: center; display: flex; flex-direction: column;
+    align-items: center; gap: 1.2rem;
+    box-shadow: 0 0 80px rgba(232,55,42,.06);
+}
+.pw-glow {
+    position: absolute; width: 400px; height: 400px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,55,42,.1), transparent 65%);
+    top: 50%; left: 50%; transform: translate(-50%,-50%);
+    pointer-events: none;
+}
+.pw-corner {
+    position: absolute; width: 14px; height: 14px;
+    border-color: rgba(232,55,42,.5); border-style: solid; pointer-events: none;
+}
+.pw-corner.tl { top:10px;left:10px;   border-width:2px 0 0 2px }
+.pw-corner.tr { top:10px;right:10px;  border-width:2px 2px 0 0 }
+.pw-corner.bl { bottom:10px;left:10px; border-width:0 0 2px 2px }
+.pw-corner.br { bottom:10px;right:10px;border-width:0 2px 2px 0 }
+
+.pw-lock-icon {
+    width: 80px; height: 80px; border-radius: 20px;
+    background: rgba(232,55,42,.1); border: 1px solid rgba(232,55,42,.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.2rem; color: var(--red-hot);
+    box-shadow: 0 0 30px rgba(232,55,42,.15);
+    animation: icon-pulse 2.5s ease-in-out infinite;
+}
+.pw-live-badge {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: rgba(232,55,42,.85); color: #fff;
+    font-family: var(--font-hud); font-size: .6rem; font-weight: 800;
+    letter-spacing: .14em; padding: .3rem .9rem; border-radius: 20px;
+    border: 1px solid rgba(255,100,100,.5);
+}
+.pw-live-dot { width:7px;height:7px;border-radius:50%;background:#fff;animation:live-dot 1.2s ease-in-out infinite; }
+.pw-title { font-family: var(--font-hud); font-size: 1.4rem; font-weight: 900; color: var(--text); margin: 0; letter-spacing: .04em; }
+.pw-coach { font-family: var(--font-mono); font-size: .7rem; color: var(--muted); margin: 0; }
+.pw-coach i { color: rgba(232,55,42,.5); }
+.pw-desc { font-family: var(--font-body); font-size: .9rem; color: rgba(255,255,255,.45); line-height: 1.6; margin: 0; max-width: 500px; }
+
+.pw-price-box {
+    background: rgba(255,255,255,.03); border: 1px solid rgba(232,55,42,.2);
+    border-radius: 14px; padding: 1.4rem 2.5rem;
+    display: flex; flex-direction: column; align-items: center; gap: .3rem;
+    min-width: 220px;
+}
+.pw-price-label { font-family: var(--font-mono); font-size: .6rem; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; }
+.pw-price-value {
+    font-family: var(--font-hud); font-size: 3rem; font-weight: 900;
+    color: var(--gold); display: flex; align-items: center; gap: .4rem; line-height: 1;
+    text-shadow: 0 0 30px rgba(246,216,96,.3);
+}
+.pw-price-value i { font-size: 2rem; }
+.pw-price-sub { font-family: var(--font-mono); font-size: .6rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; }
+
+.pw-balance { font-family: var(--font-mono); font-size: .72rem; color: var(--muted); }
+.pw-balance-val { color: var(--gold); font-weight: 700; }
+.pw-balance-val i { font-size: .75rem; }
+
+.pw-form { width: 100%; display: flex; justify-content: center; }
+.pw-insufficient {
+    font-family: var(--font-mono); font-size: .7rem;
+    color: var(--gold); background: rgba(246,173,85,.1);
+    border: 1px solid rgba(246,173,85,.3); border-radius: 8px;
+    padding: .65rem 1.1rem; display: flex; align-items: center; gap: .5rem;
+}
+
+/* ══════════════════════════
+   BUTTONS
+══════════════════════════ */
+.btn-fire {
+    position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: .6rem;
+    background: linear-gradient(135deg, var(--red-deep), var(--red), var(--red-hot));
+    border: none; border-radius: 9px; color: #fff;
+    font-family: var(--font-hud); font-size: .78rem; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; cursor: pointer;
+    box-shadow: 0 4px 24px rgba(232,55,42,.4);
+    transition: transform .18s, box-shadow .18s;
+    padding: .65rem 1.8rem;
+}
+.btn-fire:hover { transform: translateY(-3px); box-shadow: 0 10px 36px rgba(232,55,42,.6); color: #fff; }
+.btn-fire-bg { position: absolute; inset: 0; background: linear-gradient(135deg,rgba(255,255,255,.15),transparent); pointer-events: none; }
+.btn-fire-lg { padding: .85rem 2.4rem; font-size: .82rem; }
+.btn-fire-sm { padding: .52rem 1.2rem; font-size: .68rem; }
+
+/* ══════════════════════════
+   SIDEBAR
+══════════════════════════ */
+.watch-sidebar { display: flex; flex-direction: column; gap: 1rem; }
+
+.sidebar-card {
+    background: rgba(6,5,16,.88); border: 1px solid rgba(232,55,42,.12);
+    border-radius: 14px; padding: 1.1rem 1.2rem;
+    position: relative; overflow: hidden;
+}
+.sidebar-card-coins { border-color: rgba(246,216,96,.15); }
+.sc-coins-glow {
+    position: absolute; width: 200px; height: 200px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(246,216,96,.06), transparent 65%);
+    top: -60px; right: -60px; pointer-events: none;
+}
+.sc-header {
+    font-family: var(--font-hud); font-size: .7rem; font-weight: 700;
+    color: var(--red-hot); letter-spacing: .12em; text-transform: uppercase;
+    display: flex; align-items: center; gap: .5rem;
+    padding-bottom: .8rem; margin-bottom: .8rem;
+    border-bottom: 1px solid rgba(232,55,42,.1);
+}
+.sc-header-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--red-hot); box-shadow: 0 0 8px var(--red); }
+
+.sc-rows { display: flex; flex-direction: column; gap: .6rem; }
+.sc-row { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.sc-label { font-family: var(--font-mono); font-size: .62rem; color: var(--muted); letter-spacing: .05em; }
+.sc-value { font-family: var(--font-mono); font-size: .67rem; color: var(--text); text-align: right; }
+.sc-status-live  { color: var(--red-hot); font-weight: 700; animation: sc-live-pulse 1.5s ease-in-out infinite; }
+@keyframes sc-live-pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+.sc-status-ended { color: var(--muted); }
+.sc-status-soon  { color: var(--orange); }
+.sc-price i { color: rgba(246,216,96,.6); margin-right: .2rem; }
+.sc-free { color: var(--green); font-weight: 700; }
+
+.sc-coins-text { font-family: var(--font-body); font-size: .8rem; color: var(--muted); line-height: 1.5; margin-bottom: .8rem; }
+
+.sidebar-back { padding: .4rem 0; }
+.back-link {
+    display: inline-flex; align-items: center; gap: .5rem;
+    font-family: var(--font-mono); font-size: .65rem; color: var(--muted);
+    text-decoration: none; letter-spacing: .05em;
+    transition: color .2s, gap .2s;
+}
+.back-link:hover { color: var(--red-hot); gap: .7rem; }
+
+/* ══ FLASH MESSAGES ══ */
+.flash-msg {
+    display: flex; align-items: center; gap: .6rem;
+    padding: .75rem 1.1rem; border-radius: 9px;
+    font-family: var(--font-mono); font-size: .72rem; margin-bottom: .8rem;
+}
+.flash-success { background: rgba(0,230,118,.08); border: 1px solid rgba(0,230,118,.25); color: var(--green); }
+.flash-error   { background: rgba(232,55,42,.08); border: 1px solid rgba(232,55,42,.25); color: var(--red-hot); }
+
+/* ══ ANIMATIONS ══ */
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* ══ RESPONSIVE ══ */
+@media (max-width: 900px) {
+    .watch-layout { grid-template-columns: 1fr; }
+    .watch-sidebar { order: -1; display: grid; grid-template-columns: 1fr 1fr; }
+    .sidebar-back { grid-column: 1 / -1; }
+}
+@media (max-width: 580px) {
+    .watch-sidebar { display: flex; flex-direction: column; }
+    .paywall-wrap { padding: 2rem 1.2rem; }
+    .pw-price-box { min-width: 0; width: 100%; }
+    .watch-bg { background-attachment: scroll; }
 }
 </style>
 
@@ -216,7 +652,6 @@ if (Hls.isSupported()) {
 
 {% if hasAccess and not live.isLive %}
 <script>
-// Auto-refresh toutes les 30s si le stream n'a pas encore commencé
 setTimeout(() => location.reload(), 30000);
 </script>
 {% endif %}

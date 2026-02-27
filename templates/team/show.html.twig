@@ -3,361 +3,817 @@
 {% block title %}{{ team.name }}{% endblock %}
 
 {% block body %}
-<section class="breadcrumb_part">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="breadcrumb_iner">
-                    <h2>{{ team.name }}</h2>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 
-<section class="blog_part section_padding">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-8">
-                {# Team Info #}
-                <div class="card mb-4">
-                    {% if team.logo %}
-                    <img src="{{ asset('uploads/teams/' ~ team.logo) }}" class="card-img-top" alt="{{ team.name }}" style="max-height: 400px; object-fit: cover;">
-                    {% endif %}
-                    
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div>
-                                <h3 class="card-title">{{ team.name }}</h3>
-                                <p class="text-muted">
-                                    <i class="fas fa-user"></i> Owner: 
-                                    <strong>{{ team.owner.username }}</strong>
-                                </p>
-                            </div>
-                           <div>
-    {% if team.owner == app.user %}
-    <a href="{{ path('app_teams_edit', {id: team.id}) }}" class="btn btn-primary">
-        <i class="fas fa-edit"></i> Edit
-    </a>
-    {% if pendingRequestsCount > 0 %}
-    <span class="badge bg-warning ms-2">
-        {{ pendingRequestsCount }} request{{ pendingRequestsCount > 1 ? 's' : '' }}
-    </span>
-    {% endif %}
-    
-    {% elseif userMembership and userMembership.status.value == 'ACTIVE' %}
-    <form method="post" action="{{ path('app_teams_leave', {id: team.id}) }}" onsubmit="return confirm('Are you sure you want to leave this team?');" style="display: inline;">
-        <button type="submit" class="btn btn-danger">
-            <i class="fas fa-sign-out-alt"></i> Leave
-        </button>
-    </form>
-    
-    {% elseif hasPendingRequest %}
-    <button class="btn btn-warning" disabled>
-        <i class="fas fa-hourglass-half"></i> Request Pending
-    </button>
-    
-    {% else %}
-    {# Show join button if user is not member and hasn't requested #}
-    {% if team.isActive %}
-        {% set activeMembersCount = team.teamMemberships|filter(m => m.status.value == 'ACTIVE')|length %}
-        {% if activeMembersCount < team.maxMembers %}
-        <form method="post" action="{{ path('app_teams_request_join', {id: team.id}) }}" style="display: inline;">
-            <button type="submit" class="btn btn-success">
-                <i class="fas fa-user-plus"></i> Request to Join
-            </button>
-        </form>
-        {% else %}
-        <button class="btn btn-secondary" disabled>
-            <i class="fas fa-users"></i> Team Full
-        </button>
-        {% endif %}
-    {% else %}
-    <button class="btn btn-secondary" disabled>
-        <i class="fas fa-lock"></i> Team Inactive
-    </button>
-    {% endif %}
-    {% endif %}
-</div>
-                           
-                           
-                         </div>
-                        
-                        <div class="mb-3">
-                            <span class="badge bg-primary">
-                                <i class="fas fa-users"></i> {{ activeMembersCount }}/{{ team.maxMembers }} members
-                            </span>
-                            {% if team.isActive %}
-                            <span class="badge bg-success">Active</span>
-                            {% else %}
-                            <span class="badge bg-secondary">Inactive</span>
-                            {% endif %}
-                        </div>
+{# ── HERO ── #}
+<div class="show-hero">
+    <canvas id="heroCanvas"></canvas>
+    <div class="hero-grid-overlay"></div>
+    <div class="hero-scanline"></div>
+    <div class="hero-vignette"></div>
 
-                        {# Pending Join Requests (Only visible to owner) #}
-{% if team.owner == app.user and pendingRequests|length > 0 %}
-<div class="card mt-4">
-    <div class="card-header bg-warning text-dark">
-        <h5 class="mb-0">
-            <i class="fas fa-user-clock"></i> Pending Join Requests 
-            <span class="badge bg-dark">{{ pendingRequestsCount }}</span>
-        </h5>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            {% for request in pendingRequests %}
-            <div class="col-md-6 mb-3">
-                <div class="d-flex align-items-center p-3 border rounded">
-                    <div class="me-3">
-                        {% if request.user.profilePicture %}
-                        <img src="{{ asset('uploads/profiles/' ~ request.user.profilePicture) }}" 
-                             alt="{{ request.user.username }}" 
-                             class="rounded-circle"
-                             style="width: 50px; height: 50px; object-fit: cover;">
-                        {% else %}
-                        <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center" 
-                             style="width: 50px; height: 50px; font-weight: bold;">
-                            {{ request.user.username|slice(0, 2)|upper }}
-                        </div>
-                        {% endif %}
-                    </div>
-                    <div class="flex-grow-1">
-                        <strong>{{ request.user.username }}</strong>
-                        {% if request.user.fullName %}
-                        <br>
-                        <small class="text-muted">{{ request.user.fullName }}</small>
-                        {% endif %}
-                        <br>
-                        <small class="text-muted">
-                            <i class="fas fa-clock"></i> {{ request.invitedAt|date('m/d/Y at H:i') }}
-                        </small>
-                    </div>
-                    <div>
-                        <form method="post" action="{{ path('app_teams_request_accept', {id: request.id}) }}" style="display: inline;">
-                            <button type="submit" class="btn btn-sm btn-success" title="Accept">
-                                <i class="fas fa-check"></i>
-                            </button>
-                        </form>
-                        <form method="post" action="{{ path('app_teams_request_reject', {id: request.id}) }}" 
-                              onsubmit="return confirm('Reject this request?');" style="display: inline;">
-                            <button type="submit" class="btn btn-sm btn-danger" title="Reject">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</div>
-{% endif %}
-                        
-                        {% if team.description %}
-                        <h5>Description</h5>
-                        <p>{{ team.description|nl2br }}</p>
-                        {% endif %}
-                        
-                        <p class="text-muted small">
-                            <i class="fas fa-calendar"></i> Created on {{ team.createdAt|date('m/d/Y at H:i') }}
-                        </p>
-                    </div>
-                </div>
+    {% if team.logo %}
+    <div class="hero-banner-img" style="background-image: url('{{ asset('uploads/teams/' ~ team.logo) }}')"></div>
+    {% endif %}
 
-                {# Members List #}
-                <div class="card">
-                    <div class="card-header">
-                        <h5><i class="fas fa-users"></i> Team Members ({{ activeMembersCount }})</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            {% for membership in activeMembers %}
-                            <div class="col-md-6 mb-3">
-                                <div class="d-flex align-items-center p-3 border rounded">
-                                    <div class="me-3">
-                                        {% if membership.user.profilePicture %}
-                                        <img src="{{ asset('uploads/profiles/' ~ membership.user.profilePicture) }}" 
-                                             alt="{{ membership.user.username }}" 
-                                             class="rounded-circle"
-                                             style="width: 50px; height: 50px; object-fit: cover;">
-                                        {% else %}
-                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" 
-                                             style="width: 50px; height: 50px; font-weight: bold;">
-                                            {{ membership.user.username|slice(0, 2)|upper }}
-                                        </div>
-                                        {% endif %}
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <strong>{{ membership.user.username }}</strong>
-                                        <br>
-                                        <span class="badge bg-{{ membership.role.value == 'OWNER' ? 'warning' : (membership.role.value == 'CO_CAPTAIN' ? 'info' : 'secondary') }}">
-                                            {{ membership.role.label }}
-                                        </span>
-                                        <br>
-                                        <small class="text-muted">Member since {{ membership.joinedAt|date('m/d/Y') }}</small>
-                                    </div>
-                                    {% if team.owner == app.user and membership.role.value != 'OWNER' %}
-                                    <div>
-                                        <form method="post" action="{{ path('app_teams_remove_member', {id: team.id, membershipId: membership.id}) }}" 
-                                              onsubmit="return confirm('Remove this member?');">
-                                            <button type="submit" class="btn btn-sm btn-danger">
-                                                <i class="fas fa-user-times"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
+    <div class="container position-relative">
+        <div class="hero-inner">
+            <span class="hero-tag">
+                <span class="hero-tag-dot"></span>
+                <i class="fas fa-users"></i> Squad Profile
+            </span>
+            <h1 class="hero-title">{{ team.name }}</h1>
+            <div class="hero-meta-row">
+                <span class="hero-meta-item">
+                    <i class="fas fa-user"></i> {{ team.owner.username }}
+                </span>
+                <span class="hero-meta-sep">·</span>
+                <span class="hero-meta-item">
+                    <i class="fas fa-calendar-alt"></i> {{ team.createdAt|date('M d, Y') }}
+                </span>
+                <span class="hero-meta-sep">·</span>
+                <span class="hero-status {% if team.isActive %}hero-status-on{% else %}hero-status-off{% endif %}">
+                    <span class="hstatus-dot"></span>
+                    {{ team.isActive ? 'ACTIVE' : 'INACTIVE' }}
+                </span>
             </div>
 
-            <div class="col-lg-4">
-                {# Invite Members (Only for owner) #}
+            {# ── ACTION BUTTONS ── #}
+            <div class="hero-actions mt-3">
+                {% set activeMembersCount = team.teamMemberships|filter(m => m.status.value == 'ACTIVE')|length %}
+
                 {% if team.owner == app.user %}
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="fas fa-user-plus"></i> Invite Members</h5>
-                    </div>
-                    <div class="card-body">
-                        {% if activeMembersCount >= team.maxMembers %}
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle"></i> Team has reached maximum number of members.
-                        </div>
-                        {% else %}
-                        <div class="mb-3">
-                            <label class="form-label">Search for a user</label>
-                            <input type="text" class="form-control" id="userSearch" placeholder="Username or email">
-                            <div id="searchResults" class="list-group mt-2" style="display: none;"></div>
-                        </div>
-                        
-                        <form method="post" action="{{ path('app_teams_invite', {id: team.id}) }}" id="inviteForm">
-                            <input type="hidden" name="user_id" id="selectedUserId">
-                            <div id="selectedUserDisplay" style="display: none;" class="alert alert-info">
-                                <strong id="selectedUserName"></strong>
-                                <button type="button" class="btn-close float-end" id="clearSelection"></button>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100" id="inviteBtn" disabled>
-                                <i class="fas fa-paper-plane"></i> Send Invitation
+                    <a href="{{ path('app_teams_edit', {id: team.id}) }}" class="btn-fire btn-fire-sm">
+                        <span class="btn-fire-bg"></span>
+                        <i class="fas fa-edit"></i> Edit Team
+                    </a>
+                    {% if pendingRequestsCount > 0 %}
+                    <span class="pending-badge">
+                        <i class="fas fa-bell"></i>
+                        {{ pendingRequestsCount }} pending request{{ pendingRequestsCount > 1 ? 's' : '' }}
+                    </span>
+                    {% endif %}
+
+                {% elseif userMembership and userMembership.status.value == 'ACTIVE' %}
+                    <form method="post" action="{{ path('app_teams_leave', {id: team.id}) }}"
+                          onsubmit="return confirm('Are you sure you want to leave this team?');">
+                        <button type="submit" class="btn-danger-sm">
+                            <i class="fas fa-sign-out-alt"></i> Leave Team
+                        </button>
+                    </form>
+
+                {% elseif hasPendingRequest %}
+                    <button class="btn-pending-sm" disabled>
+                        <i class="fas fa-hourglass-half"></i> Request Pending
+                    </button>
+
+                {% else %}
+                    {% if team.isActive %}
+                        {% if activeMembersCount < team.maxMembers %}
+                        <form method="post" action="{{ path('app_teams_request_join', {id: team.id}) }}">
+                            <button type="submit" class="btn-join-sm">
+                                <i class="fas fa-user-plus"></i> Request to Join
                             </button>
                         </form>
+                        {% else %}
+                        <button class="btn-ghost-sm" disabled><i class="fas fa-users"></i> Team Full</button>
                         {% endif %}
+                    {% else %}
+                        <button class="btn-ghost-sm" disabled><i class="fas fa-lock"></i> Team Inactive</button>
+                    {% endif %}
+                {% endif %}
+
+                <a href="{{ path('app_teams_index') }}" class="btn-ghost-sm">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {# Stat bar #}
+    <div class="hero-stats">
+        <div class="container">
+            <div class="hstat-row">
+                <div class="hstat">
+                    <span class="hstat-val">{{ activeMembersCount }}</span>
+                    <span class="hstat-lbl">Members</span>
+                </div>
+                <div class="hstat-divider"></div>
+                <div class="hstat">
+                    <span class="hstat-val">{{ team.maxMembers }}</span>
+                    <span class="hstat-lbl">Max Size</span>
+                </div>
+                <div class="hstat-divider"></div>
+                <div class="hstat">
+                    <span class="hstat-val">{{ pendingRequestsCount }}</span>
+                    <span class="hstat-lbl">Requests</span>
+                </div>
+                <div class="hstat-divider"></div>
+                <div class="hstat">
+                    <span class="hstat-val">{{ ((activeMembersCount / team.maxMembers) * 100)|round }}%</span>
+                    <span class="hstat-lbl">Capacity</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── SECTION ── #}
+<section class="show-section">
+    <div class="container">
+        <div class="row">
+
+            {# ══ LEFT COLUMN ══ #}
+            <div class="col-lg-8">
+
+                {# ── TEAM INFO ── #}
+                <div class="gcard mb-4" style="--ci:1">
+                    <div class="card-topline"></div>
+                    <div class="gcard-head">
+                        <span class="gstep"><i class="fas fa-info-circle"></i></span>
+                        <div>
+                            <div class="gcard-title">Team Info</div>
+                            <div class="gcard-sub">About this squad</div>
+                        </div>
+                    </div>
+
+                    {% if team.description %}
+                    <div class="team-desc mt-4">
+                        {{ team.description|nl2br }}
+                    </div>
+                    {% endif %}
+
+                    {# Members bar #}
+                    <div class="tc-members mt-4">
+                        <div class="tc-members-label">
+                            <span><i class="fas fa-users"></i> Squad Capacity</span>
+                            <span class="tc-members-count">
+                                {{ activeMembersCount }}<span class="tc-members-max">/{{ team.maxMembers }}</span>
+                            </span>
+                        </div>
+                        {% set fillPct = team.maxMembers > 0 ? ((activeMembersCount / team.maxMembers) * 100)|round : 0 %}
+                        <div class="tc-bar-track">
+                            <div class="tc-bar-fill {% if fillPct >= 100 %}tc-bar-full{% elseif fillPct >= 75 %}tc-bar-warn{% endif %}"
+                                 style="width: {{ fillPct }}%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                {# ── PENDING REQUESTS (owner only) ── #}
+                {% if team.owner == app.user and pendingRequests|length > 0 %}
+                <div class="gcard mb-4" style="--ci:2">
+                    <div class="card-topline"></div>
+                    <div class="gcard-head">
+                        <div class="gstep req-step"><i class="fas fa-user-clock"></i><div class="req-ping"></div></div>
+                        <div>
+                            <div class="gcard-title">Pending Join Requests</div>
+                            <div class="gcard-sub">{{ pendingRequestsCount }} player{{ pendingRequestsCount > 1 ? 's' : '' }} waiting for approval</div>
+                        </div>
+                        <span class="t-count t-count-req ms-auto">{{ pendingRequestsCount }}</span>
+                    </div>
+                    <div class="member-grid mt-4">
+                        {% for request in pendingRequests %}
+                        <div class="member-card member-req">
+                            <div class="member-avatar">
+                                {% if request.user.profilePicture %}
+                                <img src="{{ asset('uploads/profiles/' ~ request.user.profilePicture) }}" alt="{{ request.user.username }}">
+                                {% else %}
+                                <span>{{ request.user.username|slice(0,2)|upper }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="member-info">
+                                <div class="member-name">{{ request.user.username }}</div>
+                                {% if request.user.fullName %}
+                                <div class="member-sub">{{ request.user.fullName }}</div>
+                                {% endif %}
+                                <div class="member-date"><i class="fas fa-clock"></i> {{ request.invitedAt|date('M d, Y · H:i') }}</div>
+                            </div>
+                            <div class="member-actions">
+                                <form method="post" action="{{ path('app_teams_request_accept', {id: request.id}) }}">
+                                    <button type="submit" class="mact-btn mact-accept" title="Accept">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+                                <form method="post" action="{{ path('app_teams_request_reject', {id: request.id}) }}"
+                                      onsubmit="return confirm('Reject this request?');">
+                                    <button type="submit" class="mact-btn mact-reject" title="Reject">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
                 {% endif %}
 
-                {# Team Stats #}
-                <div class="card">
-                    <div class="card-header">
-                        <h5><i class="fas fa-chart-bar"></i> Statistics</h5>
+                {# ── ACTIVE MEMBERS ── #}
+                <div class="gcard" style="--ci:3">
+                    <div class="card-topline"></div>
+                    <div class="gcard-head">
+                        <span class="gstep"><i class="fas fa-users"></i></span>
+                        <div>
+                            <div class="gcard-title">Team Members</div>
+                            <div class="gcard-sub">{{ activeMembersCount }} active player{{ activeMembersCount != 1 ? 's' : '' }} in this squad</div>
+                        </div>
+                        <span class="t-count t-count-own ms-auto">{{ activeMembersCount }}</span>
                     </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Active members</span>
-                                <strong>{{ activeMembersCount }}/{{ team.maxMembers }}</strong>
+                    <div class="member-grid mt-4">
+                        {% for membership in activeMembers %}
+                        <div class="member-card">
+                            <div class="member-avatar {% if membership.role.value == 'OWNER' %}avatar-owner{% elseif membership.role.value == 'CO_CAPTAIN' %}avatar-co{% endif %}">
+                                {% if membership.user.profilePicture %}
+                                <img src="{{ asset('uploads/profiles/' ~ membership.user.profilePicture) }}" alt="{{ membership.user.username }}">
+                                {% else %}
+                                <span>{{ membership.user.username|slice(0,2)|upper }}</span>
+                                {% endif %}
+                                {% if membership.role.value == 'OWNER' %}
+                                <div class="avatar-crown"><i class="fas fa-crown"></i></div>
+                                {% endif %}
                             </div>
-                            <div class="progress">
-                                <div class="progress-bar" role="progressbar" 
-                                     style="width: {{ (activeMembersCount / team.maxMembers * 100)|round }}%">
-                                </div>
+                            <div class="member-info">
+                                <div class="member-name">{{ membership.user.username }}</div>
+                                <span class="role-badge role-{{ membership.role.value|lower }}">{{ membership.role.label }}</span>
+                                <div class="member-date"><i class="fas fa-calendar-alt"></i> Since {{ membership.joinedAt|date('M d, Y') }}</div>
                             </div>
+                            {% if team.owner == app.user and membership.role.value != 'OWNER' %}
+                            <div class="member-actions">
+                                <form method="post" action="{{ path('app_teams_remove_member', {id: team.id, membershipId: membership.id}) }}"
+                                      onsubmit="return confirm('Remove this member?');">
+                                    <button type="submit" class="mact-btn mact-remove" title="Remove">
+                                        <i class="fas fa-user-times"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            {% endif %}
                         </div>
-                        
-                        <hr>
-                        
-                        <div class="d-flex justify-content-between mb-2">
-                            <span><i class="fas fa-calendar"></i> Created on</span>
-                            <strong>{{ team.createdAt|date('m/d/Y') }}</strong>
-                        </div>
-                        
-                        <div class="d-flex justify-content-between">
-                            <span><i class="fas fa-clock"></i> Age</span>
-                                <strong>{{ 'now'|date('U') - team.createdAt|date('U') }} seconds ago</strong>
-                        </div>
+                        {% endfor %}
                     </div>
                 </div>
+
+            </div>
+
+            {# ══ RIGHT COLUMN ══ #}
+            <div class="col-lg-4">
+
+                {# ── INVITE (owner only) ── #}
+                {% if team.owner == app.user %}
+                <div class="gcard mb-4" style="--ci:1">
+                    <div class="card-topline"></div>
+                    <div class="gcard-head">
+                        <span class="gstep"><i class="fas fa-user-plus"></i></span>
+                        <div>
+                            <div class="gcard-title">Invite Members</div>
+                            <div class="gcard-sub">Search and send invitations</div>
+                        </div>
+                    </div>
+
+                    {% if activeMembersCount >= team.maxMembers %}
+                    <div class="info-alert mt-4">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Squad has reached maximum capacity.
+                    </div>
+                    {% else %}
+                    <div class="f-group mt-4">
+                        <label class="f-label"><i class="fas fa-search"></i> Search Player</label>
+                        <div class="search-wrap">
+                            <input type="text" class="g-input" id="userSearch" placeholder="Username or email…" autocomplete="off">
+                            <div id="searchResults" class="search-dropdown" style="display:none;"></div>
+                        </div>
+                    </div>
+
+                    <form method="post" action="{{ path('app_teams_invite', {id: team.id}) }}" id="inviteForm">
+                        <input type="hidden" name="user_id" id="selectedUserId">
+                        <div id="selectedUserDisplay" class="selected-user-box" style="display:none;">
+                            <div class="selected-user-info">
+                                <i class="fas fa-user-check"></i>
+                                <strong id="selectedUserName"></strong>
+                            </div>
+                            <button type="button" class="clear-btn" id="clearSelection">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <button type="submit" class="btn-fire w-100 mt-3" id="inviteBtn" disabled>
+                            <span class="btn-fire-bg"></span>
+                            <i class="fas fa-paper-plane"></i>
+                            <span>Send Invitation</span>
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {# ── STATS ── #}
+                <div class="gcard" style="--ci:2">
+                    <div class="card-topline"></div>
+                    <div class="gcard-head">
+                        <span class="gstep"><i class="fas fa-chart-bar"></i></span>
+                        <div>
+                            <div class="gcard-title">Statistics</div>
+                            <div class="gcard-sub">Squad data overview</div>
+                        </div>
+                    </div>
+
+                    <div class="stats-list mt-4">
+                        <div class="stat-row">
+                            <span class="stat-label"><i class="fas fa-users"></i> Active Members</span>
+                            <span class="stat-val">{{ activeMembersCount }}/{{ team.maxMembers }}</span>
+                        </div>
+                        <div class="stat-bar-track mt-1 mb-3">
+                            <div class="stat-bar-fill {% if fillPct >= 100 %}tc-bar-full{% elseif fillPct >= 75 %}tc-bar-warn{% endif %}"
+                                 style="width: {{ fillPct }}%"></div>
+                        </div>
+
+                        <div class="stat-row">
+                            <span class="stat-label"><i class="fas fa-calendar"></i> Created</span>
+                            <span class="stat-val">{{ team.createdAt|date('M d, Y') }}</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-row">
+                            <span class="stat-label"><i class="fas fa-toggle-on"></i> Status</span>
+                            <span class="stat-val {% if team.isActive %}stat-active{% else %}stat-inactive{% endif %}">
+                                {{ team.isActive ? 'Active' : 'Inactive' }}
+                            </span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-row">
+                            <span class="stat-label"><i class="fas fa-user-shield"></i> Owner</span>
+                            <span class="stat-val">{{ team.owner.username }}</span>
+                        </div>
+                        {% if team.owner == app.user %}
+                        <div class="stat-divider"></div>
+                        <div class="stat-row">
+                            <span class="stat-label"><i class="fas fa-hourglass-half"></i> Pending</span>
+                            <span class="stat-val stat-pending">{{ pendingRequestsCount }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 </section>
 
-{% endblock %}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
 
-{% block javascripts %}
-{{ parent() }}
+/* ═══════════════════════════════════════════
+   EYE2WIN — TEAM SHOW [FULL RED]
+═══════════════════════════════════════════ */
+:root {
+    --red:       #e8372a;
+    --red-hot:   #ff4d3d;
+    --red-deep:  #b02b20;
+    --red-dim:   rgba(232,55,42,0.12);
+    --orange:    #ff6b2b;
+    --pink:      #ff2060;
+    --green:     #00e676;
+    --dark:      #080810;
+    --border-r:  rgba(232,55,42,0.3);
+    --text:      rgba(255,255,255,0.93);
+    --muted:     rgba(255,255,255,0.38);
+    --font-hud:  'Orbitron', sans-serif;
+    --font-body: 'Rajdhani', sans-serif;
+    --font-mono: 'Share Tech Mono', monospace;
+}
+* { box-sizing: border-box; }
+body { background: var(--dark); font-family: var(--font-body); }
+
+/* ══ HERO ══ */
+.show-hero {
+    position: relative;
+    background: linear-gradient(165deg, #1a0308 0%, #0c0b18 50%, #080810 100%);
+    padding: 4rem 0 0;
+    overflow: hidden;
+}
+.show-hero::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--red), var(--orange), var(--pink), transparent);
+    background-size: 300% 100%;
+    animation: border-shimmer 4s linear infinite;
+}
+@keyframes border-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+.hero-banner-img {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    opacity: .08; filter: blur(2px);
+}
+#heroCanvas { position: absolute; inset: 0; pointer-events: none; z-index: 1; width: 100%; height: 100%; }
+.hero-grid-overlay {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(232,55,42,0.055) 1px,transparent 1px), linear-gradient(90deg,rgba(232,55,42,0.055) 1px,transparent 1px);
+    background-size: 50px 50px; animation: grid-pulse 6s ease-in-out infinite;
+}
+@keyframes grid-pulse { 0%,100%{opacity:1} 50%{opacity:.45} }
+.hero-scanline {
+    position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.055) 2px,rgba(0,0,0,.055) 4px);
+    animation: scanline-move 8s linear infinite;
+}
+@keyframes scanline-move { from{background-position:0 0} to{background-position:0 100px} }
+.hero-vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center,transparent 35%,rgba(0,0,0,.65) 100%); }
+.hero-inner { position: relative; z-index: 3; padding-bottom: 2rem; }
+
+.hero-tag {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: rgba(232,55,42,.09); border: 1px solid rgba(232,55,42,.28);
+    color: var(--red-hot); font-family: var(--font-hud);
+    font-size: .62rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+    padding: .32rem .9rem; border-radius: 3px; margin-bottom: 1rem;
+    animation: badge-in .5s .1s both;
+}
+@keyframes badge-in { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:none} }
+.hero-tag-dot { width:6px;height:6px;border-radius:50%;background:#3dff8a;box-shadow:0 0 8px #3dff8a;animation:blink 1s step-end infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.hero-title {
+    font-family: var(--font-hud); font-weight: 900;
+    font-size: clamp(2rem, 5vw, 3.8rem);
+    line-height: 1; letter-spacing: .04em;
+    background: linear-gradient(90deg, #fff 0%, rgba(255,255,255,.75) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    margin-bottom: .8rem;
+    animation: title-in .6s .2s both cubic-bezier(.22,1,.36,1);
+}
+@keyframes title-in { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
+
+.hero-meta-row { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem; margin-bottom: .8rem; animation: sub-in .5s .3s both; }
+@keyframes sub-in { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+.hero-meta-item { font-family: var(--font-mono); font-size: .7rem; color: var(--muted); display: flex; align-items: center; gap: .3rem; }
+.hero-meta-item i { color: rgba(232,55,42,.5); }
+.hero-meta-sep { color: rgba(255,255,255,.15); }
+.hero-status { display: inline-flex; align-items: center; gap: .3rem; font-family: var(--font-hud); font-size: .58rem; font-weight: 700; letter-spacing: .1em; padding: .18rem .55rem; border-radius: 4px; }
+.hero-status-on  { background: rgba(0,230,118,.12); border: 1px solid rgba(0,230,118,.3); color: var(--green); }
+.hero-status-off { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12); color: var(--muted); }
+.hstatus-dot { width:5px;height:5px;border-radius:50%;background:currentColor; }
+.hero-status-on .hstatus-dot { animation: blink 1.2s ease-in-out infinite; }
+
+/* ── HERO ACTION BUTTONS ── */
+.hero-actions { display: flex; flex-wrap: wrap; gap: .6rem; animation: sub-in .5s .4s both; }
+
+.btn-fire {
+    position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: .5rem;
+    padding: .65rem 1.5rem;
+    background: linear-gradient(135deg, var(--red-deep), var(--red), var(--red-hot));
+    border: none; border-radius: 9px; color: #fff;
+    font-family: var(--font-hud); font-size: .72rem; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; cursor: pointer; text-decoration: none;
+    box-shadow: 0 4px 20px rgba(232,55,42,.45);
+    transition: transform .18s, box-shadow .18s;
+}
+.btn-fire:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(232,55,42,.6); color: #fff; }
+.btn-fire-sm { padding: .55rem 1.2rem; font-size: .68rem; }
+.btn-fire-bg { position: absolute; inset: 0; background: linear-gradient(135deg,rgba(255,255,255,.15),transparent); pointer-events: none; }
+.btn-fire.w-100 { width: 100%; justify-content: center; }
+
+.btn-danger-sm {
+    display: inline-flex; align-items: center; gap: .4rem; padding: .55rem 1.1rem;
+    background: rgba(232,55,42,.12); border: 1px solid rgba(232,55,42,.35); border-radius: 9px;
+    color: var(--red-hot); font-family: var(--font-hud); font-size: .68rem; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase; cursor: pointer;
+    transition: all .18s;
+}
+.btn-danger-sm:hover { background: rgba(232,55,42,.22); border-color: var(--red); box-shadow: 0 4px 16px rgba(232,55,42,.2); }
+
+.btn-join-sm {
+    display: inline-flex; align-items: center; gap: .4rem; padding: .55rem 1.1rem;
+    background: rgba(0,230,118,.1); border: 1px solid rgba(0,230,118,.3); border-radius: 9px;
+    color: var(--green); font-family: var(--font-hud); font-size: .68rem; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase; cursor: pointer;
+    transition: all .18s;
+}
+.btn-join-sm:hover { background: rgba(0,230,118,.2); border-color: var(--green); }
+
+.btn-pending-sm, .btn-ghost-sm {
+    display: inline-flex; align-items: center; gap: .4rem; padding: .55rem 1.1rem;
+    background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); border-radius: 9px;
+    color: var(--muted); font-family: var(--font-hud); font-size: .68rem; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase; text-decoration: none;
+    transition: all .18s;
+}
+.btn-ghost-sm:not([disabled]):hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.2); color: var(--text); }
+
+.pending-badge {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: rgba(255,107,43,.12); border: 1px solid rgba(255,107,43,.3); border-radius: 20px;
+    color: var(--orange); font-family: var(--font-mono); font-size: .65rem; font-weight: 700;
+    padding: .3rem .75rem;
+    animation: pulse-badge 2s ease-in-out infinite;
+}
+@keyframes pulse-badge { 0%,100%{box-shadow:0 0 0 0 rgba(255,107,43,.4)} 50%{box-shadow:0 0 0 6px rgba(255,107,43,0)} }
+
+/* ── STAT BAR ── */
+.hero-stats {
+    position: relative; z-index: 3;
+    background: rgba(0,0,0,.4); border-top: 1px solid rgba(232,55,42,.12);
+    padding: .85rem 0; backdrop-filter: blur(8px);
+}
+.hstat-row { display: flex; align-items: center; flex-wrap: wrap; }
+.hstat { display: flex; flex-direction: column; align-items: center; padding: .4rem 2rem; }
+.hstat-val { font-family: var(--font-hud); font-size: 1.4rem; font-weight: 900; color: var(--red-hot); line-height: 1; text-shadow: 0 0 20px rgba(232,55,42,.6); }
+.hstat-lbl { font-family: var(--font-mono); font-size: .6rem; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-top: .15rem; }
+.hstat-divider { width: 1px; height: 32px; background: linear-gradient(180deg,transparent,rgba(232,55,42,.2),transparent); }
+
+/* ══ SECTION ══ */
+.show-section { background: var(--dark); padding: 2.5rem 0 4rem; }
+
+/* ══ GLASS CARD ══ */
+.gcard {
+    background: rgba(6,5,16,.85); border: 1px solid rgba(255,255,255,.065); border-radius: 14px;
+    padding: 1.75rem 2rem; position: relative; overflow: hidden; backdrop-filter: blur(10px);
+    opacity: 0; transform: translateY(20px);
+    animation: card-enter .5s calc(var(--ci,1)*120ms) forwards cubic-bezier(.22,1,.36,1);
+}
+@keyframes card-enter { to{opacity:1;transform:none} }
+.gcard:focus-within { border-color: rgba(232,55,42,.3); box-shadow: 0 0 0 1px rgba(232,55,42,.08),0 16px 48px rgba(0,0,0,.4); }
+.card-topline {
+    position: absolute; top:0;left:0;right:0;height:1.5px;
+    background: linear-gradient(90deg,transparent,var(--red),var(--orange),var(--pink),transparent);
+    background-size: 200% 100%; opacity:0; transition:opacity .3s;
+}
+.gcard:hover .card-topline { opacity:1; animation:topline-race 1.4s linear infinite; }
+@keyframes topline-race { from{background-position:200% 0} to{background-position:-200% 0} }
+.gcard::after {
+    content:'';position:absolute;left:0;top:10%;bottom:10%;width:3px;
+    background:linear-gradient(180deg,transparent,var(--red),var(--orange),transparent);
+    border-radius:0 2px 2px 0;opacity:0;transform:scaleY(0);
+    transition:opacity .3s,transform .35s cubic-bezier(.22,1,.36,1);
+}
+.gcard:hover::after { opacity:1;transform:scaleY(1); }
+.gcard-head { display:flex;align-items:flex-start;gap:1rem; }
+.gstep {
+    flex-shrink:0;width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+    background:var(--red-dim);border:1px solid var(--border-r);border-radius:10px;
+    font-size:1.1rem;color:var(--red-hot);transition:background .2s,box-shadow .2s;position:relative;
+}
+.gcard:hover .gstep { background:rgba(232,55,42,.2);box-shadow:0 0 14px rgba(232,55,42,.25); }
+.req-step { background:rgba(255,107,43,.1);border-color:rgba(255,107,43,.3);color:var(--orange); }
+.req-ping {
+    position:absolute;top:-3px;right:-3px;width:10px;height:10px;border-radius:50%;
+    background:var(--orange);animation:ping-req 1.5s ease-out infinite;
+}
+@keyframes ping-req { 0%{box-shadow:0 0 0 0 rgba(255,107,43,.6)} 70%{box-shadow:0 0 0 8px rgba(255,107,43,0)} 100%{box-shadow:0 0 0 0 rgba(255,107,43,0)} }
+.gcard-title { font-family:var(--font-hud);font-size:.9rem;font-weight:700;color:var(--text);letter-spacing:.04em; }
+.gcard-sub { font-family:var(--font-mono);font-size:.72rem;color:var(--muted);margin-top:.2rem; }
+
+/* ── COUNT BADGES ── */
+.t-count { margin-left:auto;flex-shrink:0;font-family:var(--font-hud);font-size:.7rem;font-weight:800;padding:.25rem .7rem;border-radius:20px; }
+.t-count-req { background:rgba(255,107,43,.12);color:var(--orange);border:1px solid rgba(255,107,43,.3); }
+.t-count-own { background:rgba(232,55,42,.12);color:var(--red-hot);border:1px solid rgba(232,55,42,.3); }
+
+/* ── TEAM DESC ── */
+.team-desc { font-family:var(--font-body);font-size:.95rem;color:rgba(255,255,255,.65);line-height:1.75; }
+
+/* ── MEMBERS BAR ── */
+.tc-members { display:flex;flex-direction:column;gap:.35rem; }
+.tc-members-label { display:flex;justify-content:space-between;align-items:center;font-family:var(--font-mono);font-size:.65rem;color:var(--muted); }
+.tc-members-label i { color:rgba(232,55,42,.5);margin-right:.25rem; }
+.tc-members-count { font-family:var(--font-hud);font-size:.75rem;font-weight:700;color:rgba(255,255,255,.7); }
+.tc-members-max { color:rgba(255,255,255,.3); }
+.tc-bar-track { height:4px;border-radius:2px;background:rgba(255,255,255,.07);overflow:hidden; }
+.tc-bar-fill { height:100%;border-radius:2px;background:linear-gradient(90deg,var(--red),var(--orange));box-shadow:0 0 8px rgba(232,55,42,.5);transition:width .6s ease; }
+.tc-bar-warn { background:linear-gradient(90deg,var(--orange),#ff9500);box-shadow:0 0 8px rgba(255,107,43,.5); }
+.tc-bar-full { background:linear-gradient(90deg,var(--pink),var(--red));box-shadow:0 0 8px rgba(255,32,96,.5); }
+
+/* ══ MEMBER GRID ══ */
+.member-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.85rem; }
+
+.member-card {
+    display:flex;align-items:center;gap:.9rem;
+    padding:.9rem 1rem;
+    background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.065);border-radius:10px;
+    transition:border-color .22s,background .22s,transform .2s;
+}
+.member-card:hover { border-color:rgba(232,55,42,.3);background:rgba(232,55,42,.04);transform:translateY(-2px); }
+.member-req { border-color:rgba(255,107,43,.15);background:rgba(255,107,43,.03); }
+.member-req:hover { border-color:rgba(255,107,43,.4); }
+
+.member-avatar {
+    flex-shrink:0;width:46px;height:46px;border-radius:10px;overflow:hidden;position:relative;
+    background:rgba(232,55,42,.1);border:1px solid rgba(232,55,42,.25);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-hud);font-size:.85rem;font-weight:800;color:var(--red-hot);
+}
+.member-avatar img { width:100%;height:100%;object-fit:cover; }
+.avatar-owner { background:rgba(232,55,42,.18);border-color:var(--red);box-shadow:0 0 12px rgba(232,55,42,.25); }
+.avatar-co    { background:rgba(255,107,43,.12);border-color:var(--orange); }
+.avatar-crown {
+    position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;
+    background:var(--red);display:flex;align-items:center;justify-content:center;
+    font-size:.45rem;color:#fff;box-shadow:0 0 6px rgba(232,55,42,.6);
+}
+
+.member-info { flex:1;min-width:0;display:flex;flex-direction:column;gap:.18rem; }
+.member-name { font-family:var(--font-hud);font-size:.82rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.member-sub  { font-family:var(--font-body);font-size:.75rem;color:var(--muted); }
+.member-date { font-family:var(--font-mono);font-size:.62rem;color:var(--muted);display:flex;align-items:center;gap:.3rem; }
+.member-date i { color:rgba(232,55,42,.4); }
+
+.role-badge {
+    display:inline-block;font-family:var(--font-hud);font-size:.55rem;font-weight:800;
+    letter-spacing:.08em;text-transform:uppercase;padding:.15rem .45rem;border-radius:4px;
+}
+.role-owner   { background:rgba(232,55,42,.15);color:var(--red-hot);border:1px solid rgba(232,55,42,.3); }
+.role-co_captain { background:rgba(255,107,43,.12);color:var(--orange);border:1px solid rgba(255,107,43,.3); }
+.role-member  { background:rgba(255,255,255,.06);color:var(--muted);border:1px solid rgba(255,255,255,.1); }
+
+.member-actions { display:flex;flex-direction:column;gap:.4rem; }
+.mact-btn {
+    width:32px;height:32px;border-radius:7px;border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;font-size:.75rem;
+    transition:all .18s;
+}
+.mact-accept { background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);color:var(--green); }
+.mact-accept:hover { background:rgba(0,230,118,.22);border-color:var(--green);box-shadow:0 4px 12px rgba(0,230,118,.15); }
+.mact-reject, .mact-remove { background:rgba(232,55,42,.1);border:1px solid rgba(232,55,42,.25);color:var(--red-hot); }
+.mact-reject:hover, .mact-remove:hover { background:rgba(232,55,42,.22);border-color:var(--red);box-shadow:0 4px 12px rgba(232,55,42,.15); }
+
+/* ══ INVITE PANEL ══ */
+.f-group { display:flex;flex-direction:column;gap:.4rem; }
+.f-label { font-family:var(--font-hud);font-size:.75rem;font-weight:700;color:var(--text);letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:.4rem; }
+.f-label i { color:var(--red-hot); }
+.search-wrap { position:relative; }
+.g-input {
+    width:100%;background:rgba(255,255,255,.03);border:1.5px solid rgba(255,255,255,.08);border-radius:9px;
+    color:var(--text);font-family:var(--font-body);font-size:.92rem;padding:.75rem 1rem;outline:none;
+    transition:border-color .2s,box-shadow .2s,background .2s;
+}
+.g-input:focus { background:rgba(232,55,42,.04);border-color:rgba(232,55,42,.5);box-shadow:0 0 0 3px rgba(232,55,42,.1); }
+.g-input::placeholder { color:var(--muted); }
+
+.search-dropdown {
+    position:absolute;top:100%;left:0;right:0;z-index:50;margin-top:.3rem;
+    background:rgba(8,6,20,.97);border:1px solid rgba(232,55,42,.25);border-radius:10px;
+    overflow:hidden;box-shadow:0 12px 36px rgba(0,0,0,.6);
+}
+.search-item {
+    display:block;padding:.75rem 1rem;cursor:pointer;text-decoration:none;
+    border-bottom:1px solid rgba(255,255,255,.04);transition:background .18s;
+}
+.search-item:last-child { border-bottom:none; }
+.search-item:hover { background:rgba(232,55,42,.08); }
+.search-item strong { font-family:var(--font-hud);font-size:.78rem;color:var(--text);display:block; }
+.search-item small  { font-family:var(--font-mono);font-size:.62rem;color:var(--muted); }
+.search-empty { padding:.75rem 1rem;font-family:var(--font-mono);font-size:.7rem;color:var(--muted);text-align:center; }
+
+.selected-user-box {
+    display:flex;align-items:center;justify-content:space-between;
+    background:rgba(232,55,42,.08);border:1px solid rgba(232,55,42,.25);border-radius:8px;
+    padding:.6rem 1rem;margin-top:.6rem;
+}
+.selected-user-info { display:flex;align-items:center;gap:.5rem;font-family:var(--font-body);font-size:.88rem;color:var(--text); }
+.selected-user-info i { color:var(--red-hot); }
+.clear-btn { background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;padding:.2rem;transition:color .18s; }
+.clear-btn:hover { color:var(--red-hot); }
+
+.info-alert {
+    display:flex;align-items:center;gap:.6rem;margin-top:1rem;
+    background:rgba(255,107,43,.08);border:1px solid rgba(255,107,43,.25);border-radius:8px;
+    padding:.75rem 1rem;font-family:var(--font-mono);font-size:.7rem;color:var(--orange);
+}
+
+/* ══ STATS LIST ══ */
+.stats-list { display:flex;flex-direction:column; }
+.stat-row { display:flex;justify-content:space-between;align-items:center;padding:.55rem 0; }
+.stat-label { font-family:var(--font-mono);font-size:.7rem;color:var(--muted);display:flex;align-items:center;gap:.4rem; }
+.stat-label i { color:rgba(232,55,42,.5); }
+.stat-val { font-family:var(--font-hud);font-size:.78rem;font-weight:700;color:var(--text); }
+.stat-active  { color:var(--green); }
+.stat-inactive{ color:var(--muted); }
+.stat-pending { color:var(--orange); }
+.stat-divider { height:1px;background:rgba(255,255,255,.05);margin:.1rem 0; }
+.stat-bar-track { height:4px;border-radius:2px;background:rgba(255,255,255,.07);overflow:hidden;margin-bottom:.3rem; }
+.stat-bar-fill { height:100%;border-radius:2px;background:linear-gradient(90deg,var(--red),var(--orange));box-shadow:0 0 8px rgba(232,55,42,.4); }
+
+/* ══ RESPONSIVE ══ */
+@media (max-width:640px) {
+    .show-hero { padding:2.5rem 0 0; }
+    .hero-title { font-size:2rem; }
+    .gcard { padding:1.25rem 1rem; }
+    .member-grid { grid-template-columns:1fr; }
+    .hstat { padding:.4rem 1rem; }
+}
+</style>
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('userSearch');
+(function () {
+    'use strict';
+
+    /* ── CANVAS PARTICLES ── */
+    const canvas = document.getElementById('heroCanvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let W, H, particles = [];
+        function resize() { W = canvas.width = canvas.parentElement.offsetWidth; H = canvas.height = canvas.parentElement.offsetHeight; }
+        resize();
+        window.addEventListener('resize', () => { resize(); spawnAll(); });
+        const COLORS = ['rgba(232,55,42,','rgba(255,77,61,','rgba(255,107,43,','rgba(255,32,96,'];
+        function mkParticle() {
+            const c = COLORS[Math.floor(Math.random()*COLORS.length)];
+            return { x:Math.random()*W, y:H+Math.random()*60, vx:(Math.random()-.5)*.55, vy:-(0.3+Math.random()*1.0), r:0.8+Math.random()*1.5, alpha:0, maxAlpha:0.25+Math.random()*0.45, phase:Math.random()*Math.PI*2, color:c, life:0, maxLife:130+Math.random()*160 };
+        }
+        function spawnAll() { particles = Array.from({length:40},mkParticle); }
+        spawnAll();
+        (function tick() {
+            ctx.clearRect(0,0,W,H);
+            particles.forEach((p,i) => {
+                p.life++; p.x += p.vx+Math.sin(p.phase+p.life*.02)*.25; p.y += p.vy;
+                const t=p.life/p.maxLife;
+                p.alpha = t<0.15?(t/.15)*p.maxAlpha:t>.75?((1-t)/.25)*p.maxAlpha:p.maxAlpha;
+                if(p.life>=p.maxLife||p.y<-10) particles[i]=mkParticle();
+                ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+                ctx.fillStyle=p.color+p.alpha+')'; ctx.shadowColor=p.color+'0.5)'; ctx.shadowBlur=7; ctx.fill();
+            });
+            requestAnimationFrame(tick);
+        })();
+    }
+
+    /* ── SCROLL REVEAL ── */
+    if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(entries => {
+            entries.forEach(e => { if(e.isIntersecting){e.target.style.animationPlayState='running';io.unobserve(e.target);} });
+        }, {threshold:0.05});
+        document.querySelectorAll('.gcard').forEach(c => { c.style.animationPlayState='paused'; io.observe(c); });
+    }
+
+    /* ── HSTAT COUNTER ── */
+    document.querySelectorAll('.hstat-val').forEach(el => {
+        const raw = el.textContent.trim();
+        const target = parseInt(raw, 10);
+        if (isNaN(target) || target === 0 || raw.includes('%')) return;
+        let current = 0;
+        const step = Math.ceil(target/20);
+        const timer = setInterval(() => {
+            current = Math.min(current+step, target);
+            el.textContent = current;
+            if (current >= target) clearInterval(timer);
+        }, 40);
+    });
+
+    /* ── INVITE SEARCH ── */
+    const searchInput  = document.getElementById('userSearch');
     const searchResults = document.getElementById('searchResults');
-    const inviteForm = document.getElementById('inviteForm');
+    const inviteForm   = document.getElementById('inviteForm');
     const selectedUserIdInput = document.getElementById('selectedUserId');
     const selectedUserDisplay = document.getElementById('selectedUserDisplay');
-    const selectedUserName = document.getElementById('selectedUserName');
+    const selectedUserName    = document.getElementById('selectedUserName');
     const clearSelection = document.getElementById('clearSelection');
-    const inviteBtn = document.getElementById('inviteBtn');
-    
+    const inviteBtn    = document.getElementById('inviteBtn');
+
     let searchTimeout;
-    
+
     if (searchInput) {
-        searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', function () {
             clearTimeout(searchTimeout);
             const query = this.value.trim();
-            
-            if (query.length < 2) {
-                searchResults.style.display = 'none';
-                return;
-            }
-            
+            if (query.length < 2) { searchResults.style.display='none'; return; }
             searchTimeout = setTimeout(() => {
                 fetch(`{{ path('app_teams_search_users') }}?q=${encodeURIComponent(query)}`)
-                    .then(response => response.json())
+                    .then(r => r.json())
                     .then(users => {
                         searchResults.innerHTML = '';
-                        
-                        if (users.length === 0) {
-                            searchResults.innerHTML = '<div class="list-group-item">No users found</div>';
+                        if (!users.length) {
+                            searchResults.innerHTML = '<div class="search-empty">No players found</div>';
                         } else {
                             users.forEach(user => {
                                 const item = document.createElement('a');
-                                item.href = '#';
-                                item.className = 'list-group-item list-group-item-action';
-                                item.innerHTML = `
-                                    <strong>${user.username}</strong><br>
-                                    <small class="text-muted">${user.email}</small>
-                                `;
-                                item.addEventListener('click', function(e) {
-                                    e.preventDefault();
-                                    selectUser(user);
-                                });
+                                item.href = '#'; item.className = 'search-item';
+                                item.innerHTML = `<strong>${user.username}</strong><small>${user.email}</small>`;
+                                item.addEventListener('click', e => { e.preventDefault(); selectUser(user); });
                                 searchResults.appendChild(item);
                             });
                         }
-                        
                         searchResults.style.display = 'block';
                     });
             }, 300);
         });
+
+        document.addEventListener('click', e => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) searchResults.style.display='none';
+        });
     }
-    
+
     function selectUser(user) {
         selectedUserIdInput.value = user.id;
         selectedUserName.textContent = user.username;
-        selectedUserDisplay.style.display = 'block';
+        selectedUserDisplay.style.display = 'flex';
         searchResults.style.display = 'none';
         searchInput.value = '';
         inviteBtn.disabled = false;
     }
-    
+
     if (clearSelection) {
-        clearSelection.addEventListener('click', function() {
+        clearSelection.addEventListener('click', () => {
             selectedUserIdInput.value = '';
             selectedUserDisplay.style.display = 'none';
             inviteBtn.disabled = true;
         });
     }
-});
+})();
 </script>
+
 {% endblock %}
+
+{% block javascripts %}{{ parent() }}{% endblock %}

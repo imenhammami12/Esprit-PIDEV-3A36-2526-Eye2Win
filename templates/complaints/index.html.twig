@@ -3,191 +3,823 @@
 {% block title %}My Complaints{% endblock %}
 
 {% block body %}
-<section class="breadcrumb_part">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="breadcrumb_iner">
-                    <h2>My Complaints</h2>
+
+{# ── Page Hero ── #}
+<div class="complaint-page-hero">
+    <canvas id="heroCanvas"></canvas>
+    <div class="hero-grid-overlay"></div>
+    <div class="hero-scanline"></div>
+    <div class="hero-vignette"></div>
+    <div class="container position-relative">
+        <div class="hero-inner">
+
+            <span class="hero-tag">
+                <span class="hero-tag-dot"></span>
+                <i class="fas fa-ticket-alt"></i> Support Terminal
+            </span>
+
+            <h1 class="hero-title">
+                <span class="title-row1">My</span>
+                <span class="title-row2">Complaints</span>
+            </h1>
+            <p class="hero-sub">Track and manage all your support tickets in one place. All issues are logged and monitored.</p>
+
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <span class="hud-val v-red" id="s-total">{{ complaints|length }}</span>
+                    <span class="stat-label">Total</span>
+                    <div class="hud-bar"><div class="hud-bar-fill" style="width:100%"></div></div>
+                </div>
+                <div class="hero-stat-divider"></div>
+                <div class="hero-stat">
+                    <span class="hud-val v-yellow" id="s-pend">{{ complaints|filter(c => c.status.badgeClass == 'warning')|length }}</span>
+                    <span class="stat-label">Pending</span>
+                    <div class="hud-bar"><div class="hud-bar-fill" id="b-pend" style="width:0%"></div></div>
+                </div>
+                <div class="hero-stat-divider"></div>
+                <div class="hero-stat">
+                    <span class="hud-val v-green" id="s-res">{{ complaints|filter(c => c.status.badgeClass == 'success')|length }}</span>
+                    <span class="stat-label">Resolved</span>
+                    <div class="hud-bar"><div class="hud-bar-fill" id="b-res" style="width:0%"></div></div>
+                </div>
+                <div class="hero-stat-divider"></div>
+                <div class="hero-stat">
+                    <span class="hud-val v-pink" id="s-crit">{{ complaints|filter(c => c.priority.badgeClass == 'danger')|length }}</span>
+                    <span class="stat-label">Critical</span>
+                    <div class="hud-bar"><div class="hud-bar-fill" id="b-crit" style="width:0%"></div></div>
                 </div>
             </div>
+
         </div>
     </div>
-</section>
+</div>
 
-<section class="py-5">
+<section class="complaint-section py-5">
     <div class="container">
-        <div class="row mb-4">
-            <div class="col-md-12">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h3 style="color: #fff !important;">Support Tickets</h3>
-                    <a href="{{ path('app_complaints_new') }}" class="btn btn_1">
-                        <i class="fas fa-plus"></i> Submit New Complaint
-                    </a>
+
+        {# ── Header Row ── #}
+        <div class="list-header mb-4">
+            <div class="list-header-left">
+                <div class="terminal-line">
+                    <span class="terminal-prompt">$&gt;</span>
+                    <span class="list-count">{{ complaints|length }} ticket{{ complaints|length != 1 ? 's' : '' }} found</span>
+                    <span class="terminal-cursor"></span>
                 </div>
             </div>
+            <a href="{{ path('app_complaints_new') }}" class="btn-fire">
+                <span class="btn-fire-bg"></span>
+                <span class="btn-fire-spark"></span>
+                <i class="fas fa-plus"></i>
+                <span>New Complaint</span>
+            </a>
         </div>
 
         {% if complaints|length > 0 %}
-        <div class="row">
+
+        <div class="tickets-list">
             {% for complaint in complaints %}
-            <div class="col-md-12 mb-4">
-                <div class="card">
-                    <div class="card-body p-4">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <div class="d-flex align-items-start gap-3">
-                                    <div class="complaint-icon-direct">
-                                        <i class="{{ complaint.category.icon }}"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <h5 class="mb-2" style="color: #fff !important;">
-                                            <a href="{{ path('app_complaints_show', {id: complaint.id}) }}" 
-                                               style="color: #fff !important; text-decoration: none;">
-                                                {{ complaint.subject }}
-                                            </a>
-                                        </h5>
-                                        <p class="mb-3" style="color: rgba(255, 255, 255, 0.7) !important; font-size: 0.9rem;">
-                                            {{ complaint.description|length > 150 ? complaint.description|slice(0, 150) ~ '...' : complaint.description }}
-                                        </p>
-                                        <div class="d-flex gap-2 flex-wrap">
-                                            <span class="badge bg-{{ complaint.status.badgeClass }}">
-                                                <i class="{{ complaint.status.icon }}"></i>
-                                                {{ complaint.status.label }}
-                                            </span>
-                                            <span class="badge bg-{{ complaint.priority.badgeClass }}">
-                                                <i class="{{ complaint.priority.icon }}"></i>
-                                                {{ complaint.priority.label }}
-                                            </span>
-                                            <span class="badge bg-secondary">
-                                                <i class="{{ complaint.category.icon }}"></i>
-                                                {{ complaint.category.label }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                                <div class="info-row mb-2">
-                                    <small style="color: rgba(255, 255, 255, 0.6) !important;">
-                                        <i class="fas fa-calendar"></i>
-                                        Submitted: {{ complaint.createdAt|date('d/m/Y H:i') }}
-                                    </small>
-                                </div>
-                                {% if complaint.updatedAt %}
-                                <div class="info-row mb-2">
-                                    <small style="color: rgba(255, 255, 255, 0.6) !important;">
-                                        <i class="fas fa-clock"></i>
-                                        Updated: {{ complaint.updatedAt|date('d/m/Y H:i') }}
-                                    </small>
-                                </div>
-                                {% endif %}
-                                <div class="info-row mb-3">
-                                    <small style="color: rgba(255, 255, 255, 0.6) !important;">
-                                        <i class="fas fa-ticket-alt"></i>
-                                        Ticket #{{ complaint.id }}
-                                    </small>
-                                </div>
-                                <div class="mt-2">
-                                    <a href="{{ path('app_complaints_show', {id: complaint.id}) }}" 
-                                       class="btn btn-sm btn-outline-light">
-                                        <i class="fas fa-eye"></i> View Details
-                                    </a>
-                                </div>
-                            </div>
+            <div class="ticket-card mb-3" style="--i: {{ loop.index }}">
+
+                {# Animated elements #}
+                <div class="card-topline"></div>
+                <div class="card-sweep"></div>
+                <div class="ticket-glow"></div>
+                <div class="ticket-corner tl"></div>
+                <div class="ticket-corner tr"></div>
+                <div class="ticket-corner bl"></div>
+                <div class="ticket-corner br"></div>
+                <div class="ticket-index">{{ '%02d'|format(loop.index) }}</div>
+
+                <div class="ticket-body">
+
+                    {# Icon — fallback map par catégorie #}
+                    {% set cat = complaint.category.label|lower %}
+                    {% set iconMap = {
+                        'network':          'fas fa-wifi',
+                        'billing':          'fas fa-coins',
+                        'account':          'fas fa-shield-alt',
+                        'gameplay':         'fas fa-gamepad',
+                        'tournament':       'fas fa-trophy',
+                        'technical':        'fas fa-wrench',
+                        'technical issue':  'fas fa-wrench',
+                        'bug':              'fas fa-bug',
+                        'payment':          'fas fa-credit-card',
+                        'chat':             'fas fa-comments',
+                        'account problem':  'fas fa-user-shield',
+                        'performance':      'fas fa-tachometer-alt',
+                        'security':         'fas fa-lock',
+                        'other':            'fas fa-question-circle',
+                    } %}
+                    {% set resolvedIcon = complaint.category.icon starts with 'fa' ? complaint.category.icon : (iconMap[cat] ?? 'fas fa-tag') %}
+
+                    <div class="ticket-icon-wrap">
+                        <div class="ticket-icon-ring"></div>
+                        <i class="{{ resolvedIcon }}"></i>
+                    </div>
+
+                    {# Main content #}
+                    <div class="ticket-main">
+                        <div class="ticket-top">
+                            <a href="{{ path('app_complaints_show', {id: complaint.id}) }}" class="ticket-subject">
+                                {{ complaint.subject }}
+                            </a>
+                            <span class="ticket-id">#{{ complaint.id }}</span>
+                        </div>
+
+                        <p class="ticket-desc">
+                            {{ complaint.description|length > 140 ? complaint.description|slice(0, 140) ~ '…' : complaint.description }}
+                        </p>
+
+                        <div class="ticket-badges">
+                            <span class="tbadge tbadge-{{ complaint.status.badgeClass }}">
+                                {% set sIcon = complaint.status.icon starts with 'fa' ? complaint.status.icon : 'fas fa-circle' %}
+                                <i class="{{ sIcon }}"></i>
+                                {{ complaint.status.label }}
+                            </span>
+                            <span class="tbadge tbadge-priority-{{ complaint.priority.badgeClass }}">
+                                {% set pIcon = complaint.priority.icon starts with 'fa' ? complaint.priority.icon : 'fas fa-bolt' %}
+                                <i class="{{ pIcon }}"></i>
+                                {{ complaint.priority.label }}
+                            </span>
+                            <span class="tbadge tbadge-cat">
+                                <i class="{{ resolvedIcon }}"></i>
+                                {{ complaint.category.label }}
+                            </span>
                         </div>
                     </div>
+
+                    {# Meta + action #}
+                    <div class="ticket-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            {{ complaint.createdAt|date('d/m/Y') }}
+                        </div>
+                        {% if complaint.updatedAt %}
+                        <div class="meta-item">
+                            <i class="fas fa-sync-alt"></i>
+                            {{ complaint.updatedAt|date('d/m/Y') }}
+                        </div>
+                        {% endif %}
+                        <a href="{{ path('app_complaints_show', {id: complaint.id}) }}" class="btn-view mt-2">
+                            <i class="fas fa-eye"></i>
+                            <span>View</span>
+                            <i class="fas fa-chevron-right btn-view-arrow"></i>
+                        </a>
+                    </div>
+
                 </div>
             </div>
             {% endfor %}
         </div>
+
         {% else %}
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-body p-5">
-                        <div class="text-center py-5">
-                            <div style="font-size: 4rem; color: rgba(255, 255, 255, 0.3);">
-                                <i class="fas fa-inbox"></i>
-                            </div>
-                            <h4 class="mt-4" style="color: #fff !important;">No Complaints Yet</h4>
-                            <p style="color: rgba(255, 255, 255, 0.7) !important;">
-                                You haven't submitted any complaints. If you're experiencing any issues, feel free to submit one.
-                            </p>
-                            <a href="{{ path('app_complaints_new') }}" class="btn btn_1 mt-3">
-                                <i class="fas fa-plus"></i> Submit Your First Complaint
-                            </a>
-                        </div>
-                    </div>
-                </div>
+
+        {# ── Empty State ── #}
+        <div class="empty-state">
+            <div class="empty-grid-overlay"></div>
+            <div class="empty-orb"></div>
+            <div class="empty-rings">
+                <div class="empty-ring"></div>
+                <div class="empty-ring"></div>
+                <div class="empty-ring"></div>
+                <div class="empty-icon-inner"><i class="fas fa-inbox"></i></div>
             </div>
+            <h4 class="empty-title">No Tickets Yet</h4>
+            <p class="empty-sub">You haven't submitted any complaints. If you're experiencing issues, feel free to open a ticket.</p>
+            <a href="{{ path('app_complaints_new') }}" class="btn-fire mt-3">
+                <span class="btn-fire-bg"></span>
+                <span class="btn-fire-spark"></span>
+                <i class="fas fa-plus"></i>
+                <span>Submit Your First Complaint</span>
+            </a>
         </div>
+
         {% endif %}
+
     </div>
 </section>
 
 <style>
-.card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    transition: all 0.3s ease;
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+/* ═══════════════════════════════════════════
+   EYE2WIN — COMPLAINTS  [RED MAX ANIMATIONS]
+═══════════════════════════════════════════ */
+:root {
+    --red:       #e8372a;
+    --red-hot:   #ff4d3d;
+    --red-glow:  rgba(232,55,42,0.4);
+    --red-dim:   rgba(232,55,42,0.12);
+    --orange:    #ff6b2b;
+    --pink:      #ff2060;
+    --dark:      #080810;
+    --dark2:     #0d0d18;
+    --panel:     rgba(255,255,255,0.025);
+    --border:    rgba(255,255,255,0.07);
+    --border-r:  rgba(232,55,42,0.4);
+    --text:      rgba(255,255,255,0.93);
+    --muted:     rgba(255,255,255,0.38);
+    --r:         10px;
+    --font-hud:  'Orbitron', sans-serif;
+    --font-body: 'Rajdhani', sans-serif;
+    --font-mono: 'Share Tech Mono', monospace;
 }
 
-.card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    background: rgba(255, 255, 255, 0.08);
+body { background: var(--dark); font-family: var(--font-body); }
+
+/* ══ HERO ══ */
+.complaint-page-hero {
+    position: relative;
+    background: linear-gradient(165deg, #1a0308 0%, #0c0b18 50%, #080810 100%);
+    border-bottom: 1px solid transparent;
+    padding: 4.5rem 0 4rem;
+    overflow: hidden;
 }
 
-.card-body {
-    color: #fff;
+/* Animated bottom border */
+.complaint-page-hero::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        var(--red) 25%, var(--orange) 50%, var(--pink) 75%,
+        transparent 100%
+    );
+    background-size: 300% 100%;
+    animation: border-shimmer 4s linear infinite;
+}
+@keyframes border-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 
-.complaint-icon-direct {
-    font-size: 3rem;
-    color: #667eea;
-    flex-shrink: 0;
-    transition: all 0.3s ease;
-    text-shadow: 0 2px 8px rgba(102, 126, 234, 0.5);
+/* Particle canvas */
+#heroCanvas {
+    position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    width: 100%; height: 100%;
 }
 
-.card:hover .complaint-icon-direct {
-    transform: scale(1.1);
-    color: #764ba2;
-    text-shadow: 0 4px 12px rgba(118, 75, 162, 0.6);
+.hero-grid-overlay {
+    position: absolute; inset: 0;
+    background-image:
+        linear-gradient(rgba(232,55,42,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,55,42,0.06) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: grid-pulse 6s ease-in-out infinite;
+}
+@keyframes grid-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.hero-scanline {
+    position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.055) 2px, rgba(0,0,0,0.055) 4px);
+    animation: scanline-move 8s linear infinite;
+}
+@keyframes scanline-move {
+    from { background-position: 0 0; }
+    to   { background-position: 0 100px; }
 }
 
-.badge {
-    padding: 0.375rem 0.75rem;
-    font-weight: 500;
-    font-size: 0.75rem;
+.hero-vignette {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.65) 100%);
 }
 
-.info-row {
+.hero-inner { position: relative; z-index: 3; }
+
+/* Live badge */
+.hero-tag {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: rgba(232,55,42,0.09); border: 1px solid rgba(232,55,42,0.28);
+    color: var(--red-hot); font-family: var(--font-hud);
+    font-size: .62rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+    padding: .32rem .9rem; border-radius: 3px; margin-bottom: 1.4rem;
+    animation: badge-in .5s .1s both;
+}
+@keyframes badge-in { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:none} }
+
+.hero-tag-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #3dff8a; box-shadow: 0 0 8px #3dff8a;
+    animation: blink 1s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* Title */
+.hero-title {
+    font-family: var(--font-hud); font-weight: 900;
+    font-size: clamp(2.8rem, 6vw, 4.8rem);
+    line-height: .95; letter-spacing: .05em;
+    margin-bottom: 1rem;
+    animation: title-in .6s .2s both cubic-bezier(.22,1,.36,1);
+}
+@keyframes title-in { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
+
+.title-row1 {
+    display: block; color: rgba(255,255,255,0.93);
+    text-shadow: 0 0 80px rgba(255,255,255,0.08);
+}
+.title-row2 {
     display: block;
-    margin-bottom: 0.5rem;
+    background: linear-gradient(90deg, var(--red) 0%, var(--orange) 50%, var(--pink) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    background-size: 200% 100%;
+    animation: gradient-pan 5s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 30px rgba(232,55,42,0.4));
+}
+@keyframes gradient-pan {
+    from { background-position: 0% 0; }
+    to   { background-position: 100% 0; }
 }
 
-.info-row i {
-    margin-right: 0.25rem;
-    opacity: 0.8;
+.hero-sub {
+    color: var(--muted); font-size: 1rem; max-width: 480px; line-height: 1.65;
+    margin-bottom: 2.5rem;
+    animation: sub-in .5s .4s both;
+}
+@keyframes sub-in { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+
+/* HUD Stats */
+.hero-stats {
+    display: inline-flex; align-items: stretch; gap: 0;
+    background: rgba(8,8,16,0.7); backdrop-filter: blur(20px);
+    border: 1px solid rgba(232,55,42,0.18);
+    border-radius: var(--r); overflow: hidden;
+    animation: hud-in .5s .5s both;
+}
+@keyframes hud-in { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
+
+.hero-stat {
+    display: flex; flex-direction: column; align-items: center;
+    padding: .9rem 1.5rem; gap: .15rem; position: relative;
+    transition: background .2s;
+}
+.hero-stat:hover { background: rgba(232,55,42,0.05); }
+
+.hero-stat-divider { width: 1px; background: rgba(232,55,42,0.12); }
+
+.stat-label {
+    font-family: var(--font-mono); font-size: .57rem; color: var(--muted);
+    letter-spacing: .12em; text-transform: uppercase;
 }
 
-a.text-white:hover {
-    color: #43e97b !important;
-    transition: color 0.3s ease;
+.hud-val {
+    font-family: var(--font-hud); font-size: 1.9rem; font-weight: 900; line-height: 1;
+}
+.v-red    { color: var(--red-hot);  text-shadow: 0 0 24px rgba(232,55,42,.55); }
+.v-yellow { color: #ffc107;         text-shadow: 0 0 24px rgba(255,193,7,.4); }
+.v-green  { color: #3dff8a;         text-shadow: 0 0 24px rgba(61,255,138,.4); }
+.v-pink   { color: var(--pink);     text-shadow: 0 0 24px rgba(255,32,96,.4); }
+
+.hud-bar {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+    background: rgba(255,255,255,0.04);
+}
+.hud-bar-fill {
+    height: 100%; width: 0;
+    background: linear-gradient(90deg, var(--red), var(--orange));
+    box-shadow: 0 0 6px var(--red);
+    transition: width 1.4s .8s cubic-bezier(.22,1,.36,1);
 }
 
-.btn-outline-light {
-    border-color: rgba(255, 255, 255, 0.3);
+/* ══ SECTION ══ */
+.complaint-section { background: var(--dark); min-height: 60vh; }
+
+/* ══ TOOLBAR ══ */
+.list-header {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+}
+.list-header-left { display: flex; align-items: center; }
+
+.terminal-line {
+    display: flex; align-items: center; gap: .4rem;
+    font-family: var(--font-mono); font-size: .78rem;
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    padding: .4rem .9rem; border-radius: 6px;
+}
+.terminal-prompt { color: var(--red); font-weight: 700; }
+.list-count { color: rgba(255,255,255,0.6); }
+.terminal-cursor {
+    width: 7px; height: 13px; background: var(--red);
+    animation: blink .8s step-end infinite; border-radius: 1px;
+}
+
+/* ══ TICKET CARD ══ */
+.ticket-card {
+    position: relative; overflow: hidden;
+    background: rgba(6,5,16,0.85);
+    border: 1px solid rgba(255,255,255,0.065);
+    border-radius: var(--r);
+    backdrop-filter: blur(10px);
+    transition: border-color .3s, transform .25s, box-shadow .3s;
+
+    opacity: 0; transform: translateY(22px) translateX(-3px);
+    animation: card-enter .5s calc(var(--i) * 90ms) forwards cubic-bezier(.22,1,.36,1);
+}
+@keyframes card-enter { to { opacity:1; transform:none; } }
+
+.ticket-card:hover {
+    border-color: rgba(232,55,42,0.38);
+    transform: translateY(-4px);
+    box-shadow:
+        0 20px 60px rgba(0,0,0,.65),
+        0 0 0 1px rgba(232,55,42,.08),
+        0 0 40px rgba(232,55,42,.04);
+}
+
+/* Racing top line */
+.card-topline {
+    position: absolute; top: 0; left: 0; right: 0; height: 1.5px;
+    background: linear-gradient(90deg, transparent, var(--red), var(--orange), var(--pink), transparent);
+    background-size: 200% 100%;
+    opacity: 0; transition: opacity .2s;
+}
+.ticket-card:hover .card-topline {
+    opacity: 1;
+    animation: topline-race 1.2s linear infinite;
+}
+@keyframes topline-race {
+    from { background-position: 200% 0; }
+    to   { background-position: -200% 0; }
+}
+
+/* Left bar */
+.ticket-card::after {
+    content: ''; position: absolute; left: 0; top: 10%; bottom: 10%; width: 3px;
+    background: linear-gradient(180deg, transparent, var(--red), var(--orange), transparent);
+    border-radius: 0 2px 2px 0;
+    opacity: 0; transform: scaleY(0);
+    transition: opacity .3s, transform .35s cubic-bezier(.22,1,.36,1);
+    box-shadow: 0 0 10px var(--red);
+}
+.ticket-card:hover::after { opacity: 1; transform: scaleY(1); }
+
+/* Sweep */
+.card-sweep {
+    position: absolute; top:0; bottom:0; width:80px;
+    background: linear-gradient(90deg, transparent, rgba(232,55,42,.05), transparent);
+    left: -80px; pointer-events: none;
+}
+.ticket-card:hover .card-sweep { animation: sweep-anim .55s ease-out forwards; }
+@keyframes sweep-anim { to { left: 110%; } }
+
+/* Corners */
+.ticket-corner {
+    position: absolute; width: 9px; height: 9px;
+    border-color: var(--red); border-style: solid;
+    opacity: 0; transform: scale(1.4);
+    transition: opacity .25s, transform .28s;
+}
+.ticket-corner.tl { top:6px;    left:6px;  border-width:1.5px 0 0 1.5px; }
+.ticket-corner.tr { top:6px;    right:6px; border-width:1.5px 1.5px 0 0; }
+.ticket-corner.bl { bottom:6px; left:6px;  border-width:0 0 1.5px 1.5px; }
+.ticket-corner.br { bottom:6px; right:6px; border-width:0 1.5px 1.5px 0; }
+.ticket-card:hover .ticket-corner { opacity: 1; transform: scale(1); }
+
+/* Glow */
+.ticket-glow {
+    position: absolute; width: 260px; height: 260px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,55,42,.14), transparent 70%);
+    top: -80px; right: -70px;
+    opacity: 0; transition: opacity .4s; pointer-events: none;
+}
+.ticket-card:hover .ticket-glow { opacity: 1; }
+
+/* Index */
+.ticket-index {
+    position: absolute; top: 1.1rem; right: 1.4rem;
+    font-family: var(--font-hud); font-size: .58rem; font-weight: 700;
+    color: rgba(255,255,255,0.06); letter-spacing: .1em; z-index: 0;
+    transition: color .3s;
+}
+.ticket-card:hover .ticket-index { color: rgba(232,55,42,.2); }
+
+/* Body */
+.ticket-body {
+    display: flex; align-items: flex-start; gap: 1.2rem;
+    padding: 1.4rem 1.6rem; position: relative; z-index: 1;
+}
+
+/* Icon */
+.ticket-icon-wrap {
+    flex-shrink: 0; width: 50px; height: 50px; position: relative;
+    background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.08);
+    border-radius: 11px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; color: rgba(255,255,255,.3);
+    transition: all .25s;
+}
+.ticket-card:hover .ticket-icon-wrap {
+    background: rgba(232,55,42,.14); border-color: rgba(232,55,42,.35); color: #ff7055;
+    box-shadow: 0 0 18px rgba(232,55,42,.2);
+    transform: scale(1.06) rotate(-2deg);
+}
+.ticket-icon-ring {
+    position: absolute; inset: -4px; border-radius: 15px;
+    border: 1px solid rgba(232,55,42,.0); transition: border-color .3s;
+}
+.ticket-card:hover .ticket-icon-ring { border-color: rgba(232,55,42,.2); }
+
+/* Content */
+.ticket-main { flex: 1; min-width: 0; }
+.ticket-top {
+    display: flex; align-items: baseline; gap: .75rem;
+    flex-wrap: wrap; margin-bottom: .45rem;
+}
+.ticket-subject {
+    font-family: var(--font-body); font-size: 1.05rem; font-weight: 700;
+    color: var(--text); text-decoration: none; transition: color .2s;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+}
+.ticket-subject:hover { color: #ff7055; }
+
+.ticket-id {
+    flex-shrink: 0; font-family: var(--font-mono); font-size: .65rem;
+    color: var(--muted); background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.07); padding: .15rem .5rem; border-radius: 4px;
+}
+.ticket-desc {
+    font-size: .88rem; color: var(--muted); margin: 0 0 .8rem; line-height: 1.55;
+}
+
+/* Badges */
+.ticket-badges { display: flex; gap: .4rem; flex-wrap: wrap; }
+.tbadge {
+    display: inline-flex; align-items: center; gap: .3rem;
+    font-family: var(--font-hud); font-size: .6rem; font-weight: 700; letter-spacing: .07em;
+    padding: .22rem .6rem; border-radius: 3px; text-transform: uppercase;
+    transition: transform .2s;
+}
+.tbadge:hover { transform: translateY(-2px); }
+.tbadge i { font-size: .55rem; }
+
+.tbadge-warning   { background:rgba(255,193,7,.12);   border:1px solid rgba(255,193,7,.25);   color:#ffc107; }
+.tbadge-info      { background:rgba(13,202,240,.1);   border:1px solid rgba(13,202,240,.25);  color:#0dcaf0; }
+.tbadge-success   { background:rgba(61,214,140,.1);   border:1px solid rgba(61,214,140,.25);  color:#3dd68c; }
+.tbadge-danger    { background:rgba(232,55,42,.12);   border:1px solid rgba(232,55,42,.3);    color:#ff6b4a; }
+.tbadge-secondary { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);  color:var(--muted); }
+.tbadge-primary   { background:rgba(13,110,253,.12);  border:1px solid rgba(13,110,253,.25);  color:#6ea8fe; }
+
+.tbadge-priority-danger   { background:rgba(232,55,42,.1);   border:1px solid rgba(232,55,42,.22);  color:#ff6b4a; }
+.tbadge-priority-warning  { background:rgba(255,193,7,.08);  border:1px solid rgba(255,193,7,.18);  color:#ffc107; }
+.tbadge-priority-success  { background:rgba(61,214,140,.08); border:1px solid rgba(61,214,140,.18); color:#3dd68c; }
+.tbadge-priority-secondary{ background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:var(--muted); }
+.tbadge-priority-info     { background:rgba(13,202,240,.08); border:1px solid rgba(13,202,240,.18); color:#0dcaf0; }
+.tbadge-cat { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); color:rgba(255,255,255,.4); }
+
+/* Meta */
+.ticket-meta {
+    flex-shrink: 0; display: flex; flex-direction: column;
+    align-items: flex-end; gap: .3rem; min-width: 95px;
+}
+.meta-item {
+    display: flex; align-items: center; gap: .35rem;
+    font-family: var(--font-mono); font-size: .68rem; color: var(--muted); white-space: nowrap;
+}
+.meta-item i { font-size: .6rem; color: rgba(232,55,42,.35); }
+
+/* View button */
+.btn-view {
+    display: inline-flex; align-items: center; gap: .4rem;
+    padding: .4rem .9rem;
+    background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.09);
+    border-radius: 7px; color: rgba(255,255,255,.55);
+    font-family: var(--font-hud); font-size: .68rem; font-weight: 700; letter-spacing: .06em;
+    text-decoration: none; text-transform: uppercase;
+    position: relative; overflow: hidden;
+    transition: color .22s, border-color .22s, box-shadow .22s;
+}
+.btn-view::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(232,55,42,0), rgba(232,55,42,.1));
+    transform: translateX(-100%); transition: transform .3s ease;
+}
+.btn-view-arrow { font-size: .55rem; transition: transform .22s; }
+.btn-view:hover {
+    color: var(--red-hot); border-color: rgba(232,55,42,.4);
+    box-shadow: 0 0 16px rgba(232,55,42,.2);
+}
+.btn-view:hover::before { transform: translateX(0); }
+.btn-view:hover .btn-view-arrow { transform: translateX(4px); }
+
+/* Fire button */
+.btn-fire {
+    position: relative; overflow: hidden;
+    display: inline-flex; align-items: center; gap: .6rem; padding: .7rem 1.6rem;
+    background: linear-gradient(135deg, #b02b20, #e8372a, #ff5533);
+    border: none; border-radius: 8px; color: #fff;
+    font-family: var(--font-hud); font-size: .8rem; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; cursor: pointer; text-decoration: none;
+    box-shadow: 0 4px 24px rgba(232,55,42,.45);
+    transition: transform .18s, box-shadow .18s;
+}
+.btn-fire:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 36px rgba(232,55,42,.6), 0 0 0 3px rgba(232,55,42,.15);
     color: #fff;
 }
+.btn-fire:active { transform: translateY(-1px); }
+.btn-fire-bg {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,.15), transparent);
+    pointer-events: none;
+}
+.btn-fire-spark {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 50% -20%, rgba(255,180,100,.28) 0%, transparent 60%);
+}
 
-.btn-outline-light:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.5);
-    color: #fff;
+/* ══ EMPTY STATE ══ */
+.empty-state {
+    position: relative; overflow: hidden;
+    background: var(--panel); border: 1px dashed rgba(255,255,255,.07);
+    border-radius: var(--r); padding: 6rem 2rem;
+    text-align: center; display: flex; flex-direction: column; align-items: center;
+}
+.empty-grid-overlay {
+    position: absolute; inset: 0;
+    background-image:
+        linear-gradient(rgba(232,55,42,.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,55,42,.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+}
+.empty-orb {
+    position: absolute; width: 340px; height: 340px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,55,42,.08), transparent 70%);
+    top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none;
+}
+.empty-rings {
+    position: relative; width: 120px; height: 120px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 2rem; z-index: 1;
+}
+.empty-ring {
+    position: absolute; border-radius: 50%;
+    border: 1px solid rgba(232,55,42,.18);
+    animation: ring-breathe 3s ease-in-out infinite;
+}
+.empty-ring:nth-child(1) { inset: 0; animation-delay: 0s; }
+.empty-ring:nth-child(2) { inset: -16px; opacity: .55; animation-delay: .6s; }
+.empty-ring:nth-child(3) { inset: -32px; opacity: .25; animation-delay: 1.2s; }
+@keyframes ring-breathe {
+    0%,100% { transform: scale(1); }
+    50%     { transform: scale(1.07); }
+}
+.empty-icon-inner {
+    font-size: 3.5rem; color: rgba(232,55,42,.25);
+    filter: drop-shadow(0 0 18px rgba(232,55,42,.15)); z-index: 1;
+}
+.empty-title {
+    font-family: var(--font-hud); font-size: 1.5rem; font-weight: 700;
+    letter-spacing: .1em; color: var(--text); margin-bottom: .6rem; z-index: 1;
+}
+.empty-sub {
+    font-size: .92rem; color: var(--muted); max-width: 380px; line-height: 1.65;
+    margin-bottom: 2rem; z-index: 1;
+}
+
+/* ══ RESPONSIVE ══ */
+@media (max-width: 640px) {
+    .complaint-page-hero { padding: 3rem 0 2.5rem; }
+    .hero-title { font-size: 2.6rem; }
+    .hero-stats { width: 100%; }
+    .hero-stat { flex: 1; padding: .7rem .8rem; }
+    .hud-val { font-size: 1.5rem; }
+    .ticket-body { flex-wrap: wrap; padding: 1rem 1.2rem; }
+    .ticket-meta { flex-direction: row; flex-wrap: wrap; align-items: center; width: 100%; justify-content: flex-start; }
+    .ticket-icon-wrap { width: 40px; height: 40px; font-size: 1rem; }
+    .list-header { flex-direction: column; align-items: flex-start; }
+    .btn-fire { width: 100%; justify-content: center; }
 }
 </style>
+
+<script>
+(function () {
+
+    /* ── PARTICLE CANVAS ── */
+    const canvas = document.getElementById('heroCanvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let W, H, particles = [];
+
+    function resize() {
+        const hero = canvas.parentElement;
+        W = canvas.width  = hero.offsetWidth;
+        H = canvas.height = hero.offsetHeight;
+    }
+    resize();
+    window.addEventListener('resize', () => { resize(); spawnAll(); });
+
+    const COLORS = [
+        'rgba(232,55,42,',
+        'rgba(255,107,43,',
+        'rgba(255,77,61,',
+        'rgba(255,32,96,',
+    ];
+
+    function mkParticle() {
+        const c = COLORS[Math.floor(Math.random() * COLORS.length)];
+        return {
+            x: Math.random() * W,
+            y: H + Math.random() * 60,
+            vx: (Math.random() - .5) * .55,
+            vy: -(0.3 + Math.random() * 1.0),
+            r: 0.8 + Math.random() * 1.5,
+            alpha: 0,
+            maxAlpha: 0.25 + Math.random() * 0.45,
+            phase: Math.random() * Math.PI * 2,
+            color: c,
+            life: 0,
+            maxLife: 130 + Math.random() * 160,
+        };
+    }
+
+    function spawnAll() { particles = Array.from({ length: 45 }, mkParticle); }
+    spawnAll();
+
+    function tick() {
+        ctx.clearRect(0, 0, W, H);
+        particles.forEach((p, i) => {
+            p.life++;
+            p.x += p.vx + Math.sin(p.phase + p.life * 0.02) * 0.25;
+            p.y += p.vy;
+            const t = p.life / p.maxLife;
+            p.alpha = t < 0.15 ? (t / 0.15) * p.maxAlpha
+                    : t > 0.75 ? ((1 - t) / 0.25) * p.maxAlpha
+                    : p.maxAlpha;
+            if (p.life >= p.maxLife || p.y < -10) particles[i] = mkParticle();
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = p.color + p.alpha + ')';
+            ctx.shadowColor = p.color + '0.5)';
+            ctx.shadowBlur = 7;
+            ctx.fill();
+        });
+        requestAnimationFrame(tick);
+    }
+    tick();
+
+    /* ── HUD BAR FILLS ── */
+    const total = {{ complaints|length }};
+    const pend  = {{ complaints|filter(c => c.status.badgeClass == 'warning')|length }};
+    const res   = {{ complaints|filter(c => c.status.badgeClass == 'success')|length }};
+    const crit  = {{ complaints|filter(c => c.priority.badgeClass == 'danger')|length }};
+
+    setTimeout(() => {
+        if (total > 0) {
+            const bp = document.getElementById('b-pend');
+            const br = document.getElementById('b-res');
+            const bc = document.getElementById('b-crit');
+            if (bp) bp.style.width = (pend / total * 100) + '%';
+            if (br) br.style.width = (res  / total * 100) + '%';
+            if (bc) bc.style.width = (crit / total * 100) + '%';
+        }
+    }, 600);
+
+    /* ── TITLE GLITCH ── */
+    const accent = document.querySelector('.title-row2');
+    if (accent) {
+        setInterval(() => {
+            if (Math.random() > 0.82) {
+                accent.animate([
+                    { transform: 'none', filter: 'none' },
+                    { transform: 'skewX(-3deg) translateX(-2px)', filter: 'hue-rotate(30deg) brightness(1.4)' },
+                    { transform: 'skewX(2deg) translateX(3px)',   filter: 'hue-rotate(-20deg)' },
+                    { transform: 'none', filter: 'none' },
+                ], { duration: 160, easing: 'steps(3)' });
+            }
+        }, 3000);
+    }
+
+    /* ── STAGGER OBSERVER ── */
+    if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.style.animationPlayState = 'running';
+                    io.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.08 });
+        document.querySelectorAll('.ticket-card').forEach(c => {
+            c.style.animationPlayState = 'paused';
+            io.observe(c);
+        });
+    }
+
+    /* ── SUBJECT GLITCH ON HOVER ── */
+    document.querySelectorAll('.ticket-subject').forEach(s => {
+        s.addEventListener('mouseenter', () => {
+            s.animate([
+                { opacity: 1 },
+                { opacity: 0.5, filter: 'blur(0.5px) skewX(-1deg)' },
+                { opacity: 1 },
+                { opacity: 0.8 },
+                { opacity: 1 },
+            ], { duration: 180, easing: 'steps(4)' });
+        });
+    });
+
+})();
+</script>
+
 {% endblock %}

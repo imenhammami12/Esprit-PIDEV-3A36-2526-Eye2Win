@@ -3,476 +3,670 @@
 {% block title %}Create Your Gaming Team{% endblock %}
 
 {% block body %}
-<!-- Breadcrumb Section -->
-<section class="breadcrumb_part breadcrumb_bg">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="breadcrumb">
-                    <div class="breadcrumb_iner">
-                        <div class="breadcrumb_iner_item">
-                            <h2>Create Team</h2>
-                            <p><a href="{{ path('app_home') }}">Home</a> <span>/</span> <a href="{{ path('app_teams_index') }}">Teams</a> <span>/</span> Create</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+{# ── HERO ── #}
+<div class="create-hero">
+    <canvas id="heroCanvas"></canvas>
+    <div class="hero-grid-overlay"></div>
+    <div class="hero-scanline"></div>
+    <div class="hero-vignette"></div>
+    <div class="container position-relative">
+        <div class="hero-inner">
+            <span class="hero-tag">
+                <span class="hero-tag-dot"></span>
+                <i class="fas fa-users-cog"></i> Team Builder
+            </span>
+            <h1 class="hero-title">
+                <span class="title-row1">Create Your</span>
+                <span class="title-row2">Dream Team</span>
+            </h1>
+            <p class="hero-sub">Forge a legendary squad and dominate the battlefield.</p>
         </div>
     </div>
-</section>
+</div>
 
-<!-- Team Creation Form Section -->
-<section class="team-creation-section section_padding">
+{# ── MAIN SECTION ── #}
+<section class="create-section">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <!-- Header Card -->
-                <div class="creation-header text-center mb-5">
-                    <h2 class="section-title">Build Your <span style="color: #ff0000;">Dream Team</span></h2>
-                    <p class="section-subtitle">Create a legendary gaming squad and dominate the battlefield</p>
+            <div class="col-lg-9">
+
+                {# ══ FORM CARD ══ #}
+                <div class="gcard mb-5" style="--ci:1">
+                    <div class="card-topline"></div>
+                    <div class="gcard-head">
+                        <span class="gstep"><i class="fas fa-users-cog"></i></span>
+                        <div>
+                            <div class="gcard-title">Team Configuration</div>
+                            <div class="gcard-sub">Fill in the details to create your squad</div>
+                        </div>
+                    </div>
+
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'create-form'}}) }}
+
+                    {# ── Team Name ── #}
+                    <div class="f-group mt-4">
+                        <label class="f-label">
+                            <i class="fas fa-shield-alt"></i> Team Name
+                        </label>
+                        <div class="f-input-wrap">
+                            {{ form_widget(form.name, {'attr': {
+                                'class': 'g-input',
+                                'placeholder': 'Enter your team name…'
+                            }}) }}
+                        </div>
+                        {{ form_errors(form.name) }}
+                        <div class="f-hint"><i class="fas fa-terminal"></i> Choose a unique and memorable name</div>
+                    </div>
+
+                    {# ── Description ── #}
+                    <div class="f-group mt-4">
+                        <label class="f-label">
+                            <i class="fas fa-file-alt"></i> Team Description
+                        </label>
+                        <div class="f-input-wrap">
+                            {{ form_widget(form.description, {'attr': {
+                                'class': 'g-input',
+                                'placeholder': 'Describe your team\'s goals and playstyle…',
+                                'rows': '5'
+                            }}) }}
+                        </div>
+                        {{ form_errors(form.description) }}
+                        <div class="f-hint"><i class="fas fa-terminal"></i> Tell others what your team is about</div>
+                    </div>
+
+                    {# ── Max Members ── #}
+                    <div class="f-group mt-4">
+                        <label class="f-label">
+                            <i class="fas fa-users"></i> Maximum Members
+                        </label>
+                        <div class="f-input-with-addon">
+                            {{ form_widget(form.maxMembers, {'attr': {
+                                'class': 'g-input g-input-addon',
+                                'min': '1',
+                                'max': '50'
+                            }}) }}
+                            <span class="f-addon"><i class="fas fa-gamepad"></i> Players</span>
+                        </div>
+                        {{ form_errors(form.maxMembers) }}
+                        <div class="f-hint"><i class="fas fa-terminal"></i> Set the maximum squad size (1–50)</div>
+                    </div>
+
+                    {# ── Logo Upload ── #}
+                    <div class="f-group mt-4">
+                        <label class="f-label">
+                            <i class="fas fa-image"></i> Team Logo <span class="opt-pill">Optional</span>
+                        </label>
+                        <label class="drop-zone" for="{{ form.logoFile.vars.id }}" id="drop-zone">
+                            <div class="drop-zone-grid"></div>
+                            <div class="upload-preview" id="logoPreview">
+                                <i class="fas fa-cloud-upload-alt drop-icon"></i>
+                                <span class="drop-text">Drop logo here or <u>browse</u></span>
+                                <span class="drop-hint">JPG · PNG · GIF · WEBP — max 2 MB</span>
+                            </div>
+                            {{ form_widget(form.logoFile, {'attr': {
+                                'class': 'd-none',
+                                'accept': 'image/*'
+                            }}) }}
+                        </label>
+                        {{ form_errors(form.logoFile) }}
+                        <div class="f-hint"><i class="fas fa-terminal"></i> Upload a logo that represents your team</div>
+                    </div>
+
+                    {# ── Actions ── #}
+                    <div class="form-actions mt-5">
+                        <a href="{{ path('app_teams_index') }}" class="btn-ghost">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
+                        <button type="submit" class="btn-fire">
+                            <span class="btn-fire-bg"></span>
+                            <span class="btn-fire-spark"></span>
+                            <i class="fas fa-rocket"></i>
+                            <span>Launch Team</span>
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
                 </div>
 
-                <!-- Main Form Card -->
-                <div class="team-form-card">
-                    <div class="form-card-header">
-                        <i class="fas fa-users-cog"></i>
-                        <h4>Team Configuration</h4>
+                {# ══ HELP CARDS ══ #}
+                <div class="row help-row">
+                    <div class="col-md-4 mb-3">
+                        <div class="help-card" style="--hi:1">
+                            <div class="help-card-topline"></div>
+                            <div class="help-icon-wrap">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <h5 class="help-title">Build to Win</h5>
+                            <p class="help-text">Create a team with clear goals and strategies to dominate competitions</p>
+                        </div>
                     </div>
-                    
-                    <div class="form-card-body">
-                        {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'team-creation-form'}}) }}
-                        
-                        <!-- Team Name -->
-                        <div class="form-group-custom mb-4">
-                            <label class="form-label-custom">
-                                <i class="fas fa-shield-alt"></i> Team Name
-                            </label>
-                            {{ form_widget(form.name, {'attr': {'class': 'form-control-custom', 'placeholder': 'Enter your team name...'}}) }}
-                            {{ form_errors(form.name) }}
-                            <div class="form-hint">
-                                <i class="fas fa-info-circle"></i> Choose a unique and memorable name for your team
+                    <div class="col-md-4 mb-3">
+                        <div class="help-card" style="--hi:2">
+                            <div class="help-card-topline"></div>
+                            <div class="help-icon-wrap">
+                                <i class="fas fa-user-friends"></i>
                             </div>
+                            <h5 class="help-title">Find Players</h5>
+                            <p class="help-text">Recruit skilled players who share your vision and playstyle</p>
                         </div>
-                        
-                        <!-- Team Description -->
-                        <div class="form-group-custom mb-4">
-                            <label class="form-label-custom">
-                                <i class="fas fa-file-alt"></i> Team Description
-                            </label>
-                            {{ form_widget(form.description, {'attr': {'class': 'form-control-custom', 'placeholder': 'Describe your team\'s goals and playstyle...', 'rows': '5'}}) }}
-                            {{ form_errors(form.description) }}
-                            <div class="form-hint">
-                                <i class="fas fa-info-circle"></i> Tell others what your team is about
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="help-card" style="--hi:3">
+                            <div class="help-card-topline"></div>
+                            <div class="help-icon-wrap">
+                                <i class="fas fa-chart-line"></i>
                             </div>
+                            <h5 class="help-title">Track Progress</h5>
+                            <p class="help-text">Monitor your team's performance and climb the leaderboards</p>
                         </div>
-                        
-                        <!-- Max Members -->
-                        <div class="form-group-custom mb-4">
-                            <label class="form-label-custom">
-                                <i class="fas fa-users"></i> Maximum Members
-                            </label>
-                            <div class="input-group-custom">
-                                {{ form_widget(form.maxMembers, {'attr': {'class': 'form-control-custom', 'min': '1', 'max': '50'}}) }}
-                                <span class="input-addon">Players</span>
-                            </div>
-                            {{ form_errors(form.maxMembers) }}
-                            <div class="form-hint">
-                                <i class="fas fa-info-circle"></i> Set the maximum number of members (1-50)
-                            </div>
-                        </div>
-                        
-                        <!-- Team Logo Upload -->
-                        <div class="form-group-custom mb-4">
-                            <label class="form-label-custom">
-                                <i class="fas fa-image"></i> Team Logo
-                            </label>
-                            <div class="logo-upload-area">
-                                <div class="upload-preview" id="logoPreview">
-                                    <i class="fas fa-cloud-upload-alt"></i>
-                                    <p>Click to upload or drag & drop</p>
-                                    <small>JPG, PNG, GIF, WEBP (Max: 2MB)</small>
-                                </div>
-                                {{ form_widget(form.logoFile, {'attr': {'class': 'file-input-custom', 'accept': 'image/*'}}) }}
-                            </div>
-                            {{ form_errors(form.logoFile) }}
-                            <div class="form-hint">
-                                <i class="fas fa-info-circle"></i> Upload a logo that represents your team
-                            </div>
-                        </div>
-                        
-                        <!-- Action Buttons -->
-                        <div class="form-actions">
-                            <button type="submit" class="btn_1">
-                                <i class="fas fa-rocket"></i> Launch Team
-                            </button>
-                            <a href="{{ path('app_teams_index') }}" class="btn_2">
-                                <i class="fas fa-times-circle"></i> Cancel
-                            </a>
-                        </div>
-                        
-                        {{ form_end(form) }}
                     </div>
                 </div>
 
-                <!-- Help Section -->
-                <div class="help-section mt-5">
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <div class="help-card">
-                                <div class="help-icon">
-                                    <i class="fas fa-trophy"></i>
-                                </div>
-                                <h5>Build to Win</h5>
-                                <p>Create a team with clear goals and strategies to dominate competitions</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="help-card">
-                                <div class="help-icon">
-                                    <i class="fas fa-user-friends"></i>
-                                </div>
-                                <h5>Find Players</h5>
-                                <p>Recruit skilled players who share your vision and playstyle</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <div class="help-card">
-                                <div class="help-icon">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                                <h5>Track Progress</h5>
-                                <p>Monitor your team's performance and climb the leaderboards</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
 </section>
 
 <style>
-/* Team Creation Section Styles */
-.team-creation-section {
-    background: linear-gradient(180deg, rgba(11,17,31,0.5) 0%, rgba(0,0,0,0.8) 100%);
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+/* ═══════════════════════════════════════════
+   EYE2WIN — CREATE TEAM [FULL RED]
+═══════════════════════════════════════════ */
+:root {
+    --red:       #e8372a;
+    --red-hot:   #ff4d3d;
+    --red-deep:  #b02b20;
+    --red-glow:  rgba(232,55,42,0.4);
+    --red-dim:   rgba(232,55,42,0.12);
+    --orange:    #ff6b2b;
+    --pink:      #ff2060;
+    --green:     #00e676;
+    --dark:      #080810;
+    --border-r:  rgba(232,55,42,0.3);
+    --text:      rgba(255,255,255,0.93);
+    --muted:     rgba(255,255,255,0.38);
+    --font-hud:  'Orbitron', sans-serif;
+    --font-body: 'Rajdhani', sans-serif;
+    --font-mono: 'Share Tech Mono', monospace;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--dark); font-family: var(--font-body); }
+
+/* ══ HERO ══ */
+.create-hero {
     position: relative;
-}
-
-.creation-header .section-title {
-    font-size: 45px;
-    font-weight: 700;
-    margin-bottom: 15px;
-    color: #fff;
-}
-
-.creation-header .section-subtitle {
-    font-size: 18px;
-    color: #bebebe;
-    font-family: "Poppins", sans-serif;
-}
-
-/* Form Card Styling */
-.team-form-card {
-    background: linear-gradient(135deg, rgba(11,17,31,0.95) 0%, rgba(20,25,40,0.95) 100%);
-    border-radius: 10px;
+    background: linear-gradient(165deg, #1a0308 0%, #0c0b18 50%, #080810 100%);
+    padding: 4rem 0 3.5rem;
     overflow: hidden;
-    box-shadow: 0 10px 40px rgba(255,0,0,0.1);
-    border: 1px solid rgba(255,0,0,0.2);
 }
-
-.form-card-header {
-    background: linear-gradient(to right, #ff0000 0%, #c6019a 100%);
-    padding: 25px 30px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
+.create-hero::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--red), var(--orange), var(--pink), transparent);
+    background-size: 300% 100%;
+    animation: border-shimmer 4s linear infinite;
 }
-
-.form-card-header i {
-    font-size: 28px;
-    color: #fff;
+@keyframes border-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
-
-.form-card-header h4 {
-    margin: 0;
-    color: #fff;
-    font-size: 24px;
-    font-weight: 600;
+#heroCanvas {
+    position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    width: 100%; height: 100%;
 }
-
-.form-card-body {
-    padding: 40px;
+.hero-grid-overlay {
+    position: absolute; inset: 0;
+    background-image:
+        linear-gradient(rgba(232,55,42,0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,55,42,0.055) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: grid-pulse 6s ease-in-out infinite;
 }
-
-@media (max-width: 768px) {
-    .form-card-body {
-        padding: 25px 20px;
-    }
+@keyframes grid-pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
+.hero-scanline {
+    position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.055) 2px, rgba(0,0,0,0.055) 4px);
+    animation: scanline-move 8s linear infinite;
 }
-
-/* Custom Form Groups */
-.form-group-custom {
-    margin-bottom: 30px;
+@keyframes scanline-move { from{background-position:0 0} to{background-position:0 100px} }
+.hero-vignette {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.65) 100%);
 }
+.hero-inner { position: relative; z-index: 3; }
 
-.form-label-custom {
+.hero-tag {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: rgba(232,55,42,0.09); border: 1px solid rgba(232,55,42,0.28);
+    color: var(--red-hot); font-family: var(--font-hud);
+    font-size: .62rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+    padding: .32rem .9rem; border-radius: 3px; margin-bottom: 1.4rem;
+    animation: badge-in .5s .1s both;
+}
+@keyframes badge-in { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:none} }
+.hero-tag-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #3dff8a; box-shadow: 0 0 8px #3dff8a;
+    animation: blink 1s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.hero-title {
+    font-family: var(--font-hud); font-weight: 900;
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    line-height: .95; letter-spacing: .05em; margin-bottom: 1rem;
+    animation: title-in .6s .2s both cubic-bezier(.22,1,.36,1);
+}
+@keyframes title-in { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
+.title-row1 { display: block; color: var(--text); }
+.title-row2 {
     display: block;
-    color: #fff;
-    font-size: 16px;
-    font-weight: 500;
-    margin-bottom: 12px;
-    font-family: "Poppins", sans-serif;
+    background: linear-gradient(90deg, var(--red) 0%, var(--orange) 50%, var(--pink) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    background-size: 200% 100%;
+    animation: gradient-pan 5s ease-in-out infinite alternate, title-in .6s .2s both cubic-bezier(.22,1,.36,1);
+    filter: drop-shadow(0 0 30px rgba(232,55,42,0.4));
+}
+@keyframes gradient-pan { from{background-position:0%} to{background-position:100%} }
+.hero-sub {
+    color: var(--muted); font-size: 1rem; max-width: 480px; line-height: 1.65; margin-bottom: 0;
+    animation: sub-in .5s .4s both;
+}
+@keyframes sub-in { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+
+/* ══ SECTION ══ */
+.create-section { background: var(--dark); padding: 2.5rem 0 4rem; }
+
+/* ══ GLASS CARD ══ */
+.gcard {
+    background: rgba(6,5,16,0.85);
+    border: 1px solid rgba(255,255,255,0.065);
+    border-radius: 14px;
+    padding: 1.75rem 2rem;
+    position: relative; overflow: hidden;
+    backdrop-filter: blur(10px);
+    opacity: 0; transform: translateY(20px);
+    animation: card-enter .5s calc(var(--ci,1) * 100ms) forwards cubic-bezier(.22,1,.36,1);
+}
+@keyframes card-enter { to { opacity:1; transform:none; } }
+.gcard:focus-within {
+    border-color: rgba(232,55,42,0.3);
+    box-shadow: 0 0 0 1px rgba(232,55,42,0.08), 0 16px 48px rgba(0,0,0,0.4);
 }
 
-.form-label-custom i {
-    color: #ff0000;
-    margin-right: 8px;
+/* Racing top line */
+.card-topline {
+    position: absolute; top: 0; left: 0; right: 0; height: 1.5px;
+    background: linear-gradient(90deg, transparent, var(--red), var(--orange), var(--pink), transparent);
+    background-size: 200% 100%;
+    opacity: 0; transition: opacity .3s;
 }
+.gcard:focus-within .card-topline {
+    opacity: 1;
+    animation: topline-race 1.4s linear infinite;
+}
+@keyframes topline-race { from{background-position:200% 0} to{background-position:-200% 0} }
 
-/* Custom Form Controls */
-.form-control-custom {
+/* Left accent bar */
+.gcard::after {
+    content: ''; position: absolute; left: 0; top: 10%; bottom: 10%; width: 3px;
+    background: linear-gradient(180deg, transparent, var(--red), var(--orange), transparent);
+    border-radius: 0 2px 2px 0;
+    opacity: 0; transform: scaleY(0);
+    transition: opacity .3s, transform .35s cubic-bezier(.22,1,.36,1);
+}
+.gcard:focus-within::after { opacity: 1; transform: scaleY(1); }
+
+.gcard-head { display: flex; align-items: flex-start; gap: 1rem; }
+.gstep {
+    flex-shrink: 0; width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--red-dim); border: 1px solid var(--border-r); border-radius: 10px;
+    font-size: 1.1rem; color: var(--red-hot);
+    transition: background .2s, box-shadow .2s;
+}
+.gcard:focus-within .gstep {
+    background: rgba(232,55,42,0.2);
+    box-shadow: 0 0 14px rgba(232,55,42,0.25);
+}
+.gcard-title {
+    font-family: var(--font-hud); font-size: .9rem; font-weight: 700;
+    color: var(--text); letter-spacing: .04em;
+}
+.gcard-sub { font-family: var(--font-mono); font-size: .72rem; color: var(--muted); margin-top: .2rem; }
+
+/* ══ FORM GROUPS ══ */
+.f-group { display: flex; flex-direction: column; gap: .4rem; }
+
+.f-label {
+    font-family: var(--font-hud); font-size: .78rem; font-weight: 700;
+    color: var(--text); letter-spacing: .06em; text-transform: uppercase;
+    display: flex; align-items: center; gap: .5rem;
+}
+.f-label i { color: var(--red-hot); font-size: .85rem; }
+
+/* ── Inputs ── */
+.f-input-wrap { position: relative; }
+.g-input {
     width: 100%;
-    padding: 15px 20px;
-    background: rgba(249,249,255,0.05);
-    border: 2px solid rgba(255,255,255,0.1);
-    border-radius: 8px;
-    color: #fff;
-    font-size: 15px;
-    font-family: "Poppins", sans-serif;
-    transition: all 0.3s ease;
-}
-
-.form-control-custom:focus {
+    background: rgba(255,255,255,0.03);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 9px;
+    color: var(--text);
+    font-family: var(--font-body); font-size: .95rem;
+    padding: .82rem 1rem;
     outline: none;
-    border-color: #ff0000;
-    background: rgba(249,249,255,0.08);
-    box-shadow: 0 0 20px rgba(255,0,0,0.1);
-}
-
-.form-control-custom::placeholder {
-    color: rgba(255,255,255,0.4);
-}
-
-textarea.form-control-custom {
+    transition: border-color .2s, box-shadow .2s, background .2s;
     resize: vertical;
-    min-height: 120px;
+}
+.g-input:focus {
+    background: rgba(232,55,42,0.04);
+    border-color: rgba(232,55,42,0.5);
+    box-shadow: 0 0 0 3px rgba(232,55,42,0.1);
+}
+.g-input::placeholder { color: var(--muted); }
+
+/* Input + addon */
+.f-input-with-addon {
+    display: flex; align-items: stretch;
+}
+.g-input-addon {
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+.f-addon {
+    display: flex; align-items: center; gap: .4rem;
+    background: linear-gradient(135deg, var(--red-deep), var(--red));
+    color: #fff; padding: .82rem 1.2rem;
+    border-radius: 0 9px 9px 0;
+    font-family: var(--font-hud); font-size: .7rem; font-weight: 700;
+    letter-spacing: .08em; white-space: nowrap;
+    border: 1.5px solid var(--red); border-left: none;
+}
+.f-addon i { font-size: .8rem; }
+
+.f-hint {
+    font-family: var(--font-mono); font-size: .66rem; color: var(--muted);
+    display: flex; align-items: center; gap: .35rem;
+}
+.f-hint i { color: rgba(232,55,42,0.5); }
+
+/* ══ OPT PILL ══ */
+.opt-pill {
+    font-family: var(--font-mono); font-size: .6rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .08em;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    color: var(--muted); padding: .1rem .45rem; border-radius: 20px;
 }
 
-/* Input Group Custom */
-.input-group-custom {
-    display: flex;
-    align-items: stretch;
+/* ══ DROP ZONE ══ */
+.drop-zone {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 2.5rem 2rem; gap: .35rem;
+    background: rgba(255,255,255,0.02);
+    border: 1.5px dashed rgba(232,55,42,0.2);
+    border-radius: 12px; cursor: pointer; text-align: center;
+    position: relative; overflow: hidden;
+    transition: background .22s, border-color .22s, box-shadow .22s;
 }
-
-.input-group-custom .form-control-custom {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
+.drop-zone-grid {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image:
+        linear-gradient(rgba(232,55,42,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,55,42,0.03) 1px, transparent 1px);
+    background-size: 30px 30px;
+    opacity: 0; transition: opacity .3s;
 }
-
-.input-group-custom .input-addon {
-    background: linear-gradient(to right, #ff0000 0%, #c6019a 100%);
-    color: #fff;
-    padding: 15px 25px;
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
+.drop-zone:hover .drop-zone-grid { opacity: 1; }
+.drop-zone:hover, .drop-zone.drag-over {
+    background: rgba(232,55,42,0.05);
+    border-color: rgba(232,55,42,0.5);
+    box-shadow: 0 0 30px rgba(232,55,42,0.06);
 }
-
-/* Form Hints */
-.form-hint {
-    margin-top: 8px;
-    font-size: 13px;
-    color: rgba(255,255,255,0.6);
-    font-family: "Poppins", sans-serif;
-}
-
-.form-hint i {
-    color: #ff0000;
-    margin-right: 5px;
-}
-
-/* Logo Upload Area */
-.logo-upload-area {
-    position: relative;
-}
-
 .upload-preview {
-    border: 2px dashed rgba(255,0,0,0.3);
-    border-radius: 8px;
-    padding: 40px 20px;
-    text-align: center;
-    background: rgba(249,249,255,0.03);
-    cursor: pointer;
-    transition: all 0.3s ease;
+    display: flex; flex-direction: column; align-items: center; gap: .4rem;
+    position: relative; z-index: 1;
+}
+.drop-icon {
+    font-size: 2.4rem; color: rgba(232,55,42,0.4);
+    transition: color .22s, transform .22s;
+}
+.drop-zone:hover .drop-icon { color: var(--red-hot); transform: translateY(-4px); }
+.drop-text {
+    font-family: var(--font-body); font-size: .88rem; color: rgba(255,255,255,0.5);
+}
+.drop-text u { color: var(--red-hot); }
+.drop-hint {
+    font-family: var(--font-mono); font-size: .65rem; color: var(--muted); letter-spacing: .06em;
 }
 
-.upload-preview:hover {
-    border-color: #ff0000;
-    background: rgba(255,0,0,0.05);
-}
-
-.upload-preview i {
-    font-size: 48px;
-    color: #ff0000;
-    margin-bottom: 15px;
-}
-
-.upload-preview p {
-    color: #fff;
-    margin-bottom: 5px;
-    font-weight: 500;
-}
-
-.upload-preview small {
-    color: rgba(255,255,255,0.5);
-}
-
-.file-input-custom {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    cursor: pointer;
-}
-
-/* Form Actions */
+/* ══ FORM ACTIONS ══ */
 .form-actions {
-    display: flex;
-    gap: 15px;
-    margin-top: 40px;
-    padding-top: 30px;
-    border-top: 1px solid rgba(255,255,255,0.1);
+    display: flex; gap: 1rem; justify-content: flex-end; align-items: center;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+.btn-ghost {
+    display: inline-flex; align-items: center; gap: .5rem; padding: .72rem 1.4rem;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 9px; color: rgba(255,255,255,0.55);
+    font-family: var(--font-hud); font-size: .72rem; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase; text-decoration: none;
+    transition: all .2s;
+}
+.btn-ghost:hover {
+    background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.9);
+}
+.btn-fire {
+    position: relative; overflow: hidden;
+    display: inline-flex; align-items: center; gap: .6rem; padding: .72rem 2rem;
+    background: linear-gradient(135deg, var(--red-deep), var(--red), var(--red-hot));
+    border: none; border-radius: 9px; color: #fff;
+    font-family: var(--font-hud); font-size: .8rem; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; cursor: pointer;
+    box-shadow: 0 4px 24px rgba(232,55,42,0.45);
+    transition: transform .18s, box-shadow .18s;
+}
+.btn-fire:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 36px rgba(232,55,42,0.6), 0 0 0 3px rgba(232,55,42,0.15);
+    color: #fff;
+}
+.btn-fire:active { transform: translateY(-1px); }
+.btn-fire-bg {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,.15), transparent);
+    pointer-events: none;
+}
+.btn-fire-spark {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at 50% -20%, rgba(255,180,100,.28) 0%, transparent 60%);
 }
 
-.form-actions .btn_1,
-.form-actions .btn_2 {
-    flex: 1;
-    text-align: center;
-    padding: 18px 30px;
-    font-size: 16px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+/* ══ HELP CARDS ══ */
+.help-row {
+    opacity: 0; transform: translateY(16px);
+    animation: card-enter .55s .35s forwards cubic-bezier(.22,1,.36,1);
 }
-
-@media (max-width: 576px) {
-    .form-actions {
-        flex-direction: column;
-    }
-}
-
-/* Error Styling */
-.form-error-message {
-    color: #ff4444;
-    font-size: 13px;
-    margin-top: 5px;
-    display: block;
-}
-
-/* Help Section */
-.help-section {
-    margin-top: 50px;
-}
-
 .help-card {
-    background: rgba(11,17,31,0.6);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 8px;
-    padding: 30px 25px;
+    background: rgba(6,5,16,0.8);
+    border: 1px solid rgba(255,255,255,0.065);
+    border-radius: 12px;
+    padding: 1.8rem 1.5rem;
     text-align: center;
-    transition: all 0.3s ease;
     height: 100%;
+    position: relative; overflow: hidden;
+    transition: border-color .25s, box-shadow .25s, transform .22s;
 }
-
+.help-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1.5px;
+    background: linear-gradient(90deg, transparent, var(--red), var(--orange), transparent);
+    background-size: 200% 100%;
+    opacity: 0; transition: opacity .25s;
+    animation: topline-race 2s linear infinite;
+}
 .help-card:hover {
-    background: rgba(255,0,0,0.05);
-    border-color: rgba(255,0,0,0.3);
-    transform: translateY(-5px);
+    border-color: rgba(232,55,42,0.35);
+    box-shadow: 0 10px 32px rgba(232,55,42,0.12);
+    transform: translateY(-4px);
+}
+.help-card:hover::before { opacity: 1; }
+
+.help-icon-wrap {
+    width: 64px; height: 64px;
+    background: rgba(232,55,42,0.1);
+    border: 1px solid rgba(232,55,42,0.3);
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.2rem;
+    font-size: 1.5rem; color: var(--red-hot);
+    transition: background .22s, box-shadow .22s;
+}
+.help-card:hover .help-icon-wrap {
+    background: rgba(232,55,42,0.2);
+    box-shadow: 0 0 20px rgba(232,55,42,0.25);
+}
+.help-title {
+    font-family: var(--font-hud); font-size: .85rem; font-weight: 700;
+    color: var(--text); letter-spacing: .04em; margin-bottom: .6rem;
+}
+.help-text {
+    font-family: var(--font-body); font-size: .82rem;
+    color: var(--muted); line-height: 1.6; margin: 0;
 }
 
-.help-icon {
-    width: 70px;
-    height: 70px;
-    background: linear-gradient(135deg, #ff0000 0%, #c6019a 100%);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 20px;
+/* ══ FORM ERRORS ══ */
+.form-error, ul.form-error li {
+    font-family: var(--font-mono); font-size: .68rem; color: #ff6b6b;
+    margin-top: .3rem; list-style: none; padding: 0;
 }
 
-.help-icon i {
-    font-size: 32px;
-    color: #fff;
-}
-
-.help-card h5 {
-    color: #fff;
-    font-size: 20px;
-    margin-bottom: 12px;
-    font-weight: 600;
-}
-
-.help-card p {
-    color: rgba(255,255,255,0.7);
-    font-size: 14px;
-    line-height: 1.6;
-    margin: 0;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 991px) {
-    .creation-header .section-title {
-        font-size: 35px;
-    }
-    
-    .creation-header .section-subtitle {
-        font-size: 16px;
-    }
-}
-
-@media (max-width: 576px) {
-    .creation-header .section-title {
-        font-size: 28px;
-    }
-    
-    .form-card-header {
-        padding: 20px;
-    }
-    
-    .form-card-header h4 {
-        font-size: 20px;
-    }
+/* ══ RESPONSIVE ══ */
+@media (max-width: 640px) {
+    .create-hero  { padding: 2.5rem 0 2rem; }
+    .hero-title   { font-size: 2.2rem; }
+    .gcard        { padding: 1.25rem 1rem; }
+    .form-actions { flex-direction: column-reverse; }
+    .btn-ghost, .btn-fire { width: 100%; justify-content: center; }
 }
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Logo preview functionality
-    const logoInput = document.querySelector('.file-input-custom');
-    const previewArea = document.getElementById('logoPreview');
-    
-    if (logoInput && previewArea) {
-        logoInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    previewArea.innerHTML = `
-                        <img src="${event.target.result}" alt="Logo Preview" style="max-width: 200px; max-height: 200px; border-radius: 8px;">
-                        <p style="margin-top: 15px; color: #4cd3e3;">✓ Logo selected</p>
-                        <small>${file.name}</small>
-                    `;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+(function () {
+    'use strict';
+
+    /* ── HERO CANVAS ── */
+    const canvas = document.getElementById('heroCanvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let W, H, particles = [];
+
+        function resize() {
+            W = canvas.width  = canvas.parentElement.offsetWidth;
+            H = canvas.height = canvas.parentElement.offsetHeight;
+        }
+        resize();
+        window.addEventListener('resize', () => { resize(); spawnAll(); });
+
+        const COLORS = ['rgba(232,55,42,','rgba(255,77,61,','rgba(255,107,43,','rgba(255,32,96,'];
+
+        function mkParticle() {
+            const c = COLORS[Math.floor(Math.random() * COLORS.length)];
+            return {
+                x: Math.random() * W, y: H + Math.random() * 60,
+                vx: (Math.random() - .5) * .55, vy: -(0.3 + Math.random() * 1.0),
+                r: 0.8 + Math.random() * 1.5, alpha: 0,
+                maxAlpha: 0.25 + Math.random() * 0.45,
+                phase: Math.random() * Math.PI * 2, color: c,
+                life: 0, maxLife: 130 + Math.random() * 160,
+            };
+        }
+        function spawnAll() { particles = Array.from({ length: 38 }, mkParticle); }
+        spawnAll();
+
+        (function tick() {
+            ctx.clearRect(0, 0, W, H);
+            particles.forEach((p, i) => {
+                p.life++;
+                p.x += p.vx + Math.sin(p.phase + p.life * 0.02) * 0.25;
+                p.y += p.vy;
+                const t = p.life / p.maxLife;
+                p.alpha = t < 0.15 ? (t/0.15)*p.maxAlpha : t > 0.75 ? ((1-t)/0.25)*p.maxAlpha : p.maxAlpha;
+                if (p.life >= p.maxLife || p.y < -10) particles[i] = mkParticle();
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = p.color + p.alpha + ')';
+                ctx.shadowColor = p.color + '0.5)';
+                ctx.shadowBlur = 7;
+                ctx.fill();
+            });
+            requestAnimationFrame(tick);
+        })();
+
+        /* Glitch */
+        const accent = document.querySelector('.title-row2');
+        if (accent) {
+            setInterval(() => {
+                if (Math.random() > 0.82) {
+                    accent.animate([
+                        { transform: 'none', filter: 'none' },
+                        { transform: 'skewX(-3deg) translateX(-2px)', filter: 'hue-rotate(30deg) brightness(1.4)' },
+                        { transform: 'skewX(2deg) translateX(3px)',  filter: 'hue-rotate(-20deg)' },
+                        { transform: 'none', filter: 'none' },
+                    ], { duration: 160, easing: 'steps(3)' });
+                }
+            }, 3000);
+        }
     }
-});
+
+    /* ── LOGO PREVIEW ── */
+    const logoInput   = document.querySelector('input[type="file"][accept="image/*"]');
+    const previewArea = document.getElementById('logoPreview');
+    const dropZone    = document.getElementById('drop-zone');
+
+    if (logoInput && previewArea) {
+        logoInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File must be less than 2 MB'); logoInput.value = ''; return;
+            }
+            const reader = new FileReader();
+            reader.onload = function (ev) {
+                previewArea.innerHTML = `
+                    <img src="${ev.target.result}" alt="Logo Preview"
+                         style="max-width:160px;max-height:160px;border-radius:10px;border:2px solid rgba(232,55,42,0.4);box-shadow:0 0 20px rgba(232,55,42,0.2);">
+                    <span style="font-family:'Share Tech Mono',monospace;font-size:.72rem;color:#ff4d3d;margin-top:.5rem;">
+                        <i class="fas fa-check-circle"></i> ${file.name}
+                    </span>
+                    <span style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:rgba(255,255,255,0.3);">
+                        Click to change
+                    </span>`;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        if (dropZone) {
+            dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+            dropZone.addEventListener('drop', e => {
+                e.preventDefault(); dropZone.classList.remove('drag-over');
+                const f = e.dataTransfer.files[0];
+                if (f && f.type.startsWith('image/')) {
+                    const dt = new DataTransfer();
+                    dt.items.add(f);
+                    logoInput.files = dt.files;
+                    logoInput.dispatchEvent(new Event('change'));
+                }
+            });
+        }
+    }
+
+})();
 </script>
 
 {% endblock %}

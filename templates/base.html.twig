@@ -3,41 +3,452 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="{% block meta_description %}EyeTwin — Plateforme eSport compétitive. Analyse vidéo, tournois, coaching et communauté gaming.{% endblock %}">
     <title>{% block title %}EyeTwin eSport Platform{% endblock %}</title>
     <link rel="icon" href="{{ asset('assets/img/favicon.png') }}">
-    
+
+    {# ✅ FIX: preconnect AVANT les fonts — réduit le délai de connexion #}
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+
+    {# ✅ FIX: Google Fonts avec display=swap — le texte s'affiche immédiatement #}
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
     {% block stylesheets %}
+    {# ✅ CSS CRITIQUES — gardés synchrones (above the fold) #}
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/animate.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/owl.carousel.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/all.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/flaticon.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/themify-icons.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/magnific-popup.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/slick.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/2fa-custom-styles.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/complaints-styles.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/navbar-fixes.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/profile.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/esport-ui.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/community.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/front-notifications.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
-          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
-          crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    {# ✅ FIX: CSS non-critiques chargés en ASYNC — ne bloquent plus le rendu #}
+    <link rel="preload" href="{{ asset('assets/css/animate.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ asset('assets/css/animate.css') }}"></noscript>
+
+    <link rel="preload" href="{{ asset('assets/css/owl.carousel.min.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ asset('assets/css/owl.carousel.min.css') }}"></noscript>
+
+    <link rel="preload" href="{{ asset('assets/css/all.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ asset('assets/css/all.css') }}"></noscript>
+
+    <link rel="preload" href="{{ asset('assets/css/flaticon.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ asset('assets/css/flaticon.css') }}"></noscript>
+
+    <link rel="preload" href="{{ asset('assets/css/themify-icons.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ asset('assets/css/themify-icons.css') }}"></noscript>
+
+    <link rel="preload" href="{{ asset('assets/css/magnific-popup.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ asset('assets/css/magnific-popup.css') }}"></noscript>
+
+    <link rel="preload" href="{{ asset('assets/css/slick.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ asset('assets/css/slick.css') }}"></noscript>
+
+    <link rel="preload" href="{{ asset('assets/css/2fa-custom-styles.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ asset('assets/css/2fa-custom-styles.css') }}"></noscript>
+
+    <link rel="preload" href="{{ asset('assets/css/complaints-styles.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ asset('assets/css/complaints-styles.css') }}"></noscript>
+
+    <link rel="preload" href="{{ asset('assets/css/profile.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ asset('assets/css/profile.css') }}"></noscript>
+
+    <link rel="preload" href="{{ asset('assets/css/esport-ui.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ asset('assets/css/esport-ui.css') }}"></noscript>
+
+    <link rel="preload" href="{{ asset('assets/css/community.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ asset('assets/css/community.css') }}"></noscript>
+
+    <link rel="preload" href="{{ asset('assets/css/front-notifications.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ asset('assets/css/front-notifications.css') }}"></noscript>
+
+    {# ✅ FIX: Font Awesome en async aussi #}
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style"
+          onload="this.onload=null;this.rel='stylesheet'"
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer">
+    <noscript>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+              integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+              crossorigin="anonymous" referrerpolicy="no-referrer">
+    </noscript>
     {% endblock %}
+
+    <style>
+    /* ═══════════════════════════════════════════════════════
+       EYETWIN — GAMING BASE THEME
+    ═══════════════════════════════════════════════════════ */
+    :root {
+        --red:        #e8372a;
+        --red-hot:    #ff4d3d;
+        --red-deep:   #b02b20;
+        --orange:     #ff6b2b;
+        --pink:       #ff2060;
+        --gold:       #f6d860;
+        --green:      #00e676;
+        --cyan:       #00e5ff;
+        --dark:       #080810;
+        --dark2:      #0d0c1a;
+        --dark3:      #12101f;
+        --text:       rgba(255,255,255,0.93);
+        --muted:      rgba(255,255,255,0.38);
+        --border-r:   rgba(232,55,42,0.25);
+        --font-hud:   'Orbitron', sans-serif;
+        --font-body:  'Rajdhani', sans-serif;
+        --font-mono:  'Share Tech Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+        background: var(--dark);
+        font-family: var(--font-body);
+        color: var(--text);
+        overflow-x: hidden;
+        cursor: none;
+    }
+
+    /* ── SVG SWORD CURSOR — OPTIMIZED ── */
+    *, a, button, [role="button"] { cursor: none !important; }
+
+    #sword-cursor {
+        position: fixed;
+        pointer-events: none;
+        z-index: 99999;
+        width: 40px; height: 40px;
+        top: 0; left: 0;
+        transform: translate(-200px, -200px) rotate(-45deg);
+        transform-origin: 4px 4px;
+        will-change: transform;
+        filter: drop-shadow(0 0 5px rgba(232,55,42,.8));
+        backface-visibility: hidden;
+        transition: filter .15s;
+    }
+    #sword-cursor svg { width: 100%; height: 100%; }
+
+    #sword-cursor.sw-hover { filter: drop-shadow(0 0 7px rgba(255,107,43,.9)); }
+    #sword-cursor.sw-click { filter: drop-shadow(0 0 12px rgba(255,255,255,.9)); transition: filter .07s; }
+
+    .spark {
+        position: fixed; pointer-events: none; z-index: 99998;
+        width: 3px; height: 3px; border-radius: 50%;
+        will-change: transform, opacity;
+        animation: spark-fly var(--dur,.4s) ease-out forwards;
+    }
+    @keyframes spark-fly {
+        0%   { opacity:1; transform:translate(-50%,-50%) translate(0,0) scale(1); }
+        100% { opacity:0; transform:translate(-50%,-50%) translate(var(--sx),var(--sy)) scale(0); }
+    }
+
+    /* ── GLOBAL BACKGROUND ── */
+    .body_bg { position: relative; min-height: 100vh; }
+
+    .body_bg::before {
+        content: '';
+        position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        background-image:
+            linear-gradient(rgba(232,55,42,0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(232,55,42,0.04) 1px, transparent 1px);
+        background-size: 60px 60px;
+        animation: grid-drift 20s linear infinite;
+    }
+    @keyframes grid-drift { from{background-position:0 0} to{background-position:60px 60px} }
+
+    .body_bg::after {
+        content: '';
+        position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 4px);
+    }
+
+    #bgCanvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; width: 100%; height: 100%; }
+
+    header, footer, main, section, .container { position: relative; z-index: 1; }
+
+    /* ═══════════════════════════════════════
+       NAVBAR
+    ═══════════════════════════════════════ */
+    .main_menu {
+        position: sticky; top: 0; z-index: 1000;
+        background: rgba(8,8,16,0.85) !important;
+        backdrop-filter: blur(16px) saturate(1.2);
+        border-bottom: 1px solid rgba(232,55,42,0.15);
+        box-shadow: 0 2px 40px rgba(0,0,0,0.6), 0 1px 0 rgba(232,55,42,0.1);
+        transition: background .3s;
+    }
+    .main_menu::after {
+        content: '';
+        position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, transparent, var(--red), var(--orange), var(--pink), transparent);
+        background-size: 300% 100%;
+        animation: shimmer-line 4s linear infinite;
+    }
+    @keyframes shimmer-line { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* ✅ FIX: Logo avec dimensions explicites — évite le CLS */
+    .navbar-brand img {
+        height: 42px;
+        width: auto;
+        filter: drop-shadow(0 0 12px rgba(232,55,42,0.4));
+        transition: filter .3s, transform .3s;
+    }
+    .navbar-brand:hover img {
+        filter: drop-shadow(0 0 22px rgba(232,55,42,0.7));
+        transform: scale(1.04);
+    }
+
+    .navbar-nav .nav-link {
+        font-family: var(--font-hud) !important;
+        font-size: .65rem !important;
+        font-weight: 600 !important;
+        letter-spacing: .14em !important;
+        text-transform: uppercase !important;
+        color: var(--muted) !important;
+        padding: .5rem .9rem !important;
+        position: relative;
+        transition: color .2s !important;
+    }
+    .navbar-nav .nav-link::after {
+        content: '';
+        position: absolute; bottom: -2px; left: 50%; right: 50%;
+        height: 1px;
+        background: linear-gradient(90deg, var(--red), var(--orange));
+        transition: left .25s, right .25s;
+    }
+    .navbar-nav .nav-link:hover, .navbar-nav .nav-link.active { color: var(--text) !important; }
+    .navbar-nav .nav-link:hover::after { left: 10%; right: 10%; }
+
+    .nav-live-link { color: var(--red-hot) !important; }
+    .nav-live-link:hover { color: #fff !important; }
+
+    .nav-live-dot {
+        width: 7px; height: 7px;
+        background: var(--red-hot); border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 8px var(--red);
+        animation: nav-pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes nav-pulse { 0%,100%{opacity:1;transform:scale(1);box-shadow:0 0 8px var(--red)} 50%{opacity:.4;transform:scale(.7);box-shadow:0 0 3px var(--red)} }
+
+    .nav-coins-pill {
+        background: linear-gradient(90deg, #f6d860, #f6ad55);
+        color: #1a1a2e !important;
+        padding: 4px 12px !important;
+        border-radius: 20px !important;
+        font-family: var(--font-hud) !important;
+        font-size: .6rem !important;
+        font-weight: 800 !important;
+        display: inline-flex; align-items: center; gap: 5px;
+        box-shadow: 0 2px 12px rgba(246,216,96,.25);
+        transition: box-shadow .2s, transform .2s !important;
+    }
+    .nav-coins-pill:hover { box-shadow: 0 4px 20px rgba(246,216,96,.5) !important; transform: translateY(-1px) !important; color: #1a1a2e !important; }
+
+    .nav-bell { position: relative; }
+    .nav-bell .badge {
+        position: absolute; top: 0; right: -6px;
+        background: var(--red) !important;
+        font-size: .55rem; border-radius: 50%;
+        width: 16px; height: 16px;
+        display: flex; align-items: center; justify-content: center;
+        font-family: var(--font-hud);
+        animation: badge-pop .3s cubic-bezier(.34,1.56,.64,1);
+        box-shadow: 0 0 8px rgba(232,55,42,.5);
+    }
+    @keyframes badge-pop { from{transform:scale(0)} to{transform:scale(1)} }
+
+    .dropdown-menu {
+        background: rgba(10,9,20,0.97) !important;
+        border: 1px solid rgba(232,55,42,.2) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 16px 60px rgba(0,0,0,.8), 0 0 0 1px rgba(232,55,42,.08) !important;
+        backdrop-filter: blur(12px);
+        animation: dropdown-in .2s cubic-bezier(.22,1,.36,1);
+        overflow: hidden;
+    }
+    @keyframes dropdown-in { from{opacity:0;transform:translateY(-8px) scale(.97)} to{opacity:1;transform:none} }
+    .dropdown-item {
+        font-family: var(--font-hud) !important;
+        font-size: .62rem !important;
+        letter-spacing: .1em !important;
+        text-transform: uppercase !important;
+        color: var(--muted) !important;
+        padding: .6rem 1.1rem !important;
+        display: flex; align-items: center; gap: .6rem;
+        transition: background .15s, color .15s, padding-left .15s !important;
+        border-left: 2px solid transparent;
+    }
+    .dropdown-item:hover { background: rgba(232,55,42,.1) !important; color: var(--red-hot) !important; padding-left: 1.4rem !important; border-left-color: var(--red) !important; }
+    .dropdown-item i { width: 16px; text-align: center; color: rgba(232,55,42,.5); }
+    .dropdown-item:hover i { color: var(--red-hot); }
+    .dropdown-divider { border-color: rgba(232,55,42,.1) !important; margin: .2rem 0 !important; }
+
+    .admin-link { color: var(--gold) !important; }
+    .admin-link:hover { color: var(--gold) !important; background: rgba(246,216,96,.08) !important; border-left-color: var(--gold) !important; }
+    .admin-link i { color: rgba(246,216,96,.5) !important; }
+    .admin-link:hover i { color: var(--gold) !important; }
+
+    .btn_1 {
+        font-family: var(--font-hud) !important;
+        font-size: .65rem !important;
+        font-weight: 700 !important;
+        letter-spacing: .12em !important;
+        text-transform: uppercase !important;
+        background: linear-gradient(135deg, var(--red-deep), var(--red), var(--red-hot)) !important;
+        border: none !important; border-radius: 8px !important;
+        color: #fff !important; padding: .5rem 1.4rem !important;
+        box-shadow: 0 4px 20px rgba(232,55,42,.4) !important;
+        transition: transform .2s, box-shadow .2s !important;
+        position: relative; overflow: hidden;
+    }
+    .btn_1::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,.2), transparent); pointer-events: none; }
+    .btn_1:hover { transform: translateY(-2px) !important; box-shadow: 0 8px 30px rgba(232,55,42,.6) !important; color: #fff !important; }
+
+    .navbar-toggler { border: 1px solid rgba(232,55,42,.35) !important; border-radius: 6px !important; }
+    .menu_icon i { color: var(--red-hot); }
+
+    .notif-header { background: rgba(232,55,42,.08); border-bottom: 1px solid rgba(232,55,42,.15) !important; font-family: var(--font-hud); font-size: .68rem; letter-spacing: .1em; color: var(--text) !important; padding: .7rem 1rem !important; }
+    .notif-body { background: rgba(8,8,16,.98) !important; max-height: 400px; overflow: auto; }
+    .notif-body::-webkit-scrollbar { width: 4px; }
+    .notif-body::-webkit-scrollbar-track { background: transparent; }
+    .notif-body::-webkit-scrollbar-thumb { background: rgba(232,55,42,.3); border-radius: 2px; }
+    .notif-item { border-bottom: 1px solid rgba(255,255,255,.06) !important; padding: .75rem 1rem !important; transition: background .15s; }
+    .notif-item:hover { background: rgba(232,55,42,.05) !important; }
+    .notif-item-unread { background: rgba(232,55,42,.04) !important; }
+    .notif-msg { font-family: var(--font-body); font-size: .85rem; color: var(--text); }
+    .notif-msg.read { color: var(--muted); }
+    .notif-date { font-family: var(--font-mono); font-size: .6rem; color: var(--muted); margin-top: .2rem; }
+
+    /* ═══════════════════════════════════════
+       FLASH ALERTS
+    ═══════════════════════════════════════ */
+    .alert { font-family: var(--font-mono) !important; font-size: .72rem !important; border-radius: 10px !important; border: none !important; display: flex; align-items: center; gap: .6rem; animation: alert-in .4s cubic-bezier(.22,1,.36,1); }
+    @keyframes alert-in { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:none} }
+    .alert-success { background: rgba(0,230,118,.1) !important; border-left: 3px solid var(--green) !important; color: var(--green) !important; }
+    .alert-danger  { background: rgba(232,55,42,.1) !important; border-left: 3px solid var(--red) !important; color: var(--red-hot) !important; }
+    .alert-warning { background: rgba(246,173,85,.1) !important; border-left: 3px solid var(--gold) !important; color: var(--gold) !important; }
+    .alert-info    { background: rgba(0,229,255,.08) !important; border-left: 3px solid var(--cyan) !important; color: var(--cyan) !important; }
+    .alert .close  { color: var(--muted) !important; opacity: 1; }
+
+    /* ═══════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════ */
+    .footer_part { position: relative; background: var(--dark2) !important; border-top: 1px solid rgba(232,55,42,.15) !important; overflow: hidden; }
+    .footer_part::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--red), var(--orange), transparent); background-size: 200% 100%; animation: shimmer-line 6s linear infinite reverse; }
+    .footer_part::after { content: ''; position: absolute; inset: 0; pointer-events: none; background-image: linear-gradient(rgba(232,55,42,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(232,55,42,.025) 1px, transparent 1px); background-size: 40px 40px; }
+    .copygight_text { padding: 1.2rem 0; }
+    .copyright_text p { font-family: var(--font-mono) !important; font-size: .62rem !important; color: var(--muted) !important; letter-spacing: .08em; }
+
+    .footer_icon.social_icon ul { display: flex; justify-content: flex-end; gap: .6rem; list-style: none; }
+    .single_social_icon { width: 36px; height: 36px; border-radius: 8px; background: rgba(255,255,255,.04); border: 1px solid rgba(232,55,42,.15); display: flex; align-items: center; justify-content: center; color: var(--muted) !important; font-size: .8rem; transition: all .2s; position: relative; overflow: hidden; }
+    .single_social_icon::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--red-deep), var(--red)); opacity: 0; transition: opacity .2s; }
+    .single_social_icon:hover { color: #fff !important; border-color: var(--red) !important; transform: translateY(-3px); box-shadow: 0 6px 20px rgba(232,55,42,.3); }
+    .single_social_icon:hover::before { opacity: 1; }
+    .single_social_icon i { position: relative; z-index: 1; }
+
+    /* ═══════════════════════════════════════
+       GLITCH LOADER OVERLAY
+    ═══════════════════════════════════════ */
+    #page-loader { position: fixed; inset: 0; z-index: 99998; background: var(--dark); display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 1.5rem; animation: loader-out .4s .8s forwards; pointer-events: none; }
+    @keyframes loader-out { to{opacity:0;visibility:hidden} }
+    .loader-logo { font-family: var(--font-hud); font-size: 1.8rem; font-weight: 900; color: var(--text); letter-spacing: .2em; animation: glitch-load 1s steps(2) infinite; }
+    @keyframes glitch-load {
+        0%,100% { text-shadow:none; }
+        25% { text-shadow:-3px 0 var(--red),3px 0 var(--cyan); }
+        50% { text-shadow:3px 0 var(--orange),-3px 0 var(--pink); }
+    }
+    .loader-bar-wrap { width: 220px; height: 3px; background: rgba(255,255,255,.07); border-radius: 2px; overflow: hidden; }
+    .loader-bar { height: 100%; background: linear-gradient(90deg, var(--red), var(--orange), var(--pink)); border-radius: 2px; animation: loader-fill .7s ease-out forwards; }
+    @keyframes loader-fill { from{width:0} to{width:100%} }
+    .loader-tag { font-family: var(--font-mono); font-size: .6rem; color: var(--muted); letter-spacing: .15em; text-transform: uppercase; animation: blink-text 1s step-end infinite; }
+    @keyframes blink-text { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+    /* ═══════════════════════════════════════
+       SCROLL PROGRESS BAR
+    ═══════════════════════════════════════ */
+    #scroll-progress { position: fixed; top: 0; left: 0; height: 2px; z-index: 9999; background: linear-gradient(90deg, var(--red), var(--orange), var(--pink)); width: 0%; transition: width .1s linear; box-shadow: 0 0 10px rgba(232,55,42,.6); }
+
+    /* ═══════════════════════════════════════
+       CORNER HUD DECORATION
+    ═══════════════════════════════════════ */
+    .hud-corner { position: fixed; z-index: 500; pointer-events: none; width: 40px; height: 40px; border-color: rgba(232,55,42,.2); border-style: solid; }
+    .hud-corner.tl { top: 12px; left: 12px; border-width: 1.5px 0 0 1.5px; }
+    .hud-corner.tr { top: 12px; right: 12px; border-width: 1.5px 1.5px 0 0; }
+    .hud-corner.bl { bottom: 12px; left: 12px; border-width: 0 0 1.5px 1.5px; }
+    .hud-corner.br { bottom: 12px; right: 12px; border-width: 0 1.5px 1.5px 0; }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: var(--dark2); }
+    ::-webkit-scrollbar-thumb { background: rgba(232,55,42,.4); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--red); }
+    ::selection { background: rgba(232,55,42,.35); color: #fff; }
+
+    .page-content { animation: page-fade-in .5s ease-out; }
+    @keyframes page-fade-in { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
+
+    .ripple { position: absolute; border-radius: 50%; background: rgba(232,55,42,.25); transform: scale(0); animation: ripple-anim .5s linear; pointer-events: none; }
+    @keyframes ripple-anim { to{transform:scale(3);opacity:0} }
+    </style>
 </head>
 
 <body data-user-id="{{ app.user ? app.user.id : '' }}">
-<div class="body_bg">
+
+<!-- SVG Sword Cursor -->
+<div id="sword-cursor">
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="6,42 10,46 44,8 40,4" fill="url(#blade-grad)" />
+        <line x1="8" y1="44" x2="42" y2="6" stroke="rgba(255,255,255,0.85)" stroke-width="1" stroke-linecap="round"/>
+        <rect x="14" y="26" width="14" height="4" rx="2" transform="rotate(-45 21 28)" fill="#b02b20" stroke="rgba(255,180,100,.6)" stroke-width=".8"/>
+        <rect x="4" y="38" width="10" height="3.5" rx="1.5" transform="rotate(-45 9 39.75)" fill="#6b1a12" stroke="rgba(255,100,60,.4)" stroke-width=".7"/>
+        <circle cx="5.5" cy="44.5" r="2.8" fill="#e8372a" stroke="rgba(255,180,100,.5)" stroke-width=".8"/>
+        <polygon points="8,40 11,43 40,8 37,5" fill="url(#shine-grad)" opacity=".35"/>
+        <text x="22" y="30" font-size="5" fill="rgba(255,200,100,.5)" font-family="serif" transform="rotate(-45 22 30)" text-anchor="middle">✦</text>
+        <defs>
+            <linearGradient id="blade-grad" x1="6" y1="42" x2="44" y2="4" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#c0c8d8"/>
+                <stop offset="40%" stop-color="#e8eef8"/>
+                <stop offset="100%" stop-color="#8090a8"/>
+            </linearGradient>
+            <linearGradient id="shine-grad" x1="8" y1="40" x2="40" y2="5" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+                <stop offset="50%" stop-color="#ffffff" stop-opacity="1"/>
+                <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+            </linearGradient>
+        </defs>
+    </svg>
+</div>
+
+<div id="scroll-progress"></div>
+<div class="hud-corner tl"></div>
+<div class="hud-corner tr"></div>
+<div class="hud-corner bl"></div>
+<div class="hud-corner br"></div>
+
+<div id="page-loader">
+    <div class="loader-logo">EYETWIN</div>
+    <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+    <div class="loader-tag">Initializing Platform…</div>
+</div>
+
+<canvas id="bgCanvas"></canvas>
+
+<div class="body_bg page-content">
+
+    {# ══ NAVBAR ══ #}
     <header class="main_menu single_page_menu">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-12">
                     <nav class="navbar navbar-expand-lg navbar-light">
-                        <a class="navbar-brand" href="{{ path('app_home') }}"> 
-                            <img src="{{ asset('assets/img/eyetwin-logo.png') }}" alt="EyeTwin Logo"> 
+                        <a class="navbar-brand" href="{{ path('app_home') }}">
+                            {# ✅ FIX: Logo en WebP avec fallback PNG + dimensions explicites (évite CLS) #}
+                            <picture>
+                                <source srcset="{{ asset('assets/img/eyetwin-logo.webp') }}" type="image/webp">
+                                <img src="{{ asset('assets/img/eyetwin-logo.png') }}"
+                                     alt="EyeTwin Logo"
+                                     width="120" height="42"
+                                     loading="eager">
+                            </picture>
                         </a>
                         <button class="navbar-toggler" type="button" data-toggle="collapse"
                             data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
@@ -67,66 +478,56 @@
                                     <li class="nav-item">
                                         <a class="nav-link" href="{{ path('community_channels_index') }}">Community</a>
                                     </li>
-
-                                    {#  LIVE STREAMS LINK #}
                                     <li class="nav-item">
-                                        <a class="nav-link" href="{{ path('live_index') }}" style="display:flex; align-items:center; gap:5px;">
-                                            <span style="width:7px; height:7px; background:#e53e3e; border-radius:50%; display:inline-block; animation:navPulse 1.5s infinite;"></span>
-                                            Live
+                                        <a class="nav-link nav-live-link" href="{{ path('live_index') }}" style="display:flex;align-items:center;gap:6px;">
+                                            <span class="nav-live-dot"></span> Live
                                         </a>
                                     </li>
-
-                                    {#  Coins balance pill in navbar #}
                                     <li class="nav-item">
-                                        <a href="{{ path('coins_index') }}" class="nav-link" style="display:flex; align-items:center; gap:5px;">
-                                            <span style="background:linear-gradient(90deg,#f6d860,#f6ad55); color:#1a1a2e; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:bold; display:flex; align-items:center; gap:5px;">
+                                        <a href="{{ path('coins_index') }}" class="nav-link" style="padding:.4rem .6rem!important;">
+                                            <span class="nav-coins-pill">
                                                 <i class="fas fa-coins"></i>
                                                 {{ app.user.coinBalance }}
                                             </span>
                                         </a>
                                     </li>
-
-
-                                    {#  Notifications bell #}
-                                    <li class="nav-item dropdown position-relative">
+                                    <li class="nav-item dropdown nav-bell">
                                         <a class="nav-link dropdown-toggle" href="#" id="notifDropdown"
-                                           role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                                           style="position: relative;">
+                                           role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                             <i class="fas fa-bell"></i>
                                             {% if navUnreadCount|default(0) > 0 %}
-                                                <span class="badge badge-danger"
-                                                      style="position:absolute; top:0px; right:-6px; font-size:10px; border-radius:50%;">
-                                                    {{ navUnreadCount }}
-                                                </span>
+                                                <span class="badge">{{ navUnreadCount }}</span>
                                             {% endif %}
                                         </a>
-                                        <div class="dropdown-menu dropdown-menu-right p-0 shadow"
-                                             aria-labelledby="notifDropdown"
-                                             style="width: 360px; border-radius: 12px; overflow: hidden;">
-                                            <div class="d-flex justify-content-between align-items-center px-3 py-2"
-                                                 style="border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2);">
-                                                <strong style="color:#fff;">Notifications</strong>
+                                        <div class="dropdown-menu dropdown-menu-right p-0" aria-labelledby="notifDropdown" style="width:360px;">
+                                            <div class="notif-header d-flex justify-content-between align-items-center">
+                                                <span><i class="fas fa-bell" style="color:var(--red-hot);margin-right:.4rem;"></i> Notifications</span>
+                                                {% if navUnreadCount|default(0) > 0 %}
+                                                <span style="font-size:.55rem;color:var(--red-hot);">{{ navUnreadCount }} unread</span>
+                                                {% endif %}
                                             </div>
-                                            <div style="max-height: 420px; overflow:auto; background: rgba(15,15,20,0.98);">
+                                            <div class="notif-body">
                                                 {% if navNotifications|default([])|length == 0 %}
-                                                    <div class="p-3 text-muted">No notifications ✅</div>
+                                                    <div class="p-3" style="font-family:var(--font-mono);font-size:.68rem;color:var(--muted);text-align:center;">
+                                                        <i class="fas fa-check-circle" style="color:var(--green);display:block;font-size:1.5rem;margin-bottom:.5rem;"></i>
+                                                        All caught up
+                                                    </div>
                                                 {% else %}
                                                     {% for notif in navNotifications %}
-                                                        <div class="px-3 py-2"
-                                                             style="border-bottom: 1px solid rgba(255,255,255,0.08); color:#fff; {{ notif.read ? '' : 'background: rgba(255,255,255,0.06);' }}">
-                                                            <div style="font-size: 14px;">
-                                                                <span class="me-2">{{ notif.type.getIcon() }}</span>
-                                                                <span class="{{ notif.read ? 'text-muted' : '' }}">{{ notif.message }}</span>
+                                                        <div class="notif-item {{ notif.read ? '' : 'notif-item-unread' }}">
+                                                            <div class="notif-msg {{ notif.read ? 'read' : '' }}">
+                                                                <span style="margin-right:.4rem;">{{ notif.type.getIcon() }}</span>
+                                                                {{ notif.message }}
                                                             </div>
-                                                            <div class="small text-muted mt-1">{{ notif.createdAt|date('d/m/Y H:i') }}</div>
+                                                            <div class="notif-date">{{ notif.createdAt|date('d/m/Y H:i') }}</div>
                                                             <div class="mt-2 d-flex gap-2">
                                                                 {% if notif.link %}
-                                                                    <a href="{{ notif.link }}" class="btn btn-sm btn-outline-light">View</a>
+                                                                    <a href="{{ notif.link }}" class="btn btn-sm" style="font-family:var(--font-hud);font-size:.55rem;letter-spacing:.08em;background:rgba(232,55,42,.15);border:1px solid rgba(232,55,42,.35);color:var(--red-hot);border-radius:5px;">View</a>
                                                                 {% endif %}
                                                                 {% if not notif.read %}
                                                                     <form method="post" action="{{ path('user_notification_read', { id: notif.id }) }}">
                                                                         <input type="hidden" name="_token" value="{{ csrf_token('notification_read_' ~ notif.id) }}">
-                                                                        <button type="submit" class="btn btn-sm btn-outline-secondary">Mark read</button>
+                                                                        <button type="submit" class="btn btn-sm" style="font-family:var(--font-hud);font-size:.55rem;letter-spacing:.08em;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--muted);border-radius:5px;">Mark read</button>
                                                                     </form>
                                                                 {% endif %}
                                                             </div>
@@ -136,49 +537,26 @@
                                             </div>
                                         </div>
                                     </li>
-
-
-
-                                    {# 👤 User dropdown #}
                                     <li class="nav-item dropdown">
                                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
-                                            role="button" data-toggle="dropdown" aria-haspopup="true"
-                                            aria-expanded="false">
-                                            <i class="fas fa-user-circle"></i> {{ app.user.username }}
+                                            role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-user-circle" style="color:var(--red-hot);margin-right:.3rem;"></i>
+                                            {{ app.user.username }}
                                         </a>
                                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                           
-                                            <a class="dropdown-item" href="{{ path('user_profile') }}">
-                                                <i class="fas fa-user"></i> My Profile
-                                            </a>
-
+                                            <a class="dropdown-item" href="{{ path('user_profile') }}"><i class="fas fa-user"></i> My Profile</a>
                                             <div class="dropdown-divider"></div>
-
-
-                                            <a class="dropdown-item" href="{{ path('app_2fa_settings') }}">
-                                                <i class="fas fa-shield-alt"></i> Two-Factor Authentication
-                                            </a>
-
+                                            <a class="dropdown-item" href="{{ path('app_2fa_settings') }}"><i class="fas fa-shield-alt"></i> Two-Factor Auth</a>
                                             <div class="dropdown-divider"></div>
-                                            
-                                            <a class="dropdown-item" href="{{ path('app_complaints_index') }}">
-                                                <i class="fas fa-headset"></i> Support
-                                            </a>
-
+                                            <a class="dropdown-item" href="{{ path('app_complaints_index') }}"><i class="fas fa-headset"></i> Support</a>
                                             {% if is_granted('ROLE_ADMIN') %}
                                                 <div class="dropdown-divider"></div>
-                                                <a class="dropdown-item admin-link" href="{{ path('admin_login') }}">
-                                                    <i class="fas fa-user-shield"></i> Administration
-                                                </a>
+                                                <a class="dropdown-item admin-link" href="{{ path('admin_login') }}"><i class="fas fa-user-shield"></i> Administration</a>
                                             {% endif %}
-
                                             <div class="dropdown-divider"></div>
-                                            <a class="dropdown-item" href="{{ path('app_logout') }}">
-                                                <i class="fas fa-sign-out-alt"></i> Logout
-                                            </a>
+                                            <a class="dropdown-item" href="{{ path('app_logout') }}" style="color:rgba(255,100,80,.7)!important;"><i class="fas fa-sign-out-alt"></i> Logout</a>
                                         </div>
                                     </li>
-
                                 {% else %}
                                     <li class="nav-item">
                                         <a class="nav-link" href="{{ path('app_login') }}">Login</a>
@@ -196,11 +574,13 @@
         </div>
     </header>
 
+    {# ── Flash messages ── #}
     {% for type in ['success', 'error', 'warning', 'info'] %}
         {% for message in app.flashes(type) %}
-            <div class="container mt-4">
+            <div class="container mt-3">
                 <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
-                    <i class="fas fa-{{ type == 'error' ? 'exclamation-triangle' : type == 'warning' ? 'exclamation-circle' : type == 'info' ? 'info-circle' : 'check-circle' }}"></i> {{ message }}
+                    <i class="fas fa-{{ type == 'error' ? 'exclamation-triangle' : type == 'warning' ? 'exclamation-circle' : type == 'info' ? 'info-circle' : 'check-circle' }}"></i>
+                    {{ message }}
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -211,18 +591,18 @@
 
     {% block body %}{% endblock %}
 
+    {# ══ FOOTER ══ #}
     <footer class="footer_part">
-        <div class="footer_top">
-            <div class="container">
-                <div class="row"></div>
-            </div>
-        </div>
+        <div class="footer_top"><div class="container"><div class="row"></div></div></div>
         <div class="copygight_text">
             <div class="container">
                 <div class="row align-items-center">
                     <div class="col-lg-8">
                         <div class="copyright_text">
-                            <p>Copyright &copy;<script>document.write(new Date().getFullYear());</script> EyeTwin eSport Platform - All Rights Reserved</p>
+                            <p>
+                                <span style="color:var(--red-hot);font-family:var(--font-hud);letter-spacing:.1em;">EYETWIN</span>
+                                &nbsp;·&nbsp; Copyright &copy;<script>document.write(new Date().getFullYear());</script> — All Rights Reserved
+                            </p>
                         </div>
                     </div>
                     <div class="col-lg-4">
@@ -241,39 +621,167 @@
     </footer>
 </div>
 
-<style>
-@keyframes navPulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-}
-</style>
-
 {% block javascripts %}
+{# ✅ FIX: jQuery/Bootstrap en PREMIER (dépendances) SANS defer #}
 <script src="{{ asset('assets/js/jquery-1.12.1.min.js') }}"></script>
 <script src="{{ asset('assets/js/popper.min.js') }}"></script>
 <script src="{{ asset('assets/js/bootstrap.min.js') }}"></script>
-<script src="{{ asset('assets/js/jquery.magnific-popup.js') }}"></script>
-<script src="{{ asset('assets/js/swiper.min.js') }}"></script>
-<script src="{{ asset('assets/js/masonry.pkgd.js') }}"></script>
-<script src="{{ asset('assets/js/owl.carousel.min.js') }}"></script>
-<script src="{{ asset('assets/js/jquery.nice-select.min.js') }}"></script>
-<script src="{{ asset('assets/js/slick.min.js') }}"></script>
-<script src="{{ asset('assets/js/jquery.counterup.min.js') }}"></script>
-<script src="{{ asset('assets/js/waypoints.min.js') }}"></script>
-<script src="{{ asset('assets/js/contact.js') }}"></script>
-<script src="{{ asset('assets/js/jquery.ajaxchimp.min.js') }}"></script>
-<script src="{{ asset('assets/js/jquery.form.js') }}"></script>
-<script src="{{ asset('assets/js/jquery.validate.min.js') }}"></script>
-<script src="{{ asset('assets/js/mail-script.js') }}"></script>
-<script src="{{ asset('assets/js/custom.js') }}"></script>
+
+{# ✅ FIX: Tous les autres scripts en defer #}
+<script src="{{ asset('assets/js/jquery.magnific-popup.js') }}" defer></script>
+<script src="{{ asset('assets/js/swiper.min.js') }}" defer></script>
+<script src="{{ asset('assets/js/masonry.pkgd.js') }}" defer></script>
+<script src="{{ asset('assets/js/owl.carousel.min.js') }}" defer></script>
+<script src="{{ asset('assets/js/jquery.nice-select.min.js') }}" defer></script>
+<script src="{{ asset('assets/js/slick.min.js') }}" defer></script>
+<script src="{{ asset('assets/js/jquery.counterup.min.js') }}" defer></script>
+<script src="{{ asset('assets/js/waypoints.min.js') }}" defer></script>
+<script src="{{ asset('assets/js/contact.js') }}" defer></script>
+<script src="{{ asset('assets/js/jquery.ajaxchimp.min.js') }}" defer></script>
+<script src="{{ asset('assets/js/jquery.form.js') }}" defer></script>
+<script src="{{ asset('assets/js/jquery.validate.min.js') }}" defer></script>
+<script src="{{ asset('assets/js/mail-script.js') }}" defer></script>
+<script src="{{ asset('assets/js/custom.js') }}" defer></script>
 {% endblock %}
 
 {% if app.user %}
-    <script>
-        window.MERCURE_HUB_URL = 'http://localhost:3000/.well-known/mercure';
-    </script>
-    <script src="{{ asset('assets/js/realtime-notifications.js') }}"></script>
+<script>window.MERCURE_HUB_URL = 'http://localhost:3000/.well-known/mercure';</script>
+<script src="{{ asset('assets/js/realtime-notifications.js') }}" defer></script>
 {% endif %}
 
+<script>
+(function () {
+    'use strict';
+
+    /* ── SVG SWORD CURSOR — OPTIMIZED ── */
+    const sw = document.getElementById('sword-cursor');
+    if (sw) { sw.style.left = '0px'; sw.style.top = '0px'; sw.style.willChange = 'transform'; }
+
+    let mouseX = -200, mouseY = -200, rafPending = false;
+
+    document.addEventListener('mousemove', e => {
+        mouseX = e.clientX; mouseY = e.clientY;
+        if (!rafPending) { rafPending = true; requestAnimationFrame(moveCursor); }
+    }, { passive: true });
+
+    function moveCursor() {
+        rafPending = false;
+        if (sw) sw.style.transform = `translate(${mouseX - 4}px, ${mouseY - 4}px) rotate(-45deg)`;
+    }
+
+    document.addEventListener('mouseover', e => { if (sw && e.target.closest('a,button,[role="button"],input,select,textarea,label')) sw.classList.add('sw-hover'); }, { passive: true });
+    document.addEventListener('mouseout',  e => { if (sw && e.target.closest('a,button,[role="button"],input,select,textarea,label')) sw.classList.remove('sw-hover'); }, { passive: true });
+    document.addEventListener('mousedown', () => sw && sw.classList.add('sw-click'));
+    document.addEventListener('mouseup',   () => sw && sw.classList.remove('sw-click'));
+
+    const SPARK_COLORS = ['#ff4d3d','#ff6b2b','#ff2060','#fff','#f6d860'];
+    document.addEventListener('click', e => {
+        for (let i = 0; i < 6; i++) {
+            const sp = document.createElement('div');
+            sp.className = 'spark';
+            const angle = (i / 6) * Math.PI * 2 + Math.random() * .5;
+            const dist  = 22 + Math.random() * 40;
+            const dur   = .28 + Math.random() * .22;
+            sp.style.cssText = `left:${e.clientX}px;top:${e.clientY}px;background:${SPARK_COLORS[i%SPARK_COLORS.length]};--sx:${Math.cos(angle)*dist}px;--sy:${Math.sin(angle)*dist}px;--dur:${dur}s;`;
+            document.body.appendChild(sp);
+            setTimeout(() => sp.remove(), dur * 1000 + 50);
+        }
+    });
+
+    /* ── SCROLL PROGRESS ── */
+    const sp = document.getElementById('scroll-progress');
+    window.addEventListener('scroll', () => {
+        const pct = (document.documentElement.scrollTop / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+        if (sp) sp.style.width = pct + '%';
+    }, { passive: true });
+
+    /* ── BG PARTICLE CANVAS ── */
+    const canvas = document.getElementById('bgCanvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d', { alpha: true });
+        ctx.imageSmoothingEnabled = false;
+        let W, H, particles = [];
+
+        function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+        resize();
+        window.addEventListener('resize', () => { resize(); spawnAll(); }, { passive: true });
+
+        const COLORS = ['rgba(232,55,42,','rgba(255,107,43,','rgba(255,32,96,','rgba(0,229,255,'];
+        function mkParticle() {
+            return { x:Math.random()*W, y:H+Math.random()*40, vx:(Math.random()-.5)*.35, vy:-(0.18+Math.random()*.55), r:.7+Math.random()*1.1, alpha:0, maxAlpha:.12+Math.random()*.18, phase:Math.random()*Math.PI*2, color:COLORS[Math.floor(Math.random()*COLORS.length)], life:0, maxLife:150+Math.random()*180 };
+        }
+        function spawnAll() { particles = Array.from({ length: 30 }, mkParticle); }
+        spawnAll();
+
+        let lastFrame = 0;
+        (function tick(ts) {
+            if (ts - lastFrame < 33) { requestAnimationFrame(tick); return; }
+            lastFrame = ts;
+            ctx.clearRect(0, 0, W, H);
+            ctx.shadowBlur = 0;
+            particles.forEach((p, i) => {
+                p.life++; p.x += p.vx + Math.sin(p.phase + p.life * .018) * .18; p.y += p.vy;
+                const t = p.life / p.maxLife;
+                p.alpha = t < .15 ? (t/.15)*p.maxAlpha : t > .75 ? ((1-t)/.25)*p.maxAlpha : p.maxAlpha;
+                if (p.life >= p.maxLife || p.y < -10) particles[i] = mkParticle();
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = p.color + p.alpha + ')'; ctx.fill();
+            });
+            requestAnimationFrame(tick);
+        })(0);
+    }
+
+    /* ── RIPPLE on nav links ── */
+    document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
+        link.style.position = 'relative'; link.style.overflow = 'hidden';
+        link.addEventListener('click', function(e) {
+            const rect = this.getBoundingClientRect();
+            const r = document.createElement('span');
+            r.className = 'ripple';
+            r.style.cssText = `width:40px;height:40px;left:${e.clientX-rect.left-20}px;top:${e.clientY-rect.top-20}px;`;
+            this.appendChild(r);
+            setTimeout(() => r.remove(), 500);
+        });
+    });
+
+    /* ── SCROLL REVEAL ── */
+    if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) { e.target.style.opacity='1'; e.target.style.transform='none'; io.unobserve(e.target); }
+            });
+        }, { threshold: .07 });
+        document.querySelectorAll('section > .container > .row > [class*="col"]').forEach(el => {
+            el.style.opacity = '0'; el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity .55s ease, transform .55s ease';
+            io.observe(el);
+        });
+    }
+
+    /* ── NAVBAR scroll shrink ── */
+    const navbar = document.querySelector('.main_menu');
+    window.addEventListener('scroll', () => {
+        if (navbar) {
+            navbar.style.background = window.scrollY > 60 ? 'rgba(5,5,12,0.95)' : '';
+            navbar.style.padding    = window.scrollY > 60 ? '0' : '';
+        }
+    }, { passive: true });
+
+    /* ── GLITCH logo ── */
+    const logo = document.querySelector('.navbar-brand img');
+    if (logo) {
+        setInterval(() => {
+            if (Math.random() > .88) {
+                logo.animate([
+                    { filter:'none', transform:'none' },
+                    { filter:'hue-rotate(180deg) brightness(1.5)', transform:'skewX(-4deg) translateX(2px)' },
+                    { filter:'hue-rotate(-90deg)', transform:'skewX(3deg) translateX(-2px)' },
+                    { filter:'none', transform:'none' },
+                ], { duration: 140, easing: 'steps(3)' });
+            }
+        }, 4000);
+    }
+})();
+</script>
 </body>
 </html>
