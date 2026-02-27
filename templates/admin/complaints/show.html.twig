@@ -12,6 +12,7 @@
 
 <div class="row">
     <div class="col-lg-8">
+
         <!-- Complaint Details Card -->
         <div class="table-card mb-4">
             <div class="d-flex justify-content-between align-items-start mb-4">
@@ -45,8 +46,8 @@
             {% if complaint.attachmentPath %}
             <div class="complaint-section">
                 <h5><i class="bi bi-paperclip"></i> Attachment</h5>
-                <a href="{{ asset('uploads/complaints/' ~ complaint.attachmentPath) }}" 
-                   class="btn btn-sm btn-outline-light" 
+                <a href="{{ asset('uploads/complaints/' ~ complaint.attachmentPath) }}"
+                   class="btn btn-sm btn-outline-light"
                    target="_blank">
                     <i class="bi bi-download"></i> Download Attachment
                 </a>
@@ -78,15 +79,13 @@
             <h5 class="mb-3"><i class="bi bi-reply"></i> Add Response</h5>
             <form method="post" action="{{ path('admin_complaints_respond', {id: complaint.id}) }}">
                 <input type="hidden" name="_token" value="{{ csrf_token('respond-' ~ complaint.id) }}">
-                
                 <div class="mb-3">
-                    <textarea class="form-control" 
-                              name="response" 
-                              rows="4" 
+                    <textarea class="form-control"
+                              name="response"
+                              rows="4"
                               placeholder="Type your response to the user..."
                               required></textarea>
                 </div>
-                
                 <button type="submit" class="btn btn-primary">
                     <i class="bi bi-send"></i> Send Response
                 </button>
@@ -98,16 +97,14 @@
             <h5 class="mb-3"><i class="bi bi-check-circle"></i> Resolve Complaint</h5>
             <form method="post" action="{{ path('admin_complaints_resolve', {id: complaint.id}) }}">
                 <input type="hidden" name="_token" value="{{ csrf_token('resolve-' ~ complaint.id) }}">
-                
                 <div class="mb-3">
                     <label class="form-label">Resolution Notes</label>
-                    <textarea class="form-control" 
-                              name="resolution_notes" 
-                              rows="3" 
+                    <textarea class="form-control"
+                              name="resolution_notes"
+                              rows="3"
                               placeholder="Describe how this complaint was resolved..."
                               required></textarea>
                 </div>
-                
                 <button type="submit" class="btn" style="background: linear-gradient(135deg, #1a6fc4, #0a4a8f); color: #fff; border: none; box-shadow: 0 4px 15px rgba(26,111,196,0.4);">
                     <i class="bi bi-check-circle"></i> Mark as Resolved
                 </button>
@@ -117,14 +114,15 @@
     </div>
 
     <div class="col-lg-4">
+
         <!-- Info Sidebar -->
         <div class="table-card mb-4">
             <h5 class="mb-3"><i class="bi bi-info-circle"></i> Information</h5>
-            
+
             <div class="info-item">
                 <strong>Submitted By:</strong>
                 <div>
-                    <a href="{{ path('admin_users_show', {id: complaint.submittedBy.id}) }}" 
+                    <a href="{{ path('admin_users_show', {id: complaint.submittedBy.id}) }}"
                        class="text-decoration-none">
                         <i class="bi bi-person"></i> {{ complaint.submittedBy.username }}
                     </a>
@@ -165,10 +163,64 @@
             {% endif %}
         </div>
 
+        <!-- ── Sentiment Analysis Card (SentimentServiceComplaints) ── -->
+        <div class="table-card mb-4">
+            <h5 class="mb-3">
+                <i class="bi bi-emoji-expressionless me-2"></i>Sentiment Analysis
+            </h5>
+
+            {% if complaint.hasSentiment() %}
+                {% set score_pct = (complaint.sentimentScore * 100)|round %}
+
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <span style="font-size:2.4rem; line-height:1;">{{ complaint.sentimentEmoji }}</span>
+                    <div>
+                        <span class="badge bg-{{ complaint.sentimentBadgeClass }} fs-6">
+                            {{ complaint.sentimentTextLabel }}
+                        </span>
+                        <div class="text-muted small mt-1">
+                            {% if complaint.sentimentSource == 'api' %}
+                                <i class="bi bi-cloud-check text-success me-1"></i>AI model (HuggingFace)
+                            {% else %}
+                                <i class="bi bi-cpu text-warning me-1"></i>Keyword analysis
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between mb-1">
+                        <small class="text-muted">Confidence</small>
+                        <small class="text-muted fw-bold">{{ score_pct }}%</small>
+                    </div>
+                    <div class="progress" style="height:6px; background:rgba(255,255,255,.08); border-radius:3px;">
+                        <div class="progress-bar bg-{{ complaint.sentimentBadgeClass }}"
+                             role="progressbar"
+                             style="width: {{ score_pct }}%; transition: width 1s ease;">
+                        </div>
+                    </div>
+                </div>
+
+                {% if complaint.sentimentPrioritySuggestion %}
+                <div class="alert alert-warning py-2 px-3 mt-3 mb-0" style="font-size:.8rem;">
+                    <i class="bi bi-lightning-fill me-1"></i>
+                    Sentiment suggested <strong>{{ complaint.sentimentPrioritySuggestion }}</strong>
+                    priority — applied automatically at submission.
+                </div>
+                {% endif %}
+
+            {% else %}
+                <p class="text-muted small mb-0">
+                    <i class="bi bi-dash-circle me-1"></i>
+                    No sentiment data available.
+                </p>
+            {% endif %}
+        </div>
+
         <!-- Actions -->
         <div class="table-card mb-4">
             <h5 class="mb-3"><i class="bi bi-gear"></i> Actions</h5>
-            
+
             <!-- Assign -->
             <form method="post" action="{{ path('admin_complaints_assign', {id: complaint.id}) }}" class="mb-3">
                 <input type="hidden" name="_token" value="{{ csrf_token('assign-complaint-' ~ complaint.id) }}">
@@ -179,7 +231,7 @@
                         <option value="unassign">Unassign</option>
                         {% if admins is defined and admins is not empty %}
                             {% for admin in admins %}
-                            <option value="{{ admin.id }}" 
+                            <option value="{{ admin.id }}"
                                     {% if complaint.assignedTo and complaint.assignedTo.id == admin.id %}selected{% endif %}>
                                 {{ admin.username }}
                                 {% if admin.email %}({{ admin.email }}){% endif %}
@@ -193,8 +245,8 @@
                 </div>
                 {% if admins is not defined or admins is empty %}
                     <small class="text-warning d-block mt-1">
-                        <i class="bi bi-exclamation-triangle"></i> 
-                        No administrators available. Please create admin users first.
+                        <i class="bi bi-exclamation-triangle"></i>
+                        No administrators available.
                     </small>
                 {% endif %}
             </form>
@@ -205,11 +257,11 @@
                 <label class="form-label">Change Status:</label>
                 <div class="input-group">
                     <select class="form-select" name="status" required>
-                        <option value="PENDING" {% if complaint.status.value == 'PENDING' %}selected{% endif %}>Pending</option>
+                        <option value="PENDING"     {% if complaint.status.value == 'PENDING' %}selected{% endif %}>Pending</option>
                         <option value="IN_PROGRESS" {% if complaint.status.value == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
-                        <option value="RESOLVED" {% if complaint.status.value == 'RESOLVED' %}selected{% endif %}>Resolved</option>
-                        <option value="CLOSED" {% if complaint.status.value == 'CLOSED' %}selected{% endif %}>Closed</option>
-                        <option value="REJECTED" {% if complaint.status.value == 'REJECTED' %}selected{% endif %}>Rejected</option>
+                        <option value="RESOLVED"    {% if complaint.status.value == 'RESOLVED' %}selected{% endif %}>Resolved</option>
+                        <option value="CLOSED"      {% if complaint.status.value == 'CLOSED' %}selected{% endif %}>Closed</option>
+                        <option value="REJECTED"    {% if complaint.status.value == 'REJECTED' %}selected{% endif %}>Rejected</option>
                     </select>
                     <button type="submit" class="btn btn-primary">Update</button>
                 </div>
@@ -221,9 +273,9 @@
                 <label class="form-label">Change Priority:</label>
                 <div class="input-group">
                     <select class="form-select" name="priority" required>
-                        <option value="LOW" {% if complaint.priority.value == 'LOW' %}selected{% endif %}>Low</option>
+                        <option value="LOW"    {% if complaint.priority.value == 'LOW' %}selected{% endif %}>Low</option>
                         <option value="MEDIUM" {% if complaint.priority.value == 'MEDIUM' %}selected{% endif %}>Medium</option>
-                        <option value="HIGH" {% if complaint.priority.value == 'HIGH' %}selected{% endif %}>High</option>
+                        <option value="HIGH"   {% if complaint.priority.value == 'HIGH' %}selected{% endif %}>High</option>
                         <option value="URGENT" {% if complaint.priority.value == 'URGENT' %}selected{% endif %}>Urgent</option>
                     </select>
                     <button type="submit" class="btn btn-primary">Update</button>
@@ -233,7 +285,7 @@
             <hr>
 
             <!-- Delete -->
-            <form method="post" action="{{ path('admin_complaints_delete', {id: complaint.id}) }}" 
+            <form method="post" action="{{ path('admin_complaints_delete', {id: complaint.id}) }}"
                   onsubmit="return confirm('Are you sure you want to delete this complaint? This action cannot be undone.');">
                 <input type="hidden" name="_token" value="{{ csrf_token('delete-' ~ complaint.id) }}">
                 <button type="submit" class="btn btn-danger w-100">
@@ -241,6 +293,7 @@
                 </button>
             </form>
         </div>
+
     </div>
 </div>
 
@@ -250,26 +303,17 @@
     padding-bottom: 2rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
-
-.complaint-section:last-child {
-    border-bottom: none;
-}
-
+.complaint-section:last-child { border-bottom: none; }
 .complaint-section h5 {
     margin-bottom: 1rem;
     color: rgba(255, 255, 255, 0.9);
     font-weight: 600;
 }
-
 .info-item {
     padding: 0.75rem 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
-
-.info-item:last-child {
-    border-bottom: none;
-}
-
+.info-item:last-child { border-bottom: none; }
 .info-item strong {
     display: block;
     color: rgba(255, 255, 255, 0.7);
