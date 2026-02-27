@@ -1,0 +1,150 @@
+{# templates/community/message/_row.html.twig #}
+{% set isMe = isMe|default(false) %}
+{% set showActions = showActions|default(false) %}
+
+<style>
+    .file-pill{
+        display:inline-block;
+        padding:6px 10px;
+        border-radius:12px;
+        background:rgba(255,255,255,0.08);
+        color:#fff;
+        text-decoration:none;
+        margin-right:6px;
+        margin-top:6px;
+        font-size:12px;
+    }
+    .chat-image{
+        max-width: 260px;
+        max-height: 180px;
+        border-radius: 12px;
+        display: block;
+        margin-top: 6px;
+        border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .msg-attach-preview{
+        margin-top: 6px;
+    }
+
+    .file-caption{
+        font-size: 12px;
+        margin-top: 4px;
+        opacity: .9;
+    }
+</style>
+
+<div class="msg-row {{ isMe ? 'me' : 'other' }}" data-msg-id="{{ m.id }}">
+    {% if not isMe %}
+        <div class="avatar" title="{{ m.senderName }}">
+            {{ m.senderName|slice(0,1)|upper }}
+        </div>
+    {% endif %}
+
+
+    <div class="bubble">
+        <div class="msg-top">
+            <div class="d-flex align-items-center gap-2" style="gap:10px;">
+                <div class="msg-name">{{ m.senderName }}</div>
+                <div class="msg-time">{{ m.sentAt|date('d/m/Y H:i') }}</div>
+            </div>
+
+            {% if showActions and not m.isDeleted %}
+                <div class="msg-actions dropdown">
+                    <button class="dots-btn" type="button" data-toggle="dropdown">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+
+                    <div class="dropdown-menu dropdown-menu-right dots-menu">
+                        <a class="dots-item"
+                           href="{{ path('community_channels_show', {id: channel.id, edit: m.id}) }}">
+                            <i class="fas fa-pen"></i> Edit
+                        </a>
+
+                        <form method="post" action="{{ path('community_message_delete', {id: m.id}) }}" style="margin:0;">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete_message_' ~ m.id) }}">
+                            <button class="dots-item dots-danger" type="submit">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        {# ✅ INLINE EDIT MODE #}
+        {% if editId is defined and editForm is not null and editId == m.id %}
+            <div class="edit-panel">
+                {{ form_start(editForm) }}
+                {{ form_widget(editForm.content, {'attr': {'rows': 3}}) }}
+
+                <div class="edit-actions">
+                    <button type="submit" class="btn-send">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+
+                    <a href="{{ path('community_channels_show', {id: channel.id}) }}" class="btn btn-soft">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+                {{ form_end(editForm) }}
+            </div>
+
+        {% else %}
+            {# ✅ NORMAL VIEW MODE #}
+            {% if m.isDeleted %}
+                <div class="msg-deleted">this message is deleted.</div>
+            {% else %}
+                {% if m.content is not empty %}
+                    <div class="msg-text">{{ m.content }}</div>
+                {% endif %}
+
+                {% if m.attachments is defined and m.attachments|length > 0 %}
+                    <div class="msg-files mt-2">
+{#                        {% for a in m.attachments %}#}
+{#                            <a class="file-pill"#}
+{#                               href="{{ path('community_attachment_download', {id: a.id}) }}"#}
+{#                               target="_blank" rel="noopener">#}
+{#                                <i class="fas fa-paperclip"></i>#}
+{#                                {{ a.originalName }}#}
+{#                                <span style="opacity:.7;">({{ (a.size / 1024)|round }} KB)</span>#}
+{#                            </a>#}
+{#                        {% endfor %}#}
+                        {% for a in m.attachments %}
+                            {% set fileUrl = a.url ? a.url : path('community_attachment_download', {id: a.id}) %}
+                            {% set mime = a.mimeType|default('') %}
+
+                            {% if mime starts with 'image/' %}
+                                <div class="msg-attach-preview">
+                                    <a href="{{ fileUrl }}" target="_blank" rel="noopener">
+                                        <img
+                                                src="{{ fileUrl }}"
+                                                alt="{{ a.originalName }}"
+                                                class="chat-image"
+                                        >
+                                    </a>
+                                    <div class="file-caption">{{ a.originalName }} <span style="opacity:.7;">({{ (a.size / 1024)|round }} KB)</span></div>
+                                </div>
+
+                            {% else %}
+                                <a class="file-pill"
+                                   href="{{ fileUrl }}"
+                                   target="_blank" rel="noopener">
+                                    <i class="fas fa-paperclip"></i>
+                                    {{ a.originalName }}
+                                    <span style="opacity:.7;">({{ (a.size / 1024)|round }} KB)</span>
+                                </a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    </div>
+
+    {% if isMe %}
+        <div class="avatar" title="You" style="background: rgba(255,45,85,0.18); border-color: rgba(255,45,85,0.20);">
+            <i class="fas fa-user"></i>
+        </div>
+    {% endif %}
+</div>

@@ -1500,6 +1500,17 @@ body::after {
 .badge.bg-warning::before {
     display: none !important;
     content: none !important;
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 12px;
+    height: 12px;
+    background: #ffc107;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 193, 7, 0.3);
+    animation: pulse 2s infinite;
 }
 
 .badge.bg-danger {

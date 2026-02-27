@@ -39,11 +39,15 @@ enum NotificationType: string
 
     // System
     case SYSTEM = 'SYSTEM';
+    case CHANNEL_ACCESS_REQUEST = 'CHANNEL_ACCESS_REQUEST';
+    case CHANNEL_ACCESS_APPROVED = 'CHANNEL_ACCESS_APPROVED';
+    case CHANNEL_ACCESS_REJECTED = 'CHANNEL_ACCESS_REJECTED';
 
     public function getLabel(): string
     {
         return match($this) {
             self::TEAM_INVITATION => 'Invitation d\'équipe',
+            self::TEAM_ACCEPTED => 'Invitation acceptée',
             self::TEAM_REQUEST => 'Demande de rejoindre une équipe',
             self::TEAM_ACCEPTED => 'Demande acceptée',
             self::TEAM_REJECTED => 'Demande refusée',
@@ -69,12 +73,16 @@ enum NotificationType: string
 
             self::ACCOUNT_WARNING => 'Avertissement',
             self::SYSTEM => 'Système',
+            self::CHANNEL_ACCESS_REQUEST => 'Channel access request',
+            self::CHANNEL_ACCESS_APPROVED => 'Access to approved channel',
+            self::CHANNEL_ACCESS_REJECTED => 'Access to rejected channel',
         };
     }
 
     public function getIcon(): string
     {
         return match($this) {
+            self::TEAM_INVITATION => '📨',
             self::TEAM_INVITATION => '👥',
             self::TEAM_REQUEST => '📩',
             self::TEAM_ACCEPTED => '✅',
@@ -101,6 +109,9 @@ enum NotificationType: string
 
             self::ACCOUNT_WARNING => '⚠️',
             self::SYSTEM => 'ℹ️',
+            self::CHANNEL_ACCESS_REQUEST => '🔒',
+            self::CHANNEL_ACCESS_APPROVED => '✅',
+            self::CHANNEL_ACCESS_REJECTED => '❌',
         };
     }
 

@@ -22,7 +22,8 @@ test_twilio.php
 #/public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
-.env 
+/var/uploads/messages/
+.env
 node_modules
 
 ###> symfony/webpack-encore-bundle ###
