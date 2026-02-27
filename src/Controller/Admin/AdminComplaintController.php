@@ -281,7 +281,9 @@ class AdminComplaintController extends AbstractController
 
         // Auto-assign to current admin if not assigned
         if (!$complaint->getAssignedTo()) {
-            $complaint->setAssignedTo($this->getUser());
+            /** @var \App\Entity\User $user */
+$user = $this->getUser();
+$complaint->setAssignedTo($user);
         }
 
         // Change status to IN_PROGRESS if PENDING

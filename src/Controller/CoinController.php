@@ -19,12 +19,11 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 #[Route('/coins')]
 class CoinController extends AbstractController
 {
-    // Coin packages: coins => price in EUR cents
     private const COIN_PACKAGES = [
-        100  => ['coins' => 100,  'price' => 199,  'label' => 'Starter Pack',   'popular' => false],
-        300  => ['coins' => 300,  'price' => 499,  'label' => 'Popular Pack',   'popular' => true],
-        700  => ['coins' => 700,  'price' => 999,  'label' => 'Pro Pack',        'popular' => false],
-        1500 => ['coins' => 1500, 'price' => 1799, 'label' => 'Elite Pack',      'popular' => false],
+        100  => ['coins' => 100,  'price' => 199,  'label' => 'Starter Pack', 'popular' => false],
+        300  => ['coins' => 300,  'price' => 499,  'label' => 'Popular Pack', 'popular' => true],
+        700  => ['coins' => 700,  'price' => 999,  'label' => 'Pro Pack',     'popular' => false],
+        1500 => ['coins' => 1500, 'price' => 1799, 'label' => 'Elite Pack',   'popular' => false],
     ];
 
     public function __construct(
@@ -42,7 +41,7 @@ class CoinController extends AbstractController
 
         return $this->render('coins/index.html.twig', [
             'packages' => self::COIN_PACKAGES,
-            'user' => $user,
+            'user'     => $user,
         ]);
     }
 
@@ -66,30 +65,29 @@ class CoinController extends AbstractController
 
         Stripe::setApiKey($this->stripeSecretKey);
 
+        // ✅ Fix PHPStan : metadata doit être array<string, string>
+        // On convertit les valeurs entières en string
         $session = Session::create([
             'payment_method_types' => ['card'],
-            'line_items' => [[
+            'line_items'           => [[
                 'price_data' => [
-                    'currency' => 'eur',
+                    'currency'     => 'eur',
                     'product_data' => [
-                        'name' => 'EyeTwin Coins — ' . $package['label'],
+                        'name'        => 'EyeTwin Coins — ' . $package['label'],
                         'description' => $package['coins'] . ' EyeTwin Coins for live stream access',
                     ],
-                    'unit_amount' => $package['price'],
+                    'unit_amount'  => $package['price'],
                 ],
-                'quantity' => 1,
+                'quantity'   => 1,
             ]],
-            'mode' => 'payment',
+            'mode'        => 'payment',
             'success_url' => $this->generateUrl('coins_success', ['coins' => $coins], UrlGeneratorInterface::ABSOLUTE_URL) . '?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => $this->generateUrl('coins_index', [], UrlGeneratorInterface::ABSOLUTE_URL),
-            'metadata' => [
-                'user_id' => $user->getId(),
-                'coins_amount' => $coins,
+            'cancel_url'  => $this->generateUrl('coins_index', [], UrlGeneratorInterface::ABSOLUTE_URL),
+            'metadata'    => [
+                'user_id'      => (string) $user->getId(),
+                'coins_amount' => (string) $coins,
             ],
         ]);
-
-        // Save pending purchase
-        // We'll confirm in webhook, but also in success route as fallback
 
         return $this->redirect($session->url);
     }
@@ -108,7 +106,6 @@ class CoinController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        // Check if already processed
         $existing = $em->getRepository(CoinPurchase::class)->findOneBy(['stripeSessionId' => $sessionId]);
         if ($existing && $existing->getStatus() === 'completed') {
             $this->addFlash('info', 'This purchase has already been processed.');
@@ -149,7 +146,7 @@ class CoinController extends AbstractController
     #[Route('/webhook', name: 'coins_webhook', methods: ['POST'])]
     public function webhook(Request $request, EntityManagerInterface $em): Response
     {
-        $payload = $request->getContent();
+        $payload   = $request->getContent();
         $sigHeader = $request->headers->get('Stripe-Signature');
 
         Stripe::setApiKey($this->stripeSecretKey);
@@ -161,8 +158,8 @@ class CoinController extends AbstractController
         }
 
         if ($event->type === 'checkout.session.completed') {
-            $session = $event->data->object;
-            $userId = $session->metadata->user_id ?? null;
+            $session     = $event->data->object;
+            $userId      = $session->metadata->user_id ?? null;
             $coinsAmount = (int)($session->metadata->coins_amount ?? 0);
 
             if ($userId && $coinsAmount && isset(self::COIN_PACKAGES[$coinsAmount])) {
