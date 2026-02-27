@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\User;
+use App\Entity\AccountStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -13,51 +14,117 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, User::class);
     }
 
+    // ══════════════════════════════════════════════════════════════
+    //  STATS GLOBALES — source unique de vérité
+    //  On charge tous les users UNE SEULE fois et on calcule tout
+    //  en PHP pour éviter tout problème de nom de colonne Doctrine.
+    // ══════════════════════════════════════════════════════════════
+
     /**
-     * Find all users with ROLE_ADMIN or ROLE_SUPER_ADMIN
-     * 
-     * IMPORTANT: Cannot use SQL LIKE because SUPER_ADMIN doesn't contain "ADMIN" string
-     * Must load all users and filter in PHP to respect role hierarchy
-     * 
+     * Retourne toutes les statistiques globales en un seul appel.
+     * Utilisé par le controller (rendu initial) et la route AJAX /stats.
+     */
+    public function getGlobalStats(): array
+    {
+        $allUsers = $this->findAll();
+
+        $total       = count($allUsers);
+        $active      = 0;
+        $suspended   = 0;
+        $banned      = 0;
+        $coaches     = 0;
+        $admins      = 0;  // ROLE_ADMIN uniquement (sans ROLE_SUPER_ADMIN)
+        $superAdmins = 0;
+
+        foreach ($allUsers as $user) {
+            // ── Status ──────────────────────────────────────────
+            $status = $user->getAccountStatus();
+            if ($status === AccountStatus::ACTIVE)    $active++;
+            if ($status === AccountStatus::SUSPENDED) $suspended++;
+            if ($status === AccountStatus::BANNED)    $banned++;
+
+            // ── Rôles ────────────────────────────────────────────
+            $roles = $user->getRoles(); // retourne toujours au moins ['ROLE_USER']
+
+            if (in_array('ROLE_SUPER_ADMIN', $roles, true)) {
+                $superAdmins++;
+                // Un super-admin n'est PAS compté dans $admins
+            } elseif (in_array('ROLE_ADMIN', $roles, true)) {
+                $admins++;
+            }
+
+            if (in_array('ROLE_COACH', $roles, true)) {
+                $coaches++;
+            }
+        }
+
+        return [
+            'total'       => $total,
+            'active'      => $active,
+            'inactive'    => $total - $active,
+            'suspended'   => $suspended,
+            'banned'      => $banned,
+            'coaches'     => $coaches,
+            'admins'      => $admins,
+            'superAdmins' => $superAdmins,
+            'activeRate'  => $total > 0 ? (int) round(($active / $total) * 100) : 0,
+        ];
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  FIND ADMINS
+    // ══════════════════════════════════════════════════════════════
+
+    /**
+     * Retourne tous les users ROLE_ADMIN ou ROLE_SUPER_ADMIN,
+     * triés par username.
+     *
      * @return User[]
      */
     public function findAdmins(): array
     {
-        // Get all users and filter by role in PHP
-        // This is the ONLY reliable way to respect Symfony's role hierarchy
-        $allUsers = $this->findAll();
         $admins = [];
-        
-        foreach ($allUsers as $user) {
+
+        foreach ($this->findAll() as $user) {
             $roles = $user->getRoles();
-            // Check if user has ROLE_ADMIN or ROLE_SUPER_ADMIN
             if (in_array('ROLE_ADMIN', $roles, true) || in_array('ROLE_SUPER_ADMIN', $roles, true)) {
                 $admins[] = $user;
             }
         }
-        
-        // Sort by username
-        usort($admins, function($a, $b) {
-            return strcmp($a->getUsername(), $b->getUsername());
-        });
-        
+
+        usort($admins, fn($a, $b) => strcmp($a->getUsername(), $b->getUsername()));
+
         return $admins;
     }
 
+    // ══════════════════════════════════════════════════════════════
+    //  MÉTHODES UTILITAIRES
+    // ══════════════════════════════════════════════════════════════
+
     /**
-     * Find users by role
-     * 
+     * Retourne les users ayant exactement ce rôle (PHP-side).
+     *
      * @return User[]
      */
     public function findUsersByRole(string $role): array
     {
-        $allUsers = $this->findAll();
-        return array_filter($allUsers, fn(User $user) => in_array($role, $user->getRoles(), true));
+        return array_values(array_filter(
+            $this->findAll(),
+            fn(User $user) => in_array($role, $user->getRoles(), true)
+        ));
     }
 
     /**
-     * Search users by username or email (for team invitations)
-     * 
+     * Compte les users ayant exactement ce rôle.
+     */
+    public function countByRole(string $role): int
+    {
+        return count($this->findUsersByRole($role));
+    }
+
+    /**
+     * Recherche pour les invitations d'équipe.
+     *
      * @return User[]
      */
     public function searchForInvitation(string $query): array
@@ -66,30 +133,26 @@ class UserRepository extends ServiceEntityRepository
             ->where('u.username LIKE :query OR u.email LIKE :query')
             ->andWhere('u.accountStatus = :status')
             ->setParameter('query', '%' . $query . '%')
-            ->setParameter('status', \App\Entity\AccountStatus::ACTIVE)
+            ->setParameter('status', AccountStatus::ACTIVE)
             ->setMaxResults(10)
             ->getQuery()
             ->getResult();
     }
 
     /**
-     * Find active users
-     * 
      * @return User[]
      */
     public function findActiveUsers(): array
     {
         return $this->createQueryBuilder('u')
             ->where('u.accountStatus = :status')
-            ->setParameter('status', \App\Entity\AccountStatus::ACTIVE)
+            ->setParameter('status', AccountStatus::ACTIVE)
             ->orderBy('u.username', 'ASC')
             ->getQuery()
             ->getResult();
     }
 
     /**
-     * Search users by username or email
-     * 
      * @return User[]
      */
     public function searchUsers(string $search): array
@@ -102,68 +165,25 @@ class UserRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    /**
-     * Count total users
-     */
     public function countTotal(): int
     {
-        return $this->createQueryBuilder('u')
+        return (int) $this->createQueryBuilder('u')
             ->select('COUNT(u.id)')
             ->getQuery()
             ->getSingleScalarResult();
     }
 
     /**
-     * Count active users
-     */
-    public function countActive(): int
-    {
-        return $this->createQueryBuilder('u')
-            ->select('COUNT(u.id)')
-            ->where('u.accountStatus = :status')
-            ->setParameter('status', \App\Entity\AccountStatus::ACTIVE)
-            ->getQuery()
-            ->getSingleScalarResult();
-    }
-
-    /**
-     * Count users by role
-     */
-    public function countByRole(string $role): int
-    {
-        return count($this->findUsersByRole($role));
-    }
-
-    /**
-     * Find recent users (registered in last X days)
-     * 
      * @return User[]
      */
     public function findRecent(int $days = 30): array
     {
         $date = new \DateTime("-{$days} days");
-        
+
         return $this->createQueryBuilder('u')
             ->where('u.createdAt >= :date')
             ->setParameter('date', $date)
             ->orderBy('u.createdAt', 'DESC')
-            ->getQuery()
-            ->getResult();
-    }
-
-    /**
-     * Alternative method: Find all admins using SQL OR condition
-     * Use this if performance is an issue
-     * 
-     * @return User[]
-     */
-    public function findAdminsViaSQL(): array
-    {
-        return $this->createQueryBuilder('u')
-            ->where('u.rolesJson LIKE :admin OR u.rolesJson LIKE :superadmin')
-            ->setParameter('admin', '%ROLE_ADMIN%')
-            ->setParameter('superadmin', '%ROLE_SUPER_ADMIN%')
-            ->orderBy('u.username', 'ASC')
             ->getQuery()
             ->getResult();
     }

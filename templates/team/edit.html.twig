@@ -3,75 +3,598 @@
 {% block title %}Edit {{ team.name }}{% endblock %}
 
 {% block body %}
-<section class="breadcrumb_part">
+
+{# ── HERO ── #}
+<div class="edit-hero">
+    <canvas id="heroCanvas"></canvas>
+    <div class="hero-grid-overlay"></div>
+    <div class="hero-scanline"></div>
+    <div class="hero-vignette"></div>
+    <div class="container position-relative">
+        <div class="hero-inner">
+            <span class="hero-tag">
+                <span class="hero-tag-dot"></span>
+                <i class="fas fa-edit"></i> Team Editor
+            </span>
+            <h1 class="hero-title">
+                <span class="title-row1">Edit</span>
+                <span class="title-row2">{{ team.name }}</span>
+            </h1>
+            <p class="hero-sub">Update your squad configuration and keep your team at peak performance.</p>
+        </div>
+    </div>
+</div>
+
+{# ── SECTION ── #}
+<section class="edit-section">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="breadcrumb_iner">
-                    <h2>Edit {{ team.name }}</h2>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+
+                {# ══ CURRENT LOGO ══ #}
+                {% if team.logo %}
+                <div class="gcard mb-4" style="--ci:1">
+                    <div class="card-topline"></div>
+                    <div class="gcard-head">
+                        <span class="gstep"><i class="fas fa-image"></i></span>
+                        <div>
+                            <div class="gcard-title">Current Logo</div>
+                            <div class="gcard-sub">Your team's active logo</div>
+                        </div>
+                    </div>
+                    <div class="current-logo-wrap mt-4">
+                        <div class="current-logo-frame">
+                            <img src="{{ asset('uploads/teams/' ~ team.logo) }}" alt="{{ team.name }}" class="current-logo-img">
+                            <div class="current-logo-overlay">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                        </div>
+                        <div class="current-logo-meta">
+                            <span class="clm-label">Active logo</span>
+                            <span class="clm-hint">Upload a new file below to replace it</span>
+                        </div>
+                    </div>
                 </div>
+                {% endif %}
+
+                {# ══ FORM CARD ══ #}
+                <div class="gcard" style="--ci:2">
+                    <div class="card-topline"></div>
+                    <div class="gcard-head">
+                        <span class="gstep"><i class="fas fa-sliders-h"></i></span>
+                        <div>
+                            <div class="gcard-title">Team Configuration</div>
+                            <div class="gcard-sub">Modify your squad settings</div>
+                        </div>
+                    </div>
+
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'edit-form'}}) }}
+
+                    {# ── Name ── #}
+                    <div class="f-group mt-4">
+                        <label class="f-label">
+                            <i class="fas fa-shield-alt"></i> Team Name
+                        </label>
+                        <div class="f-input-wrap">
+                            {{ form_widget(form.name, {'attr': {'class': 'g-input', 'placeholder': 'Enter team name…'}}) }}
+                        </div>
+                        {{ form_errors(form.name) }}
+                        <div class="f-hint"><i class="fas fa-terminal"></i> Choose a unique and memorable name</div>
+                    </div>
+
+                    {# ── Description ── #}
+                    <div class="f-group mt-4">
+                        <label class="f-label">
+                            <i class="fas fa-file-alt"></i> Team Description
+                        </label>
+                        <div class="f-input-wrap">
+                            {{ form_widget(form.description, {'attr': {'class': 'g-input', 'placeholder': 'Describe your team\'s goals and playstyle…', 'rows': '5'}}) }}
+                        </div>
+                        {{ form_errors(form.description) }}
+                        <div class="f-hint"><i class="fas fa-terminal"></i> Tell others what your team is about</div>
+                    </div>
+
+                    {# ── Max Members ── #}
+                    <div class="f-group mt-4">
+                        <label class="f-label">
+                            <i class="fas fa-users"></i> Maximum Members
+                        </label>
+                        <div class="f-input-with-addon">
+                            {{ form_widget(form.maxMembers, {'attr': {'class': 'g-input g-input-addon', 'min': '1', 'max': '50'}}) }}
+                            <span class="f-addon"><i class="fas fa-gamepad"></i> Players</span>
+                        </div>
+                        {{ form_errors(form.maxMembers) }}
+                        <div class="f-hint"><i class="fas fa-terminal"></i> Set the maximum squad size (1–50)</div>
+                    </div>
+
+                    {# ── Logo Upload ── #}
+                    <div class="f-group mt-4">
+                        <label class="f-label">
+                            <i class="fas fa-image"></i> Replace Logo
+                            <span class="opt-pill">Optional</span>
+                        </label>
+                        <label class="drop-zone" for="{{ form.logoFile.vars.id }}" id="drop-zone">
+                            <div class="drop-zone-grid"></div>
+                            <div class="upload-preview" id="logoPreview">
+                                <i class="fas fa-cloud-upload-alt drop-icon"></i>
+                                <span class="drop-text">Drop new logo here or <u>browse</u></span>
+                                <span class="drop-hint">JPG · PNG · GIF · WEBP — max 2 MB</span>
+                            </div>
+                            {{ form_widget(form.logoFile, {'attr': {'class': 'd-none', 'accept': 'image/*'}}) }}
+                        </label>
+                        {{ form_errors(form.logoFile) }}
+                        <div class="f-hint"><i class="fas fa-terminal"></i> Leave empty to keep the current logo</div>
+                    </div>
+
+                    {# ── Actions ── #}
+                    <div class="form-actions mt-5">
+                        <a href="{{ path('app_teams_show', {id: team.id}) }}" class="btn-ghost">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn-fire">
+                            <span class="btn-fire-bg"></span>
+                            <span class="btn-fire-spark"></span>
+                            <i class="fas fa-save"></i>
+                            <span>Save Changes</span>
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+
             </div>
         </div>
     </div>
 </section>
 
-<section class="blog_part section_padding">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="mb-4"><i class="fas fa-edit"></i> Edit Team</h4>
-                        
-                        {% if team.logo %}
-                        <div class="mb-3 text-center">
-                            <img src="{{ asset('uploads/teams/' ~ team.logo) }}" alt="{{ team.name }}" 
-                                 class="img-thumbnail" style="max-height: 200px;">
-                            <p class="text-muted small mt-2">Current logo</p>
-                        </div>
-                        {% endif %}
-                        
-                        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-                        
-                        <div class="mb-3">
-                            {{ form_label(form.name) }}
-                            {{ form_widget(form.name) }}
-                            {{ form_errors(form.name) }}
-                        </div>
-                        
-                        <div class="mb-3">
-                            {{ form_label(form.description) }}
-                            {{ form_widget(form.description) }}
-                            {{ form_errors(form.description) }}
-                        </div>
-                        
-                        <div class="mb-3">
-                            {{ form_label(form.maxMembers) }}
-                            {{ form_widget(form.maxMembers) }}
-                            {{ form_errors(form.maxMembers) }}
-                        </div>
-                        
-                        <div class="mb-3">
-                            {{ form_label(form.logoFile) }}
-                            {{ form_widget(form.logoFile) }}
-                            {{ form_errors(form.logoFile) }}
-                            <small class="form-text text-muted">Leave blank to keep current logo</small>
-                        </div>
-                        
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-save"></i> Save Changes
-                            </button>
-                            <a href="{{ path('app_teams_show', {id: team.id}) }}" class="btn btn-secondary">
-                                <i class="fas fa-times"></i> Cancel
-                            </a>
-                        </div>
-                        
-                        {{ form_end(form) }}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+/* ═══════════════════════════════════════════
+   EYE2WIN — EDIT TEAM [FULL RED]
+═══════════════════════════════════════════ */
+:root {
+    --red:       #e8372a;
+    --red-hot:   #ff4d3d;
+    --red-deep:  #b02b20;
+    --red-glow:  rgba(232,55,42,0.4);
+    --red-dim:   rgba(232,55,42,0.12);
+    --orange:    #ff6b2b;
+    --pink:      #ff2060;
+    --dark:      #080810;
+    --border-r:  rgba(232,55,42,0.3);
+    --text:      rgba(255,255,255,0.93);
+    --muted:     rgba(255,255,255,0.38);
+    --font-hud:  'Orbitron', sans-serif;
+    --font-body: 'Rajdhani', sans-serif;
+    --font-mono: 'Share Tech Mono', monospace;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--dark); font-family: var(--font-body); }
+
+/* ══ HERO ══ */
+.edit-hero {
+    position: relative;
+    background: linear-gradient(165deg, #1a0308 0%, #0c0b18 50%, #080810 100%);
+    padding: 4rem 0 3.5rem;
+    overflow: hidden;
+}
+.edit-hero::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--red), var(--orange), var(--pink), transparent);
+    background-size: 300% 100%;
+    animation: border-shimmer 4s linear infinite;
+}
+@keyframes border-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+#heroCanvas {
+    position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    width: 100%; height: 100%;
+}
+.hero-grid-overlay {
+    position: absolute; inset: 0;
+    background-image:
+        linear-gradient(rgba(232,55,42,0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,55,42,0.055) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: grid-pulse 6s ease-in-out infinite;
+}
+@keyframes grid-pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
+.hero-scanline {
+    position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.055) 2px, rgba(0,0,0,0.055) 4px);
+    animation: scanline-move 8s linear infinite;
+}
+@keyframes scanline-move { from{background-position:0 0} to{background-position:0 100px} }
+.hero-vignette {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.65) 100%);
+}
+.hero-inner { position: relative; z-index: 3; }
+
+.hero-tag {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: rgba(232,55,42,0.09); border: 1px solid rgba(232,55,42,0.28);
+    color: var(--red-hot); font-family: var(--font-hud);
+    font-size: .62rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+    padding: .32rem .9rem; border-radius: 3px; margin-bottom: 1.4rem;
+    animation: badge-in .5s .1s both;
+}
+@keyframes badge-in { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:none} }
+.hero-tag-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #3dff8a; box-shadow: 0 0 8px #3dff8a;
+    animation: blink 1s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.hero-title {
+    font-family: var(--font-hud); font-weight: 900;
+    font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+    line-height: .95; letter-spacing: .05em; margin-bottom: 1rem;
+    animation: title-in .6s .2s both cubic-bezier(.22,1,.36,1);
+}
+@keyframes title-in { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
+.title-row1 { display: block; color: var(--text); }
+.title-row2 {
+    display: block;
+    background: linear-gradient(90deg, var(--red) 0%, var(--orange) 50%, var(--pink) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    background-size: 200% 100%;
+    animation: gradient-pan 5s ease-in-out infinite alternate, title-in .6s .2s both cubic-bezier(.22,1,.36,1);
+    filter: drop-shadow(0 0 30px rgba(232,55,42,0.4));
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 90vw;
+}
+@keyframes gradient-pan { from{background-position:0%} to{background-position:100%} }
+.hero-sub {
+    color: var(--muted); font-size: 1rem; max-width: 480px; line-height: 1.65; margin-bottom: 0;
+    animation: sub-in .5s .4s both;
+}
+@keyframes sub-in { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+
+/* ══ SECTION ══ */
+.edit-section { background: var(--dark); padding: 2.5rem 0 4rem; }
+
+/* ══ GLASS CARD ══ */
+.gcard {
+    background: rgba(6,5,16,0.85);
+    border: 1px solid rgba(255,255,255,0.065);
+    border-radius: 14px;
+    padding: 1.75rem 2rem;
+    position: relative; overflow: hidden;
+    backdrop-filter: blur(10px);
+    opacity: 0; transform: translateY(20px);
+    animation: card-enter .5s calc(var(--ci,1) * 120ms) forwards cubic-bezier(.22,1,.36,1);
+}
+@keyframes card-enter { to { opacity:1; transform:none; } }
+.gcard:focus-within {
+    border-color: rgba(232,55,42,0.3);
+    box-shadow: 0 0 0 1px rgba(232,55,42,0.08), 0 16px 48px rgba(0,0,0,0.4);
+}
+.card-topline {
+    position: absolute; top: 0; left: 0; right: 0; height: 1.5px;
+    background: linear-gradient(90deg, transparent, var(--red), var(--orange), var(--pink), transparent);
+    background-size: 200% 100%;
+    opacity: 0; transition: opacity .3s;
+}
+.gcard:focus-within .card-topline,
+.gcard:hover .card-topline {
+    opacity: 1;
+    animation: topline-race 1.4s linear infinite;
+}
+@keyframes topline-race { from{background-position:200% 0} to{background-position:-200% 0} }
+.gcard::after {
+    content: ''; position: absolute; left: 0; top: 10%; bottom: 10%; width: 3px;
+    background: linear-gradient(180deg, transparent, var(--red), var(--orange), transparent);
+    border-radius: 0 2px 2px 0;
+    opacity: 0; transform: scaleY(0);
+    transition: opacity .3s, transform .35s cubic-bezier(.22,1,.36,1);
+}
+.gcard:focus-within::after { opacity: 1; transform: scaleY(1); }
+
+.gcard-head { display: flex; align-items: flex-start; gap: 1rem; }
+.gstep {
+    flex-shrink: 0; width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--red-dim); border: 1px solid var(--border-r); border-radius: 10px;
+    font-size: 1.1rem; color: var(--red-hot);
+    transition: background .2s, box-shadow .2s;
+}
+.gcard:focus-within .gstep {
+    background: rgba(232,55,42,0.2);
+    box-shadow: 0 0 14px rgba(232,55,42,0.25);
+}
+.gcard-title {
+    font-family: var(--font-hud); font-size: .9rem; font-weight: 700;
+    color: var(--text); letter-spacing: .04em;
+}
+.gcard-sub { font-family: var(--font-mono); font-size: .72rem; color: var(--muted); margin-top: .2rem; }
+
+/* ══ CURRENT LOGO ══ */
+.current-logo-wrap {
+    display: flex; align-items: center; gap: 1.2rem;
+}
+.current-logo-frame {
+    position: relative; flex-shrink: 0;
+    width: 96px; height: 96px; border-radius: 14px; overflow: hidden;
+    border: 2px solid rgba(232,55,42,0.3);
+    box-shadow: 0 0 20px rgba(232,55,42,0.15);
+}
+.current-logo-img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform .3s;
+}
+.current-logo-frame:hover .current-logo-img { transform: scale(1.08); }
+.current-logo-overlay {
+    position: absolute; inset: 0;
+    background: rgba(232,55,42,0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; color: #fff;
+    opacity: 0; transition: opacity .22s;
+}
+.current-logo-frame:hover .current-logo-overlay { opacity: 1; }
+.current-logo-meta { display: flex; flex-direction: column; gap: .3rem; }
+.clm-label {
+    font-family: var(--font-hud); font-size: .72rem; font-weight: 700;
+    color: var(--red-hot); letter-spacing: .08em; text-transform: uppercase;
+}
+.clm-hint {
+    font-family: var(--font-mono); font-size: .66rem; color: var(--muted);
+}
+
+/* ══ FORM GROUPS ══ */
+.f-group { display: flex; flex-direction: column; gap: .4rem; }
+.f-label {
+    font-family: var(--font-hud); font-size: .78rem; font-weight: 700;
+    color: var(--text); letter-spacing: .06em; text-transform: uppercase;
+    display: flex; align-items: center; gap: .5rem;
+}
+.f-label i { color: var(--red-hot); font-size: .85rem; }
+.f-input-wrap { position: relative; }
+
+.g-input {
+    width: 100%;
+    background: rgba(255,255,255,0.03);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 9px;
+    color: var(--text);
+    font-family: var(--font-body); font-size: .95rem;
+    padding: .82rem 1rem;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+    resize: vertical;
+}
+.g-input:focus {
+    background: rgba(232,55,42,0.04);
+    border-color: rgba(232,55,42,0.5);
+    box-shadow: 0 0 0 3px rgba(232,55,42,0.1);
+}
+.g-input::placeholder { color: var(--muted); }
+
+.f-input-with-addon { display: flex; align-items: stretch; }
+.g-input-addon { border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important; }
+.f-addon {
+    display: flex; align-items: center; gap: .4rem;
+    background: linear-gradient(135deg, var(--red-deep), var(--red));
+    color: #fff; padding: .82rem 1.2rem;
+    border-radius: 0 9px 9px 0;
+    font-family: var(--font-hud); font-size: .7rem; font-weight: 700;
+    letter-spacing: .08em; white-space: nowrap;
+    border: 1.5px solid var(--red); border-left: none;
+}
+
+.f-hint {
+    font-family: var(--font-mono); font-size: .66rem; color: var(--muted);
+    display: flex; align-items: center; gap: .35rem;
+}
+.f-hint i { color: rgba(232,55,42,0.5); }
+
+/* ══ OPT PILL ══ */
+.opt-pill {
+    font-family: var(--font-mono); font-size: .6rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .08em;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    color: var(--muted); padding: .1rem .45rem; border-radius: 20px;
+}
+
+/* ══ DROP ZONE ══ */
+.drop-zone {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 2.2rem 2rem; gap: .35rem;
+    background: rgba(255,255,255,0.02);
+    border: 1.5px dashed rgba(232,55,42,0.2);
+    border-radius: 12px; cursor: pointer; text-align: center;
+    position: relative; overflow: hidden;
+    transition: background .22s, border-color .22s, box-shadow .22s;
+}
+.drop-zone-grid {
+    position: absolute; inset: 0; pointer-events: none;
+    background-image:
+        linear-gradient(rgba(232,55,42,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,55,42,0.03) 1px, transparent 1px);
+    background-size: 30px 30px;
+    opacity: 0; transition: opacity .3s;
+}
+.drop-zone:hover .drop-zone-grid, .drop-zone.drag-over .drop-zone-grid { opacity: 1; }
+.drop-zone:hover, .drop-zone.drag-over {
+    background: rgba(232,55,42,0.05);
+    border-color: rgba(232,55,42,0.5);
+    box-shadow: 0 0 30px rgba(232,55,42,0.06);
+}
+.upload-preview { display: flex; flex-direction: column; align-items: center; gap: .4rem; position: relative; z-index: 1; }
+.drop-icon { font-size: 2.2rem; color: rgba(232,55,42,0.4); transition: color .22s, transform .22s; }
+.drop-zone:hover .drop-icon { color: var(--red-hot); transform: translateY(-4px); }
+.drop-text { font-family: var(--font-body); font-size: .88rem; color: rgba(255,255,255,0.5); }
+.drop-text u { color: var(--red-hot); }
+.drop-hint { font-family: var(--font-mono); font-size: .65rem; color: var(--muted); letter-spacing: .06em; }
+
+/* ══ FORM ACTIONS ══ */
+.form-actions {
+    display: flex; gap: 1rem; justify-content: flex-end; align-items: center;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+.btn-ghost {
+    display: inline-flex; align-items: center; gap: .5rem; padding: .72rem 1.4rem;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 9px; color: rgba(255,255,255,0.55);
+    font-family: var(--font-hud); font-size: .72rem; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase; text-decoration: none;
+    transition: all .2s;
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.9); }
+.btn-fire {
+    position: relative; overflow: hidden;
+    display: inline-flex; align-items: center; gap: .6rem; padding: .72rem 2rem;
+    background: linear-gradient(135deg, var(--red-deep), var(--red), var(--red-hot));
+    border: none; border-radius: 9px; color: #fff;
+    font-family: var(--font-hud); font-size: .8rem; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; cursor: pointer;
+    box-shadow: 0 4px 24px rgba(232,55,42,0.45);
+    transition: transform .18s, box-shadow .18s;
+}
+.btn-fire:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 36px rgba(232,55,42,0.6), 0 0 0 3px rgba(232,55,42,0.15);
+    color: #fff;
+}
+.btn-fire:active { transform: translateY(-1px); }
+.btn-fire-bg { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,.15), transparent); pointer-events: none; }
+.btn-fire-spark { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 50% -20%, rgba(255,180,100,.28) 0%, transparent 60%); }
+
+/* ══ FORM ERRORS ══ */
+.form-error, ul.form-error li {
+    font-family: var(--font-mono); font-size: .68rem; color: #ff6b6b;
+    margin-top: .3rem; list-style: none; padding: 0;
+}
+
+/* ══ RESPONSIVE ══ */
+@media (max-width: 640px) {
+    .edit-hero     { padding: 2.5rem 0 2rem; }
+    .hero-title    { font-size: 2rem; }
+    .gcard         { padding: 1.25rem 1rem; }
+    .form-actions  { flex-direction: column-reverse; }
+    .btn-ghost, .btn-fire { width: 100%; justify-content: center; }
+    .current-logo-wrap { flex-direction: column; align-items: flex-start; }
+}
+</style>
+
+<script>
+(function () {
+    'use strict';
+
+    /* ── HERO CANVAS ── */
+    const canvas = document.getElementById('heroCanvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let W, H, particles = [];
+
+        function resize() {
+            W = canvas.width  = canvas.parentElement.offsetWidth;
+            H = canvas.height = canvas.parentElement.offsetHeight;
+        }
+        resize();
+        window.addEventListener('resize', () => { resize(); spawnAll(); });
+
+        const COLORS = ['rgba(232,55,42,','rgba(255,77,61,','rgba(255,107,43,','rgba(255,32,96,'];
+
+        function mkParticle() {
+            const c = COLORS[Math.floor(Math.random() * COLORS.length)];
+            return {
+                x: Math.random() * W, y: H + Math.random() * 60,
+                vx: (Math.random() - .5) * .55, vy: -(0.3 + Math.random() * 1.0),
+                r: 0.8 + Math.random() * 1.5, alpha: 0,
+                maxAlpha: 0.25 + Math.random() * 0.45,
+                phase: Math.random() * Math.PI * 2, color: c,
+                life: 0, maxLife: 130 + Math.random() * 160,
+            };
+        }
+        function spawnAll() { particles = Array.from({ length: 38 }, mkParticle); }
+        spawnAll();
+
+        (function tick() {
+            ctx.clearRect(0, 0, W, H);
+            particles.forEach((p, i) => {
+                p.life++;
+                p.x += p.vx + Math.sin(p.phase + p.life * 0.02) * 0.25;
+                p.y += p.vy;
+                const t = p.life / p.maxLife;
+                p.alpha = t < 0.15 ? (t/0.15)*p.maxAlpha : t > 0.75 ? ((1-t)/0.25)*p.maxAlpha : p.maxAlpha;
+                if (p.life >= p.maxLife || p.y < -10) particles[i] = mkParticle();
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = p.color + p.alpha + ')';
+                ctx.shadowColor = p.color + '0.5)';
+                ctx.shadowBlur = 7;
+                ctx.fill();
+            });
+            requestAnimationFrame(tick);
+        })();
+
+        /* Glitch on team name */
+        const accent = document.querySelector('.title-row2');
+        if (accent) {
+            setInterval(() => {
+                if (Math.random() > 0.82) {
+                    accent.animate([
+                        { transform: 'none', filter: 'none' },
+                        { transform: 'skewX(-3deg) translateX(-2px)', filter: 'hue-rotate(30deg) brightness(1.4)' },
+                        { transform: 'skewX(2deg) translateX(3px)',  filter: 'hue-rotate(-20deg)' },
+                        { transform: 'none', filter: 'none' },
+                    ], { duration: 160, easing: 'steps(3)' });
+                }
+            }, 3000);
+        }
+    }
+
+    /* ── LOGO PREVIEW ── */
+    const logoInput   = document.querySelector('input[type="file"][accept="image/*"]');
+    const previewArea = document.getElementById('logoPreview');
+    const dropZone    = document.getElementById('drop-zone');
+
+    if (logoInput && previewArea) {
+        logoInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 2 * 1024 * 1024) {
+                alert('File must be less than 2 MB'); logoInput.value = ''; return;
+            }
+            const reader = new FileReader();
+            reader.onload = function (ev) {
+                previewArea.innerHTML = `
+                    <img src="${ev.target.result}" alt="Preview"
+                         style="max-width:140px;max-height:140px;border-radius:10px;border:2px solid rgba(232,55,42,0.4);box-shadow:0 0 20px rgba(232,55,42,0.2);">
+                    <span style="font-family:'Share Tech Mono',monospace;font-size:.72rem;color:#ff4d3d;margin-top:.5rem;">
+                        <i class="fas fa-check-circle"></i> ${file.name}
+                    </span>
+                    <span style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:rgba(255,255,255,0.3);">
+                        Click to change
+                    </span>`;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        if (dropZone) {
+            dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+            dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+            dropZone.addEventListener('drop', e => {
+                e.preventDefault(); dropZone.classList.remove('drag-over');
+                const f = e.dataTransfer.files[0];
+                if (f && f.type.startsWith('image/')) {
+                    const dt = new DataTransfer();
+                    dt.items.add(f);
+                    logoInput.files = dt.files;
+                    logoInput.dispatchEvent(new Event('change'));
+                }
+            });
+        }
+    }
+
+})();
+</script>
+
 {% endblock %}

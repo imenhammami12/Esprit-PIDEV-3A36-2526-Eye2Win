@@ -44,37 +44,45 @@ class AdminComplaintController extends AbstractController
             ->orderBy('c.priority', 'DESC')
             ->addOrderBy('c.createdAt', 'DESC');
 
-        // Search — only subject + username to avoid full-scan on TEXT column
+        // Search
         if ($search) {
             $queryBuilder
-                ->andWhere('c.subject LIKE :search OR u.username LIKE :search')
+                ->andWhere('c.subject LIKE :search OR c.description LIKE :search OR u.username LIKE :search')
                 ->setParameter('search', '%' . $search . '%');
         }
 
+        // Filter by status
         if ($statusFilter) {
-            $queryBuilder->andWhere('c.status = :status')
+            $queryBuilder
+                ->andWhere('c.status = :status')
                 ->setParameter('status', $statusFilter);
         }
 
+        // Filter by priority
         if ($priorityFilter) {
-            $queryBuilder->andWhere('c.priority = :priority')
+            $queryBuilder
+                ->andWhere('c.priority = :priority')
                 ->setParameter('priority', $priorityFilter);
         }
 
+        // Filter by category
         if ($categoryFilter) {
-            $queryBuilder->andWhere('c.category = :category')
+            $queryBuilder
+                ->andWhere('c.category = :category')
                 ->setParameter('category', $categoryFilter);
         }
 
+        // Pagination
         $pagination = $paginator->paginate(
             $queryBuilder,
             $request->query->getInt('page', 1),
             15
         );
 
-        // FIX: getStatistics() already includes unassigned + avg_resolution_hours
-        // — no extra queries needed
-        $stats = $complaintRepository->getStatistics();
+        // Statistics
+        $stats                         = $complaintRepository->getStatistics();
+        $stats['unassigned']           = $complaintRepository->countUnassigned();
+        $stats['avg_resolution_hours'] = $complaintRepository->getAverageResolutionTime();
 
         return $this->render('admin/complaints/index.html.twig', [
             'pagination'     => $pagination,
@@ -94,6 +102,7 @@ class AdminComplaintController extends AbstractController
         try {
             $admins = $userRepository->findAdmins();
         } catch (\Exception $e) {
+            // Fallback — get all users and filter manually
             try {
                 $allUsers = $userRepository->findAll();
                 foreach ($allUsers as $user) {
@@ -101,8 +110,8 @@ class AdminComplaintController extends AbstractController
                         $admins[] = $user;
                     }
                 }
-                usort($admins, static fn($a, $b) => strcmp($a->getUsername(), $b->getUsername()));
-            } catch (\Exception) {
+                usort($admins, fn($a, $b) => strcmp($a->getUsername(), $b->getUsername()));
+            } catch (\Exception $e2) {
                 $admins = [];
             }
         }
@@ -139,21 +148,23 @@ class AdminComplaintController extends AbstractController
                 'COMPLAINT_UNASSIGNED',
                 'Complaint',
                 $complaint->getId(),
-                "Complaint #{$complaint->getId()} unassigned from " . ($previousAdmin?->getUsername() ?? 'unknown')
+                "Complaint #{$complaint->getId()} unassigned from " . ($previousAdmin ? $previousAdmin->getUsername() : 'unknown')
             );
 
             $em->flush();
+
             $this->addFlash('success', 'Complaint unassigned successfully');
         } else {
             $admin = $userRepository->find($adminId);
 
-            if (!$admin || !in_array('ROLE_ADMIN', $admin->getRoles(), true)) {
+            if (!$admin || !in_array('ROLE_ADMIN', $admin->getRoles())) {
                 $this->addFlash('error', 'Invalid administrator selected');
                 return $this->redirectToRoute('admin_complaints_show', ['id' => $complaint->getId()]);
             }
 
             $complaint->setAssignedTo($admin);
 
+            // Auto-change status to IN_PROGRESS if it's PENDING
             if ($complaint->getStatus() === ComplaintStatus::PENDING) {
                 $complaint->setStatus(ComplaintStatus::IN_PROGRESS);
             }
@@ -168,7 +179,9 @@ class AdminComplaintController extends AbstractController
 
             $em->flush();
 
+            // Send notification AFTER flush
             $this->notificationService->notifyComplaintAssigned($complaint, $admin);
+
             $this->addFlash('success', "Complaint assigned to {$admin->getUsername()} successfully");
         }
 
@@ -200,6 +213,7 @@ class AdminComplaintController extends AbstractController
 
         $em->flush();
 
+        // Send notification AFTER flush
         $this->notificationService->notifyComplaintStatusChanged(
             $complaint,
             $oldStatus->getLabel(),
@@ -235,6 +249,7 @@ class AdminComplaintController extends AbstractController
 
         $em->flush();
 
+        // Send notification AFTER flush
         $this->notificationService->notifyComplaintPriorityChanged(
             $complaint,
             $oldPriority->getLabel(),
@@ -264,10 +279,12 @@ class AdminComplaintController extends AbstractController
 
         $complaint->setAdminResponse($response);
 
+        // Auto-assign to current admin if not assigned
         if (!$complaint->getAssignedTo()) {
             $complaint->setAssignedTo($this->getUser());
         }
 
+        // Change status to IN_PROGRESS if PENDING
         if ($complaint->getStatus() === ComplaintStatus::PENDING) {
             $complaint->setStatus(ComplaintStatus::IN_PROGRESS);
         }
@@ -282,6 +299,7 @@ class AdminComplaintController extends AbstractController
 
         $em->flush();
 
+        // Send notification AFTER flush
         $this->notificationService->notifyComplaintResponded($complaint);
 
         $this->addFlash('success', 'Response submitted successfully');
@@ -318,6 +336,7 @@ class AdminComplaintController extends AbstractController
 
         $em->flush();
 
+        // Send notification AFTER flush
         $this->notificationService->notifyComplaintResolved($complaint);
 
         $this->addFlash('success', 'Complaint resolved successfully');

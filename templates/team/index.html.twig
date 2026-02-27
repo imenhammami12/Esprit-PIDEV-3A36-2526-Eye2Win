@@ -4,188 +4,808 @@
 
 {% block body %}
 
-<section class="breadcrumb breadcrumb_bg">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="breadcrumb_iner text-center">
-                    <div class="breadcrumb_iner_item">
-                        <h2>Team Management</h2>
-                        <p><a href="{{ path('app_home') }}">Home</a> <span>-</span> Dashboard</p>
-                    </div>
+{# ── HERO ── #}
+<div class="teams-hero">
+    <canvas id="heroCanvas"></canvas>
+    <div class="hero-grid-overlay"></div>
+    <div class="hero-scanline"></div>
+    <div class="hero-vignette"></div>
+    <div class="container position-relative">
+        <div class="hero-inner">
+            <span class="hero-tag">
+                <span class="hero-tag-dot"></span>
+                <i class="fas fa-users"></i> Team Command Center
+            </span>
+            <h1 class="hero-title">
+                <span class="title-row1">Team</span>
+                <span class="title-row2">Management</span>
+            </h1>
+            <p class="hero-sub">Forge alliances, lead your squad, dominate the leaderboard.</p>
+            <a href="{{ path('app_teams_create') }}" class="hero-cta">
+                <span class="hero-cta-bg"></span>
+                <i class="fas fa-plus"></i>
+                <span>Create Team</span>
+            </a>
+        </div>
+    </div>
+    {# Stat pills #}
+    <div class="hero-stats">
+        <div class="container">
+            <div class="hstat-row">
+                <div class="hstat">
+                    <span class="hstat-val">{{ ownedTeams|length }}</span>
+                    <span class="hstat-lbl">Owned</span>
+                </div>
+                <div class="hstat-divider"></div>
+                <div class="hstat">
+                    <span class="hstat-val">{{ memberTeams|length }}</span>
+                    <span class="hstat-lbl">Member Of</span>
+                </div>
+                <div class="hstat-divider"></div>
+                <div class="hstat">
+                    <span class="hstat-val">{{ pendingInvitations|length }}</span>
+                    <span class="hstat-lbl">Invitations</span>
+                </div>
+                <div class="hstat-divider"></div>
+                <div class="hstat">
+                    <span class="hstat-val">{{ pendingRequests|length }}</span>
+                    <span class="hstat-lbl">Requests</span>
                 </div>
             </div>
         </div>
     </div>
-</section>
+</div>
 
-<section class="blog_part section_padding">
+<section class="teams-section">
     <div class="container">
-        {# Pending Invitations #}
+
+        {# ══ PENDING INVITATIONS ══ #}
         {% if pendingInvitations|length > 0 %}
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="alert alert-info shadow-sm">
-                    <h4 class="text-dark">
-                        <i class="fas fa-envelope me-2"></i> 
-                        Pending Invitations ({{ pendingInvitations|length }})
-                    </h4>
-                    <div class="row mt-3">
-                        {% for invitation in pendingInvitations %}
-                        <div class="col-md-6 col-lg-4 mb-3">
-                            <div class="card h-100 border-info">
-                                <div class="card-body">
-                                    <h5 class="card-title text-dark">{{ invitation.team.name }}</h5>
-                                    <p class="card-text text-muted small">
-                                        <i class="fas fa-user me-1"></i> Invited by {{ invitation.team.owner.username }}<br>
-                                        <i class="fas fa-clock me-1"></i> {{ invitation.invitedAt|date('M d, Y at H:i') }}
-                                    </p>
-                                    <div class="d-grid gap-2">
-                                        <form method="post" action="{{ path('app_teams_invitation_accept', {id: invitation.id}) }}">
-                                            <button type="submit" class="btn btn-success btn-sm w-100">
-                                                <i class="fas fa-check"></i> Accept
-                                            </button>
-                                        </form>
-                                        <form method="post" action="{{ path('app_teams_invitation_decline', {id: invitation.id}) }}">
-                                            <button type="submit" class="btn btn-danger btn-sm w-100">
-                                                <i class="fas fa-times"></i> Decline
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
+        <div class="t-block" style="--bi:1">
+            <div class="t-block-header">
+                <div class="t-block-icon inv">
+                    <i class="fas fa-envelope-open-text"></i>
+                    <div class="tbi-ping"></div>
+                </div>
+                <div>
+                    <div class="t-block-title">Pending Invitations</div>
+                    <div class="t-block-sub">You have {{ pendingInvitations|length }} team invite{{ pendingInvitations|length > 1 ? 's' : '' }} waiting</div>
+                </div>
+                <span class="t-count t-count-inv">{{ pendingInvitations|length }}</span>
+            </div>
+            <div class="tcard-grid mt-4">
+                {% for invitation in pendingInvitations %}
+                <div class="tcard tcard-inv">
+                    <div class="tcard-glow"></div>
+                    <div class="tcard-corner tl"></div><div class="tcard-corner tr"></div>
+                    <div class="tcard-corner bl"></div><div class="tcard-corner br"></div>
+                    <div class="tcard-top">
+                        <div class="tcard-avatar">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="tcard-info">
+                            <div class="tcard-name">{{ invitation.team.name }}</div>
+                            <div class="tcard-meta">
+                                <i class="fas fa-user"></i> {{ invitation.team.owner.username }}
+                            </div>
+                            <div class="tcard-meta">
+                                <i class="fas fa-clock"></i> {{ invitation.invitedAt|date('M d, Y') }}
                             </div>
                         </div>
-                        {% endfor %}
+                        <span class="tcard-badge inv-badge">INVITED</span>
+                    </div>
+                    <div class="tcard-actions">
+                        <form method="post" action="{{ path('app_teams_invitation_accept', {id: invitation.id}) }}" class="flex-1">
+                            <button type="submit" class="tact-btn tact-accept">
+                                <i class="fas fa-check"></i> Accept
+                            </button>
+                        </form>
+                        <form method="post" action="{{ path('app_teams_invitation_decline', {id: invitation.id}) }}" class="flex-1">
+                            <button type="submit" class="tact-btn tact-decline">
+                                <i class="fas fa-times"></i> Decline
+                            </button>
+                        </form>
                     </div>
                 </div>
+                {% endfor %}
             </div>
         </div>
         {% endif %}
 
-        {# Pending Join Requests #}
+        {# ══ PENDING REQUESTS ══ #}
         {% if pendingRequests|length > 0 %}
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="alert alert-warning shadow-sm">
-                    <h4 class="text-dark">
-                        <i class="fas fa-hourglass-half me-2"></i> 
-                        My Pending Requests ({{ pendingRequests|length }})
-                    </h4>
-                    <div class="row mt-3">
-                        {% for request in pendingRequests %}
-                        <div class="col-md-6 col-lg-4 mb-3">
-                            <div class="card h-100 border-warning">
-                                <div class="card-body">
-                                    <h5 class="card-title text-dark">{{ request.team.name }}</h5>
-                                    <p class="card-text text-muted small">
-                                        <i class="fas fa-user me-1"></i> Owner: {{ request.team.owner.username }}<br>
-                                        <i class="fas fa-clock me-1"></i> Requested on {{ request.invitedAt|date('M d, Y at H:i') }}
-                                    </p>
-                                    <span class="badge bg-warning text-dark">
-                                        <i class="fas fa-clock"></i> Awaiting Response
-                                    </span>
-                                    <form method="post" action="{{ path('app_teams_request_cancel', {id: request.id}) }}" class="mt-2">
-                                        <button type="submit" class="btn btn-sm btn-secondary w-100" onclick="return confirm('Cancel this request?')">
-                                            <i class="fas fa-times"></i> Cancel Request
-                                        </button>
-                                    </form>
-                                </div>
+        <div class="t-block" style="--bi:2">
+            <div class="t-block-header">
+                <div class="t-block-icon req">
+                    <i class="fas fa-hourglass-half"></i>
+                </div>
+                <div>
+                    <div class="t-block-title">My Pending Requests</div>
+                    <div class="t-block-sub">{{ pendingRequests|length }} request{{ pendingRequests|length > 1 ? 's' : '' }} awaiting response</div>
+                </div>
+                <span class="t-count t-count-req">{{ pendingRequests|length }}</span>
+            </div>
+            <div class="tcard-grid mt-4">
+                {% for request in pendingRequests %}
+                <div class="tcard tcard-req">
+                    <div class="tcard-glow"></div>
+                    <div class="tcard-corner tl"></div><div class="tcard-corner tr"></div>
+                    <div class="tcard-corner bl"></div><div class="tcard-corner br"></div>
+                    <div class="tcard-top">
+                        <div class="tcard-avatar">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="tcard-info">
+                            <div class="tcard-name">{{ request.team.name }}</div>
+                            <div class="tcard-meta">
+                                <i class="fas fa-user"></i> {{ request.team.owner.username }}
+                            </div>
+                            <div class="tcard-meta">
+                                <i class="fas fa-clock"></i> {{ request.invitedAt|date('M d, Y') }}
                             </div>
                         </div>
-                        {% endfor %}
+                        <span class="tcard-badge req-badge">PENDING</span>
+                    </div>
+                    <div class="tcard-actions">
+                        <form method="post" action="{{ path('app_teams_request_cancel', {id: request.id}) }}" class="flex-1"
+                              onsubmit="return confirm('Cancel this request?')">
+                            <button type="submit" class="tact-btn tact-cancel">
+                                <i class="fas fa-times"></i> Cancel Request
+                            </button>
+                        </form>
                     </div>
                 </div>
+                {% endfor %}
             </div>
         </div>
         {% endif %}
 
-        <div class="row mb-4">
-            <div class="col-lg-6">
-                <h2 class="text-white"><i class="fas fa-users me-2"></i>My Teams</h2>
-            </div>
-            <div class="col-lg-6 text-end">
-                <a href="{{ path('app_teams_create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Create Team
-                </a>
-            </div>
-        </div>
-
-        {# Owned Teams #}
+        {# ══ OWNED TEAMS ══ #}
         {% if ownedTeams|length > 0 %}
-        <div class="row mb-5">
-            <div class="col-12">
-                <h4 class="text-white mb-3">
-                    <i class="fas fa-crown text-warning me-2"></i> Teams I Own
-                </h4>
-                <div class="row">
-                    {% for team in ownedTeams %}
-                    <div class="col-md-6 col-lg-4 mb-4">
-                        {% include 'team/_team_card.html.twig' with {'team': team, 'isOwner': true} %}
-                    </div>
-                    {% endfor %}
+        <div class="t-block" style="--bi:3">
+            <div class="t-block-header">
+                <div class="t-block-icon own">
+                    <i class="fas fa-crown"></i>
                 </div>
+                <div>
+                    <div class="t-block-title">Teams I Own</div>
+                    <div class="t-block-sub">You are the commander of {{ ownedTeams|length }} team{{ ownedTeams|length > 1 ? 's' : '' }}</div>
+                </div>
+                <span class="t-count t-count-own">{{ ownedTeams|length }}</span>
+            </div>
+            <div class="tcard-grid mt-4">
+                {% for team in ownedTeams %}
+                <div class="tcard tcard-own">
+                    <div class="tcard-glow"></div>
+                    <div class="tcard-corner tl"></div><div class="tcard-corner tr"></div>
+                    <div class="tcard-corner bl"></div><div class="tcard-corner br"></div>
+                    {% include 'team/_team_card.html.twig' with {'team': team, 'isOwner': true} %}
+                </div>
+                {% endfor %}
             </div>
         </div>
         {% endif %}
 
-        {# Member Teams #}
+        {# ══ MEMBER TEAMS ══ #}
         {% if memberTeams|length > 0 %}
-        <div class="row mb-5">
-            <div class="col-12">
-                <h4 class="text-white mb-3">
-                    <i class="fas fa-users me-2"></i> Teams I'm Member Of
-                </h4>
-                <div class="row">
-                    {% for team in memberTeams %}
-                    <div class="col-md-6 col-lg-4 mb-4">
-                        {% include 'team/_team_card.html.twig' with {'team': team, 'isOwner': false} %}
-                    </div>
-                    {% endfor %}
+        <div class="t-block" style="--bi:4">
+            <div class="t-block-header">
+                <div class="t-block-icon mbr">
+                    <i class="fas fa-shield-alt"></i>
                 </div>
+                <div>
+                    <div class="t-block-title">Teams I'm In</div>
+                    <div class="t-block-sub">Active member in {{ memberTeams|length }} team{{ memberTeams|length > 1 ? 's' : '' }}</div>
+                </div>
+                <span class="t-count t-count-mbr">{{ memberTeams|length }}</span>
+            </div>
+            <div class="tcard-grid mt-4">
+                {% for team in memberTeams %}
+                <div class="tcard tcard-mbr">
+                    <div class="tcard-glow"></div>
+                    <div class="tcard-corner tl"></div><div class="tcard-corner tr"></div>
+                    <div class="tcard-corner bl"></div><div class="tcard-corner br"></div>
+                    {% include 'team/_team_card.html.twig' with {'team': team, 'isOwner': false} %}
+                </div>
+                {% endfor %}
             </div>
         </div>
         {% endif %}
 
-        {# All Teams #}
-        <div class="row">
-            <div class="col-12">
-                <h4 class="text-white mb-3">
-                    <i class="fas fa-globe me-2"></i> All Teams
-                </h4>
-                <div class="row">
-                    {% for team in allTeams %}
-                        {# Skip teams user is already part of #}
-                        {% set userIsMember = false %}
-                        {% for membership in team.teamMemberships %}
-                            {% if membership.user == app.user and membership.status.value in ['ACTIVE', 'INVITED'] %}
-                                {% set userIsMember = true %}
-                            {% endif %}
-                        {% endfor %}
-                        
-                        {% if not userIsMember %}
-                        <div class="col-md-6 col-lg-4 mb-4">
-                            {% include 'team/_team_card.html.twig' with {'team': team, 'isOwner': false} %}
-                        </div>
+        {# ══ ALL TEAMS ══ #}
+        <div class="t-block" style="--bi:5">
+            <div class="t-block-header">
+                <div class="t-block-icon all">
+                    <i class="fas fa-globe"></i>
+                </div>
+                <div>
+                    <div class="t-block-title">Discover Teams</div>
+                    <div class="t-block-sub">Browse all active squads and request to join</div>
+                </div>
+            </div>
+            <div class="tcard-grid mt-4">
+                {% set anyFound = false %}
+                {% for team in allTeams %}
+                    {% set userIsMember = false %}
+                    {% for membership in team.teamMemberships %}
+                        {% if membership.user == app.user and membership.status.value in ['ACTIVE', 'INVITED'] %}
+                            {% set userIsMember = true %}
                         {% endif %}
                     {% endfor %}
+                    {% if not userIsMember %}
+                        {% set anyFound = true %}
+                        <div class="tcard tcard-all">
+                            <div class="tcard-glow"></div>
+                            <div class="tcard-corner tl"></div><div class="tcard-corner tr"></div>
+                            <div class="tcard-corner bl"></div><div class="tcard-corner br"></div>
+                            {% include 'team/_team_card.html.twig' with {'team': team, 'isOwner': false} %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+                {% if not anyFound %}
+                <div class="t-empty">
+                    <i class="fas fa-satellite-dish"></i>
+                    <span>No other teams found</span>
                 </div>
+                {% endif %}
             </div>
         </div>
 
+        {# ══ EMPTY STATE ══ #}
         {% if ownedTeams|length == 0 and memberTeams|length == 0 %}
-        <div class="row">
-            <div class="col-12">
-                <div class="alert alert-info text-center shadow-sm">
-                    <i class="fas fa-info-circle fa-3x mb-3 text-info"></i>
-                    <h4 class="text-dark">You're Not Part of Any Team</h4>
-                    <p class="text-muted">Create your own team or wait for an invitation!</p>
-                    <a href="{{ path('app_teams_create') }}" class="btn btn-primary mt-3">
-                        <i class="fas fa-plus"></i> Create My First Team
-                    </a>
-                </div>
+        <div class="t-empty-hero">
+            <div class="t-empty-hero-glow"></div>
+            <div class="t-empty-hero-icon">
+                <i class="fas fa-users-slash"></i>
             </div>
+            <h3>You're Not Part of Any Squad</h3>
+            <p>Create your first team or wait for an invitation from another commander.</p>
+            <a href="{{ path('app_teams_create') }}" class="btn-fire">
+                <span class="btn-fire-bg"></span>
+                <i class="fas fa-plus"></i>
+                <span>Create My First Team</span>
+            </a>
         </div>
         {% endif %}
+
     </div>
 </section>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+/* ═══════════════════════════════════════════
+   EYE2WIN — TEAM MANAGEMENT [FULL RED]
+═══════════════════════════════════════════ */
+:root {
+    --red:       #e8372a;
+    --red-hot:   #ff4d3d;
+    --red-deep:  #b02b20;
+    --red-glow:  rgba(232,55,42,0.4);
+    --red-dim:   rgba(232,55,42,0.12);
+    --red-mid:   rgba(232,55,42,0.22);
+    --orange:    #ff6b2b;
+    --pink:      #ff2060;
+    --cyan:      #00e5ff;
+    --cyan-dim:  rgba(0,229,255,0.1);
+    --green:     #00e676;
+    --green-dim: rgba(0,230,118,0.1);
+    --dark:      #080810;
+    --border:    rgba(255,255,255,0.07);
+    --border-r:  rgba(232,55,42,0.3);
+    --text:      rgba(255,255,255,0.93);
+    --muted:     rgba(255,255,255,0.38);
+    --r:         10px;
+    --font-hud:  'Orbitron', sans-serif;
+    --font-body: 'Rajdhani', sans-serif;
+    --font-mono: 'Share Tech Mono', monospace;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--dark); font-family: var(--font-body); }
+
+/* ══ HERO ══ */
+.teams-hero {
+    position: relative;
+    background: linear-gradient(165deg, #1a0308 0%, #0c0b18 50%, #080810 100%);
+    padding: 4rem 0 0;
+    overflow: hidden;
+}
+.teams-hero::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--red), var(--orange), var(--pink), transparent);
+    background-size: 300% 100%;
+    animation: border-shimmer 4s linear infinite;
+}
+@keyframes border-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+#heroCanvas {
+    position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    width: 100%; height: 100%;
+}
+.hero-grid-overlay {
+    position: absolute; inset: 0;
+    background-image:
+        linear-gradient(rgba(232,55,42,0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,55,42,0.055) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: grid-pulse 6s ease-in-out infinite;
+}
+@keyframes grid-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.hero-scanline {
+    position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.055) 2px, rgba(0,0,0,0.055) 4px);
+    animation: scanline-move 8s linear infinite;
+}
+@keyframes scanline-move { from{background-position:0 0} to{background-position:0 100px} }
+
+.hero-vignette {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.7) 100%);
+}
+
+.hero-inner { position: relative; z-index: 3; padding-bottom: 2rem; }
+
+.hero-tag {
+    display: inline-flex; align-items: center; gap: .5rem;
+    background: rgba(232,55,42,0.09); border: 1px solid rgba(232,55,42,0.28);
+    color: var(--red-hot); font-family: var(--font-hud);
+    font-size: .62rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+    padding: .32rem .9rem; border-radius: 3px; margin-bottom: 1.4rem;
+    animation: badge-in .5s .1s both;
+}
+@keyframes badge-in { from{opacity:0;transform:translateX(-10px)} to{opacity:1;transform:none} }
+
+.hero-tag-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #3dff8a; box-shadow: 0 0 8px #3dff8a;
+    animation: blink 1s step-end infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+.hero-title {
+    font-family: var(--font-hud); font-weight: 900;
+    font-size: clamp(2.6rem, 5.5vw, 4.5rem);
+    line-height: .95; letter-spacing: .05em; margin-bottom: 1rem;
+    animation: title-in .6s .2s both cubic-bezier(.22,1,.36,1);
+}
+@keyframes title-in { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
+
+.title-row1 { display: block; color: var(--text); }
+.title-row2 {
+    display: block;
+    background: linear-gradient(90deg, var(--red) 0%, var(--orange) 50%, var(--pink) 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    background-size: 200% 100%;
+    animation: gradient-pan 5s ease-in-out infinite alternate, title-in .6s .2s both cubic-bezier(.22,1,.36,1);
+    filter: drop-shadow(0 0 30px rgba(232,55,42,0.4));
+}
+@keyframes gradient-pan { from{background-position:0%} to{background-position:100%} }
+
+.hero-sub {
+    color: var(--muted); font-size: 1rem; max-width: 480px; line-height: 1.65; margin-bottom: 1.5rem;
+    animation: sub-in .5s .4s both;
+}
+@keyframes sub-in { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+
+.hero-cta {
+    position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: .6rem;
+    padding: .72rem 2rem;
+    background: linear-gradient(135deg, var(--red-deep), var(--red), var(--red-hot));
+    border: none; border-radius: 9px; color: #fff;
+    font-family: var(--font-hud); font-size: .8rem; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; text-decoration: none; cursor: pointer;
+    box-shadow: 0 4px 24px rgba(232,55,42,0.5);
+    transition: transform .18s, box-shadow .18s;
+    animation: sub-in .5s .5s both;
+}
+.hero-cta:hover {
+    transform: translateY(-3px); color: #fff;
+    box-shadow: 0 10px 36px rgba(232,55,42,0.65), 0 0 0 3px rgba(232,55,42,0.2);
+}
+.hero-cta-bg {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,.18), transparent);
+    pointer-events: none;
+}
+
+/* ── STAT ROW ── */
+.hero-stats {
+    position: relative; z-index: 3;
+    background: rgba(0,0,0,0.4);
+    border-top: 1px solid rgba(232,55,42,0.12);
+    padding: 1rem 0;
+    backdrop-filter: blur(8px);
+}
+.hstat-row {
+    display: flex; align-items: center; justify-content: flex-start;
+    gap: 0; flex-wrap: wrap;
+}
+.hstat {
+    display: flex; flex-direction: column; align-items: center;
+    padding: .5rem 2rem;
+}
+.hstat-val {
+    font-family: var(--font-hud); font-size: 1.5rem; font-weight: 900;
+    color: var(--red-hot); line-height: 1;
+    text-shadow: 0 0 20px rgba(232,55,42,0.6);
+}
+.hstat-lbl {
+    font-family: var(--font-mono); font-size: .62rem; color: var(--muted);
+    letter-spacing: .1em; text-transform: uppercase; margin-top: .2rem;
+}
+.hstat-divider {
+    width: 1px; height: 36px;
+    background: linear-gradient(180deg, transparent, rgba(232,55,42,0.2), transparent);
+}
+
+/* ══ SECTION ══ */
+.teams-section { background: var(--dark); padding: 2.5rem 0 4rem; }
+
+/* ══ BLOCK ══ */
+.t-block {
+    background: rgba(6,5,16,0.85);
+    border: 1px solid rgba(255,255,255,0.065);
+    border-radius: 14px;
+    padding: 1.75rem 2rem;
+    margin-bottom: 2rem;
+    position: relative; overflow: hidden;
+    backdrop-filter: blur(10px);
+    opacity: 0; transform: translateY(20px);
+    animation: block-enter .55s calc(var(--bi,1) * 110ms) forwards cubic-bezier(.22,1,.36,1);
+}
+@keyframes block-enter { to { opacity:1; transform:none; } }
+
+.t-block::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1.5px;
+    background: linear-gradient(90deg, transparent, var(--red), var(--orange), var(--pink), transparent);
+    background-size: 200% 100%;
+    animation: topline-race 3s linear infinite;
+}
+@keyframes topline-race { from{background-position:200% 0} to{background-position:-200% 0} }
+
+.t-block-header {
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+}
+
+.t-block-icon {
+    flex-shrink: 0; width: 46px; height: 46px;
+    border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; position: relative;
+}
+/* All icons use red tones — each with a slightly different shade */
+.t-block-icon.inv  { background: rgba(232,55,42,0.1);  border: 1px solid rgba(232,55,42,0.3);  color: var(--red-hot); }
+.t-block-icon.req  { background: rgba(255,107,43,0.1);  border: 1px solid rgba(255,107,43,0.3);  color: var(--orange); }
+.t-block-icon.own  { background: rgba(232,55,42,0.18); border: 1px solid rgba(232,55,42,0.45);  color: #ff7055; }
+.t-block-icon.mbr  { background: rgba(255,32,96,0.1);  border: 1px solid rgba(255,32,96,0.3);   color: var(--pink); }
+.t-block-icon.all  { background: rgba(232,55,42,0.08); border: 1px solid rgba(232,55,42,0.2);   color: var(--red); }
+
+.tbi-ping {
+    position: absolute; top: -2px; right: -2px;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--red-hot); box-shadow: 0 0 0 0 rgba(232,55,42,0.6);
+    animation: ping 1.5s ease-out infinite;
+}
+@keyframes ping {
+    0%  { transform: scale(1); box-shadow: 0 0 0 0 rgba(232,55,42,0.6); }
+    70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(232,55,42,0); }
+    100%{ transform: scale(1); box-shadow: 0 0 0 0 rgba(232,55,42,0); }
+}
+
+.t-block-title {
+    font-family: var(--font-hud); font-size: .9rem; font-weight: 700;
+    color: var(--text); letter-spacing: .04em;
+}
+.t-block-sub {
+    font-family: var(--font-mono); font-size: .7rem; color: var(--muted); margin-top: .15rem;
+}
+
+.t-count {
+    margin-left: auto; flex-shrink: 0;
+    font-family: var(--font-hud); font-size: .7rem; font-weight: 800;
+    padding: .25rem .7rem; border-radius: 20px;
+}
+.t-count-inv { background: rgba(232,55,42,0.12); color: var(--red-hot); border: 1px solid rgba(232,55,42,0.3); }
+.t-count-req { background: rgba(255,107,43,0.12); color: var(--orange);  border: 1px solid rgba(255,107,43,0.3); }
+.t-count-own { background: rgba(232,55,42,0.18); color: #ff7055;         border: 1px solid rgba(232,55,42,0.4); }
+.t-count-mbr { background: rgba(255,32,96,0.1);  color: var(--pink);     border: 1px solid rgba(255,32,96,0.3); }
+
+/* ══ TEAM CARD GRID ══ */
+.tcard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+    align-items: stretch;
+}
+
+/* ══ TEAM CARD ══ */
+.tcard {
+    border-radius: 12px;
+    padding: 1.1rem 1.2rem;
+    position: relative; overflow: hidden;
+    cursor: pointer;
+    transition: transform .2s, box-shadow .2s, border-color .2s;
+    display: flex; flex-direction: column; gap: .8rem;
+}
+.tcard:hover { transform: translateY(-3px); }
+
+/* All cards use red family — each with subtle variation */
+.tcard-inv {
+    background: rgba(232,55,42,0.04);
+    border: 1px solid rgba(232,55,42,0.15);
+}
+.tcard-inv:hover { border-color: var(--red-hot); box-shadow: 0 8px 28px rgba(232,55,42,0.15); }
+.tcard-inv .tcard-glow { background: radial-gradient(circle, rgba(232,55,42,0.25), transparent 65%); }
+
+.tcard-req {
+    background: rgba(255,107,43,0.04);
+    border: 1px solid rgba(255,107,43,0.15);
+}
+.tcard-req:hover { border-color: var(--orange); box-shadow: 0 8px 28px rgba(255,107,43,0.15); }
+.tcard-req .tcard-glow { background: radial-gradient(circle, rgba(255,107,43,0.2), transparent 65%); }
+
+.tcard-own {
+    background: rgba(232,55,42,0.06);
+    border: 1px solid rgba(232,55,42,0.22);
+}
+.tcard-own:hover { border-color: var(--red); box-shadow: 0 8px 28px rgba(232,55,42,0.2); }
+.tcard-own .tcard-glow { background: radial-gradient(circle, rgba(232,55,42,0.3), transparent 65%); }
+
+.tcard-mbr {
+    background: rgba(255,32,96,0.04);
+    border: 1px solid rgba(255,32,96,0.15);
+}
+.tcard-mbr:hover { border-color: var(--pink); box-shadow: 0 8px 28px rgba(255,32,96,0.15); }
+.tcard-mbr .tcard-glow { background: radial-gradient(circle, rgba(255,32,96,0.2), transparent 65%); }
+
+.tcard-all {
+    background: rgba(232,55,42,0.03);
+    border: 1px solid rgba(232,55,42,0.1);
+}
+.tcard-all:hover { border-color: rgba(232,55,42,0.4); box-shadow: 0 8px 28px rgba(232,55,42,0.12); }
+.tcard-all .tcard-glow { background: radial-gradient(circle, rgba(232,55,42,0.18), transparent 65%); }
+
+/* Shared card parts */
+.tcard-glow {
+    position: absolute; width: 100px; height: 100px; border-radius: 50%;
+    top: -30px; right: -20px; pointer-events: none;
+    opacity: 0; transition: opacity .3s;
+}
+.tcard:hover .tcard-glow { opacity: 1; }
+
+.tcard-corner {
+    position: absolute; width: 8px; height: 8px;
+    border-color: var(--red); border-style: solid;
+    opacity: 0; transform: scale(1.4); transition: opacity .2s, transform .25s;
+}
+.tcard-corner.tl { top:5px;    left:5px;  border-width:1.5px 0 0 1.5px; }
+.tcard-corner.tr { top:5px;    right:5px; border-width:1.5px 1.5px 0 0; }
+.tcard-corner.bl { bottom:5px; left:5px;  border-width:0 0 1.5px 1.5px; }
+.tcard-corner.br { bottom:5px; right:5px; border-width:0 1.5px 1.5px 0; }
+.tcard:hover .tcard-corner { opacity: 1; transform: scale(1); }
+
+.tcard-top { display: flex; align-items: flex-start; gap: .8rem; }
+
+.tcard-avatar {
+    flex-shrink: 0; width: 42px; height: 42px; border-radius: 10px;
+    background: rgba(232,55,42,0.06); border: 1px solid rgba(232,55,42,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; color: rgba(232,55,42,0.5);
+}
+
+.tcard-info { flex: 1; min-width: 0; }
+.tcard-name {
+    font-family: var(--font-hud); font-size: .85rem; font-weight: 700;
+    color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tcard-meta {
+    font-family: var(--font-mono); font-size: .67rem; color: var(--muted);
+    margin-top: .18rem; display: flex; align-items: center; gap: .3rem;
+}
+
+.tcard-badge {
+    flex-shrink: 0;
+    font-family: var(--font-hud); font-size: .55rem; font-weight: 800;
+    letter-spacing: .1em; padding: .2rem .5rem; border-radius: 4px;
+}
+.inv-badge { background: rgba(232,55,42,0.12); color: var(--red-hot); border: 1px solid rgba(232,55,42,0.3); }
+.req-badge { background: rgba(255,107,43,0.12); color: var(--orange);  border: 1px solid rgba(255,107,43,0.3); }
+
+/* ══ ACTIONS ══ */
+.tcard-actions { display: flex; gap: .5rem; }
+.flex-1 { flex: 1; }
+
+.tact-btn {
+    width: 100%; padding: .45rem .5rem;
+    border: none; border-radius: 7px;
+    font-family: var(--font-hud); font-size: .65rem; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: .4rem;
+    transition: all .18s;
+}
+.tact-accept {
+    background: rgba(0,230,118,0.12); border: 1px solid rgba(0,230,118,0.3); color: var(--green);
+}
+.tact-accept:hover { background: rgba(0,230,118,0.22); border-color: var(--green); box-shadow: 0 4px 16px rgba(0,230,118,0.15); }
+
+.tact-decline {
+    background: rgba(232,55,42,0.1); border: 1px solid rgba(232,55,42,0.3); color: var(--red-hot);
+}
+.tact-decline:hover { background: rgba(232,55,42,0.22); border-color: var(--red); box-shadow: 0 4px 16px rgba(232,55,42,0.2); }
+
+.tact-cancel {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--muted);
+}
+.tact-cancel:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+
+/* ══ EMPTY ══ */
+.t-empty {
+    grid-column: 1 / -1;
+    display: flex; align-items: center; justify-content: center; gap: .7rem;
+    padding: 2rem; color: var(--muted);
+    font-family: var(--font-mono); font-size: .78rem; letter-spacing: .08em;
+    border: 1px dashed rgba(255,255,255,0.07); border-radius: 10px;
+}
+.t-empty i { font-size: 1.1rem; }
+
+.t-empty-hero {
+    text-align: center; padding: 4rem 2rem; position: relative;
+    background: rgba(6,5,16,0.6); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px; overflow: hidden; margin-top: 1rem;
+}
+.t-empty-hero-glow {
+    position: absolute; width: 300px; height: 300px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,55,42,0.1), transparent 65%);
+    top: 50%; left: 50%; transform: translate(-50%,-50%);
+    pointer-events: none;
+}
+.t-empty-hero-icon {
+    width: 70px; height: 70px; border-radius: 18px; margin: 0 auto 1.5rem;
+    background: rgba(232,55,42,0.1); border: 1px solid rgba(232,55,42,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; color: var(--red-hot);
+}
+.t-empty-hero h3 {
+    font-family: var(--font-hud); color: var(--text); margin-bottom: .5rem;
+}
+.t-empty-hero p { font-family: var(--font-body); color: var(--muted); margin-bottom: 1.5rem; }
+
+/* ══ BTN FIRE ══ */
+.btn-fire {
+    position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: .6rem;
+    padding: .72rem 2rem;
+    background: linear-gradient(135deg, #b02b20, #e8372a, #ff5533);
+    border: none; border-radius: 9px; color: #fff;
+    font-family: var(--font-hud); font-size: .8rem; font-weight: 700;
+    letter-spacing: .1em; text-transform: uppercase; cursor: pointer; text-decoration: none;
+    box-shadow: 0 4px 24px rgba(232,55,42,0.45);
+    transition: transform .18s, box-shadow .18s;
+}
+.btn-fire:hover { transform: translateY(-3px); box-shadow: 0 10px 36px rgba(232,55,42,0.6); color:#fff; }
+.btn-fire-bg { position: absolute; inset: 0; background: linear-gradient(135deg,rgba(255,255,255,.15),transparent); pointer-events:none; }
+
+/* ══ RESPONSIVE ══ */
+@media (max-width: 640px) {
+    .teams-hero { padding: 2.5rem 0 0; }
+    .hero-title { font-size: 2.4rem; }
+    .t-block { padding: 1.25rem 1rem; }
+    .tcard-grid { grid-template-columns: 1fr; }
+    .hstat { padding: .5rem 1.2rem; }
+    .hstat-val { font-size: 1.2rem; }
+}
+</style>
+
+<script>
+(function () {
+    'use strict';
+
+    /* ── PARTICLE CANVAS ── */
+    const canvas = document.getElementById('heroCanvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let W, H, particles = [];
+
+        function resize() {
+            const hero = canvas.parentElement;
+            W = canvas.width  = hero.offsetWidth;
+            H = canvas.height = hero.offsetHeight;
+        }
+        resize();
+        window.addEventListener('resize', () => { resize(); spawnAll(); });
+
+        const COLORS = [
+            'rgba(232,55,42,',
+            'rgba(255,77,61,',
+            'rgba(255,107,43,',
+            'rgba(255,32,96,',
+        ];
+
+        function mkParticle() {
+            const c = COLORS[Math.floor(Math.random() * COLORS.length)];
+            return {
+                x: Math.random() * W, y: H + Math.random() * 60,
+                vx: (Math.random() - .5) * .5, vy: -(0.3 + Math.random() * 0.9),
+                r: 0.8 + Math.random() * 1.6, alpha: 0,
+                maxAlpha: 0.2 + Math.random() * 0.4,
+                phase: Math.random() * Math.PI * 2, color: c,
+                life: 0, maxLife: 140 + Math.random() * 160,
+            };
+        }
+        function spawnAll() { particles = Array.from({ length: 42 }, mkParticle); }
+        spawnAll();
+
+        function tick() {
+            ctx.clearRect(0, 0, W, H);
+            particles.forEach((p, i) => {
+                p.life++;
+                p.x += p.vx + Math.sin(p.phase + p.life * 0.02) * 0.22;
+                p.y += p.vy;
+                const t = p.life / p.maxLife;
+                p.alpha = t < 0.15 ? (t/0.15)*p.maxAlpha : t > 0.75 ? ((1-t)/0.25)*p.maxAlpha : p.maxAlpha;
+                if (p.life >= p.maxLife || p.y < -10) particles[i] = mkParticle();
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = p.color + p.alpha + ')';
+                ctx.shadowColor = p.color + '0.5)';
+                ctx.shadowBlur = 6;
+                ctx.fill();
+            });
+            requestAnimationFrame(tick);
+        }
+        tick();
+
+        /* Title glitch */
+        const accent = document.querySelector('.title-row2');
+        if (accent) {
+            setInterval(() => {
+                if (Math.random() > 0.82) {
+                    accent.animate([
+                        { transform: 'none', filter: 'none' },
+                        { transform: 'skewX(-3deg) translateX(-2px)', filter: 'hue-rotate(20deg) brightness(1.4)' },
+                        { transform: 'skewX(2deg) translateX(3px)', filter: 'hue-rotate(-15deg)' },
+                        { transform: 'none', filter: 'none' },
+                    ], { duration: 160, easing: 'steps(3)' });
+                }
+            }, 3200);
+        }
+    }
+
+    /* ── SCROLL REVEAL ── */
+    if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.style.animationPlayState = 'running';
+                    io.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.05 });
+
+        document.querySelectorAll('.t-block').forEach(b => {
+            b.style.animationPlayState = 'paused';
+            io.observe(b);
+        });
+    }
+
+    /* ── HSTAT COUNTER ANIMATION ── */
+    document.querySelectorAll('.hstat-val').forEach(el => {
+        const target = parseInt(el.textContent, 10);
+        if (isNaN(target) || target === 0) return;
+        let current = 0;
+        const step = Math.ceil(target / 20);
+        const timer = setInterval(() => {
+            current = Math.min(current + step, target);
+            el.textContent = current;
+            if (current >= target) clearInterval(timer);
+        }, 40);
+    });
+
+})();
+</script>
+
 {% endblock %}

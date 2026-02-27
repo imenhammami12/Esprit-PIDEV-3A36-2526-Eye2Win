@@ -1,84 +1,415 @@
-<div class="card h-100 shadow-sm">
-    {% if team.logo %}
-    <img src="{{ asset('uploads/teams/' ~ team.logo) }}" class="card-img-top" alt="{{ team.name }}" style="height: 200px; object-fit: cover;">
-    {% else %}
-    <div class="card-img-top bg-gradient" style="height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center;">
-        <h2 class="text-white">{{ team.name|slice(0, 2)|upper }}</h2>
-    </div>
-    {% endif %}
-    
-    <div class="card-body">
-        <h5 class="card-title">
-            {{ team.name }}
-            {% if isOwner %}
-            <span class="badge bg-warning text-dark"><i class="fas fa-crown"></i> Owner</span>
-            {% endif %}
-        </h5>
-        
-        <p class="card-text text-muted small">
-            <i class="fas fa-user"></i> {{ team.owner.username }}
-        </p>
-        
-        {% if team.description %}
-        <p class="card-text">{{ team.description|slice(0, 100) }}{% if team.description|length > 100 %}...{% endif %}</p>
-        {% endif %}
-        
-        <div class="mb-3">
-            <span class="badge bg-primary">
-                <i class="fas fa-users"></i> 
-                {% set activeCount = team.teamMemberships|filter(m => m.status.value == 'ACTIVE')|length %}
-                {{ activeCount }}/{{ team.maxMembers }} members
-            </span>
-            {% if team.isActive %}
-            <span class="badge bg-success">Active</span>
+<div class="tc-wrap">
+    <div class="tc-card">
+
+        {# ── TOP LINE RACE ── #}
+        <div class="tc-topline"></div>
+
+        {# ── CORNERS ── #}
+        <div class="tc-corner tl"></div>
+        <div class="tc-corner tr"></div>
+        <div class="tc-corner bl"></div>
+        <div class="tc-corner br"></div>
+
+        {# ── GLOW ── #}
+        <div class="tc-glow"></div>
+
+        {# ── BANNER ── #}
+        <div class="tc-banner">
+            {% if team.logo %}
+                <img src="{{ asset('uploads/teams/' ~ team.logo) }}" class="tc-banner-img" alt="{{ team.name }}">
             {% else %}
-            <span class="badge bg-secondary">Inactive</span>
+                <div class="tc-banner-placeholder">
+                    <div class="tc-banner-grid"></div>
+                    <div class="tc-banner-scanline"></div>
+                    <span class="tc-banner-initials">{{ team.name|slice(0,2)|upper }}</span>
+                    <div class="tc-banner-decoration"></div>
+                </div>
             {% endif %}
+
+            {# Owner badge pinned on banner #}
+            {% if isOwner %}
+            <span class="tc-owner-pin">
+                <i class="fas fa-crown"></i> Commander
+            </span>
+            {% endif %}
+
+            {# Status pill #}
+            <span class="tc-status-pill {% if team.isActive %}tc-status-active{% else %}tc-status-inactive{% endif %}">
+                <span class="tc-status-dot"></span>
+                {{ team.isActive ? 'ACTIVE' : 'INACTIVE' }}
+            </span>
         </div>
 
+        {# ── BODY ── #}
+        <div class="tc-body">
 
-{% if not isOwner %}
-    {% set userIsMember = false %}
-    {% set hasPendingRequest = false %}
-    {% for membership in team.teamMemberships %}
-        {% if membership.user == app.user %}
-            {% if membership.status.value == 'ACTIVE' %}
-                {% set userIsMember = true %}
-            {% elseif membership.status.value == 'PENDING' %}
-                {% set hasPendingRequest = true %}
+            {# Name + owner #}
+            <div class="tc-name-row">
+                <h5 class="tc-name">{{ team.name }}</h5>
+            </div>
+
+            {# Owner meta #}
+            <div class="tc-meta">
+                <i class="fas fa-user"></i>
+                <span>{{ team.owner.username }}</span>
+                <span class="tc-meta-sep">·</span>
+                <i class="fas fa-calendar-alt"></i>
+                <span>{{ team.createdAt|date('M d, Y') }}</span>
+            </div>
+
+            {# Description #}
+            {% if team.description %}
+            <p class="tc-desc">
+                {{ team.description|slice(0,100) }}{% if team.description|length > 100 %}…{% endif %}
+            </p>
             {% endif %}
-        {% endif %}
-    {% endfor %}
-    
-    {% if not userIsMember and not hasPendingRequest and team.isActive %}
-        {% set activeCount = team.teamMemberships|filter(m => m.status.value == 'ACTIVE')|length %}
-        {% if activeCount < team.maxMembers %}
-        <form method="post" action="{{ path('app_teams_request_join', {id: team.id}) }}" class="d-inline">
-            <button type="submit" class="btn btn-success btn-sm mb-2 w-100">
-                <i class="fas fa-user-plus"></i> Request to Join
-            </button>
-        </form>
-        {% endif %}
-    {% elseif hasPendingRequest %}
-        <button class="btn btn-warning btn-sm mb-2 w-100" disabled>
-            <i class="fas fa-hourglass-half"></i> Request Pending
-        </button>
-    {% endif %}
-{% endif %}
 
-<a href="{{ path('app_teams_show', {id: team.id}) }}" class="btn btn-primary btn-sm">
-    <i class="fas fa-eye"></i> View Team
-</a>
+            {# Members bar #}
+            {% set activeCount = team.teamMemberships|filter(m => m.status.value == 'ACTIVE')|length %}
+            {% set fillPct = team.maxMembers > 0 ? ((activeCount / team.maxMembers) * 100)|round : 0 %}
+            <div class="tc-members">
+                <div class="tc-members-label">
+                    <span><i class="fas fa-users"></i> Squad</span>
+                    <span class="tc-members-count">{{ activeCount }}<span class="tc-members-max">/{{ team.maxMembers }}</span></span>
+                </div>
+                <div class="tc-bar-track">
+                    <div class="tc-bar-fill {% if fillPct >= 100 %}tc-bar-full{% elseif fillPct >= 75 %}tc-bar-warn{% endif %}"
+                         style="width: {{ fillPct }}%"></div>
+                </div>
+            </div>
 
-        
-        {% if isOwner %}
-        <a href="{{ path('app_teams_edit', {id: team.id}) }}" class="btn btn-secondary btn-sm">
-            <i class="fas fa-edit"></i> Edit
-        </a>
-        {% endif %}
-    </div>
-    
-    <div class="card-footer text-muted small">
-        <i class="fas fa-calendar"></i> Created on {{ team.createdAt|date('m/d/Y') }}
+            {# ── ACTION ZONE ── #}
+            <div class="tc-actions">
+
+                {% if not isOwner %}
+                    {% set userIsMember = false %}
+                    {% set hasPendingRequest = false %}
+                    {% for membership in team.teamMemberships %}
+                        {% if membership.user == app.user %}
+                            {% if membership.status.value == 'ACTIVE' %}
+                                {% set userIsMember = true %}
+                            {% elseif membership.status.value == 'PENDING' %}
+                                {% set hasPendingRequest = true %}
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if not userIsMember and not hasPendingRequest and team.isActive and activeCount < team.maxMembers %}
+                    <form method="post" action="{{ path('app_teams_request_join', {id: team.id}) }}" class="tc-form">
+                        <button type="submit" class="tc-btn tc-btn-join">
+                            <i class="fas fa-user-plus"></i>
+                            <span>Request to Join</span>
+                        </button>
+                    </form>
+                    {% elseif hasPendingRequest %}
+                    <button class="tc-btn tc-btn-pending" disabled>
+                        <i class="fas fa-hourglass-half"></i>
+                        <span>Request Pending</span>
+                    </button>
+                    {% endif %}
+                {% endif %}
+
+                <div class="tc-btn-row">
+                    <a href="{{ path('app_teams_show', {id: team.id}) }}" class="tc-btn tc-btn-view">
+                        <i class="fas fa-eye"></i>
+                        <span>View</span>
+                    </a>
+                    {% if isOwner %}
+                    <a href="{{ path('app_teams_edit', {id: team.id}) }}" class="tc-btn tc-btn-edit">
+                        <i class="fas fa-edit"></i>
+                        <span>Edit</span>
+                    </a>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+
     </div>
 </div>
+
+<style>
+/* ═══════════════════════════════════════════
+   EYE2WIN — TEAM CARD [RED]
+═══════════════════════════════════════════ */
+
+/* Inherit root variables from parent page */
+
+.tc-wrap {
+    height: 100%;
+}
+
+.tc-card {
+    height: 100%;
+    background: rgba(6,5,16,0.88);
+    border: 1px solid rgba(232,55,42,0.18);
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    transition: border-color .25s, box-shadow .25s, transform .22s;
+}
+.tc-card:hover {
+    border-color: rgba(232,55,42,0.5);
+    box-shadow: 0 12px 40px rgba(232,55,42,0.18), 0 0 0 1px rgba(232,55,42,0.1);
+    transform: translateY(-4px);
+}
+
+/* ── TOP RACING LINE ── */
+.tc-topline {
+    position: absolute; top: 0; left: 0; right: 0; height: 2px; z-index: 5;
+    background: linear-gradient(90deg, transparent, #e8372a, #ff6b2b, #ff2060, transparent);
+    background-size: 200% 100%;
+    opacity: 0;
+    transition: opacity .25s;
+    animation: tc-line-race 1.6s linear infinite;
+}
+.tc-card:hover .tc-topline { opacity: 1; }
+@keyframes tc-line-race {
+    from { background-position: 200% 0; }
+    to   { background-position: -200% 0; }
+}
+
+/* ── CORNERS ── */
+.tc-corner {
+    position: absolute; width: 9px; height: 9px;
+    border-color: #e8372a; border-style: solid; z-index: 5;
+    opacity: 0; transform: scale(1.5);
+    transition: opacity .22s, transform .28s cubic-bezier(.34,1.56,.64,1);
+}
+.tc-corner.tl { top:6px; left:6px;   border-width: 1.5px 0 0 1.5px; }
+.tc-corner.tr { top:6px; right:6px;  border-width: 1.5px 1.5px 0 0; }
+.tc-corner.bl { bottom:6px; left:6px;  border-width: 0 0 1.5px 1.5px; }
+.tc-corner.br { bottom:6px; right:6px; border-width: 0 1.5px 1.5px 0; }
+.tc-card:hover .tc-corner { opacity: 1; transform: scale(1); }
+
+/* ── GLOW ── */
+.tc-glow {
+    position: absolute; width: 180px; height: 180px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,55,42,0.18), transparent 65%);
+    top: -60px; right: -40px; pointer-events: none; z-index: 0;
+    opacity: 0; transition: opacity .3s;
+}
+.tc-card:hover .tc-glow { opacity: 1; }
+
+/* ── BANNER ── */
+.tc-banner {
+    position: relative;
+    height: 130px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.tc-banner-img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform .4s ease;
+}
+.tc-card:hover .tc-banner-img { transform: scale(1.04); }
+
+.tc-banner-placeholder {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, #1a0308 0%, #12050e 50%, #0d080f 100%);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+}
+.tc-banner-grid {
+    position: absolute; inset: 0;
+    background-image:
+        linear-gradient(rgba(232,55,42,0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,55,42,0.07) 1px, transparent 1px);
+    background-size: 28px 28px;
+}
+.tc-banner-scanline {
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
+}
+.tc-banner-initials {
+    position: relative; z-index: 2;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.2rem; font-weight: 900; letter-spacing: .1em;
+    background: linear-gradient(135deg, #ff4d3d, #ff6b2b);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 0 20px rgba(232,55,42,0.5));
+}
+.tc-banner-decoration {
+    position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%);
+    width: 80px; height: 80px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,55,42,0.2), transparent 65%);
+}
+
+/* ── BANNER BADGES ── */
+.tc-owner-pin {
+    position: absolute; top: 10px; left: 10px; z-index: 4;
+    display: inline-flex; align-items: center; gap: .3rem;
+    background: rgba(232,55,42,0.85);
+    border: 1px solid rgba(255,107,43,0.5);
+    color: #fff; border-radius: 5px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: .55rem; font-weight: 700; letter-spacing: .1em;
+    padding: .22rem .55rem;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 12px rgba(232,55,42,0.4);
+}
+.tc-owner-pin i { color: #ffcf60; }
+
+.tc-status-pill {
+    position: absolute; top: 10px; right: 10px; z-index: 4;
+    display: inline-flex; align-items: center; gap: .3rem;
+    border-radius: 5px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: .55rem; font-weight: 700; letter-spacing: .12em;
+    padding: .22rem .55rem;
+    backdrop-filter: blur(4px);
+}
+.tc-status-active  {
+    background: rgba(0,230,118,0.15); border: 1px solid rgba(0,230,118,0.35); color: #00e676;
+}
+.tc-status-inactive {
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: rgba(255,255,255,0.4);
+}
+.tc-status-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: currentColor;
+}
+.tc-status-active .tc-status-dot {
+    animation: tc-dot-blink 1.2s ease-in-out infinite;
+}
+@keyframes tc-dot-blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+/* ── BODY ── */
+.tc-body {
+    padding: 1rem 1.1rem 1.1rem;
+    display: flex; flex-direction: column; gap: .7rem;
+    flex: 1;
+    position: relative; z-index: 1;
+}
+
+.tc-name-row {
+    display: flex; align-items: center; gap: .5rem;
+}
+.tc-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: .88rem; font-weight: 700;
+    color: rgba(255,255,255,0.93);
+    margin: 0; letter-spacing: .04em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.tc-meta {
+    display: flex; align-items: center; flex-wrap: wrap; gap: .3rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: .65rem; color: rgba(255,255,255,0.38);
+}
+.tc-meta i { color: rgba(232,55,42,0.5); font-size: .6rem; }
+.tc-meta-sep { color: rgba(255,255,255,0.15); }
+
+.tc-desc {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: .82rem; color: rgba(255,255,255,0.5);
+    line-height: 1.5; margin: 0;
+}
+
+/* ── MEMBERS BAR ── */
+.tc-members {
+    display: flex; flex-direction: column; gap: .35rem;
+}
+.tc-members-label {
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: .64rem; color: rgba(255,255,255,0.38);
+}
+.tc-members-label i { color: rgba(232,55,42,0.5); margin-right: .25rem; }
+.tc-members-count {
+    font-family: 'Orbitron', sans-serif;
+    font-size: .72rem; font-weight: 700; color: rgba(255,255,255,0.7);
+}
+.tc-members-max { color: rgba(255,255,255,0.3); }
+
+.tc-bar-track {
+    height: 4px; border-radius: 2px;
+    background: rgba(255,255,255,0.07);
+    overflow: hidden;
+}
+.tc-bar-fill {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(90deg, #e8372a, #ff6b2b);
+    box-shadow: 0 0 8px rgba(232,55,42,0.5);
+    transition: width .6s ease;
+}
+.tc-bar-warn {
+    background: linear-gradient(90deg, #ff6b2b, #ff9500);
+    box-shadow: 0 0 8px rgba(255,107,43,0.5);
+}
+.tc-bar-full {
+    background: linear-gradient(90deg, #ff2060, #e8372a);
+    box-shadow: 0 0 8px rgba(255,32,96,0.5);
+}
+
+/* ── ACTIONS ── */
+.tc-actions {
+    display: flex; flex-direction: column; gap: .5rem;
+    margin-top: auto; padding-top: .2rem;
+}
+
+.tc-form { width: 100%; }
+
+.tc-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+    width: 100%;
+    padding: .5rem .8rem;
+    border: none; border-radius: 8px; cursor: pointer; text-decoration: none;
+    font-family: 'Orbitron', sans-serif;
+    font-size: .62rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    transition: all .18s;
+}
+
+.tc-btn-join {
+    background: rgba(0,230,118,0.1);
+    border: 1px solid rgba(0,230,118,0.3);
+    color: #00e676;
+}
+.tc-btn-join:hover {
+    background: rgba(0,230,118,0.2);
+    border-color: #00e676;
+    box-shadow: 0 4px 16px rgba(0,230,118,0.2);
+    color: #00e676;
+}
+
+.tc-btn-pending {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.3);
+    cursor: not-allowed;
+    width: 100%;
+}
+
+.tc-btn-row {
+    display: flex; gap: .5rem;
+}
+.tc-btn-row .tc-btn { flex: 1; }
+
+.tc-btn-view {
+    background: rgba(232,55,42,0.1);
+    border: 1px solid rgba(232,55,42,0.3);
+    color: #ff4d3d;
+}
+.tc-btn-view:hover {
+    background: rgba(232,55,42,0.22);
+    border-color: #e8372a;
+    box-shadow: 0 4px 16px rgba(232,55,42,0.2);
+    color: #ff6b55;
+}
+
+.tc-btn-edit {
+    background: rgba(255,107,43,0.08);
+    border: 1px solid rgba(255,107,43,0.25);
+    color: #ff6b2b;
+}
+.tc-btn-edit:hover {
+    background: rgba(255,107,43,0.18);
+    border-color: #ff6b2b;
+    box-shadow: 0 4px 16px rgba(255,107,43,0.15);
+    color: #ff8c55;
+}
+</style>
