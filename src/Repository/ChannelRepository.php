@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Channel;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @extends ServiceEntityRepository<Channel>
@@ -41,21 +42,65 @@ class ChannelRepository extends ServiceEntityRepository
     //        ;
     //    }
 
-    public function findVisibleForUser(): array
+//    public function findVisibleForUser(?UserInterface $user = null): array
+//    {
+//        $qb = $this->createQueryBuilder('c')
+//            ->andWhere('c.status = :approved')
+//            ->andWhere('c.isActive = :active')
+//            ->setParameter('approved', \App\Entity\Channel::STATUS_APPROVED)
+//            ->setParameter('active', true)
+//            ->orderBy('c.createdAt', 'DESC')
+//            ;
+//        // visitor => only public
+//        if ($user === null) {
+//            $qb->andWhere('c.type = :public')
+//                ->setParameter('public', Channel::TYPE_PUBLIC);
+//            return $qb->getQuery()->getResult();
+//        }
+//
+//        // Logged-in => show public + private (both visible)
+//        $qb->andWhere('c.type IN (:types)')
+//            ->setParameter('types', [Channel::TYPE_PUBLIC, Channel::TYPE_PRIVATE]);
+//
+//
+//        // user => public OR createdBy = me
+//        $roles = method_exists($user, 'getRoles') ? $user->getRoles() : [];
+//        $isAdmin = in_array('ROLE_ADMIN', $roles, true);
+//
+//        if (!$isAdmin) {
+//            $qb->andWhere('c.type = :public OR c.createdBy = :me')
+//                ->setParameter('public', Channel::TYPE_PUBLIC)
+//                ->setParameter('me', $user->getUserIdentifier());
+//        }
+//
+//        return $qb->getQuery()->getResult();
+//    } /// returns only channels that are approved + active /// used in channelController index+show
+
+    public function findVisibleForUser(?UserInterface $user = null): array
     {
         $qb = $this->createQueryBuilder('c')
             ->andWhere('c.status = :approved')
             ->andWhere('c.isActive = :active')
-            ->setParameter('approved', \App\Entity\Channel::STATUS_APPROVED)
+            ->setParameter('approved', Channel::STATUS_APPROVED)
             ->setParameter('active', true)
-            ->orderBy('c.createdAt', 'DESC')
-            ;
+            ->orderBy('c.createdAt', 'DESC');
+
+        // Visitor => only public
+        if ($user === null) {
+            $qb->andWhere('c.type = :public')
+                ->setParameter('public', Channel::TYPE_PUBLIC);
+
+            return $qb->getQuery()->getResult();
+        }
+
+        // Logged-in => show public + private (both visible)
+        $qb->andWhere('c.type IN (:types)')
+            ->setParameter('types', [Channel::TYPE_PUBLIC, Channel::TYPE_PRIVATE]);
 
         return $qb->getQuery()->getResult();
-
     }
 
-    public function findAdminList(string $q, string $status, string $type, string $active): array
+    public function findAdminList(string $q, string $status, string $type, string $active, string $sort, string $dir): array
     {
         $qb = $this->createQueryBuilder('c');
 
@@ -79,9 +124,40 @@ class ChannelRepository extends ServiceEntityRepository
         if ($active !== 'all') {
             $qb->andWhere('c.isActive = :active')->setParameter('active', $active === '1');
         }
+        $sortMap = [
+            'id'        => 'c.id',
+            'name'      => 'c.name',
+            'game'      => 'c.game',
+            'type'      => 'c.type',
+            'status'    => 'c.status',
+            'active'    => 'c.isActive',
+            'createdAt' => 'c.createdAt',
+            'createdBy' => 'c.createdBy',
+            'approvedAt'=> 'c.approvedAt',
+        ];
 
-        return $qb->orderBy('c.createdAt', 'DESC')->getQuery()->getResult();
-    }
+        $sortExpr = $sortMap[$sort] ?? 'c.createdAt';
+        $dirSql   = strtoupper($dir) === 'asc' ? 'ASC' : 'DESC';
+
+        $qb->orderBy('LOWER(' . $sortExpr . ')', $dirSql);
+
+        if($sortExpr !== "c.id"){
+            $qb->addOrderBy("c.id", $dirSql);
+        }
+
+        return $qb->getQuery()->getResult();
+
+        /*if($sortExpr !== 'c.id'){
+            $qb->addOrderBy('c.id','DESC');
+        }
+        return $qb->getQuery()->getResult();
+
+        return $qb
+            //->orderBy('c.id', 'DESC')
+            ->addOrderBy($sortExpr, $dirSql)
+            ->getQuery()
+            ->getResult();*/
+    }/// used in adminchannelcontroller for filtering
 
     public function countByStatus(string $status): int
     {
@@ -91,7 +167,7 @@ class ChannelRepository extends ServiceEntityRepository
             ->setParameter('s', $status)
             ->getQuery()
             ->getSingleScalarResult();
-    }
+    } /// count channels by status user in adminchannelcontroller for pending count in admin ui
 
 
 }

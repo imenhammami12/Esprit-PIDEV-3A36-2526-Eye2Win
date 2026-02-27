@@ -253,7 +253,7 @@ class AdminPlanningController extends AbstractController
         EntityManagerInterface $em
     ): Response {
         $review = $reviewRepository->find($id);
-        
+
         if (!$review) {
             $this->addFlash('error', 'The review no longer exists.');
             return $this->redirectToRoute('admin_planning_reviews');
@@ -262,10 +262,10 @@ class AdminPlanningController extends AbstractController
         if (!$this->isCsrfTokenValid('delete-review-' . $review->getId(), $request->request->get('_token'))) {
             throw $this->createAccessDeniedException('Token CSRF invalide');
         }
-        
+
         $em->remove($review);
         $em->flush();
-        
+
         $this->addFlash('success', 'The review has been deleted.');
         return $this->redirectToRoute('admin_planning_reviews');
     }

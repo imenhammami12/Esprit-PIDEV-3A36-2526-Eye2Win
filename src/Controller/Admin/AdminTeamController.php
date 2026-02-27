@@ -68,7 +68,7 @@ class AdminTeamController extends AbstractController
             $request->query->getInt('page', 1),
             20 // Items per page
         );
-        
+
         $stats = $teamRepository->getStatistics();
         
         return $this->render('admin/teams/index.html.twig', [

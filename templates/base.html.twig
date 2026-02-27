@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+    <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="{% block meta_description %}EyeTwin — Plateforme eSport compétitive. Analyse vidéo, tournois, coaching et communauté gaming.{% endblock %}">
@@ -13,9 +14,28 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
+
     {% block stylesheets %}
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.min.css') }}">
+    <!-- animate CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/css/animate.css') }}">
+    <!-- owl carousel CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/css/owl.carousel.min.css') }}">
+    <!-- font awesome CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/css/all.css') }}">
+    <!-- flaticon CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/css/flaticon.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/themify-icons.css') }}">
+    <!-- magnific popup CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/css/magnific-popup.css') }}">
+    <!-- slick CSS -->
+    <link rel="stylesheet" href="{{ asset('assets/css/slick.css') }}">
+    <!-- style CSS -->
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/2fa-custom-styles.css') }}">
+
+    <!-- NAVBAR FIXES -->
     <link rel="stylesheet" href="{{ asset('assets/css/navbar-fixes.css') }}">
 
     <link rel="preload" href="{{ asset('assets/css/animate.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -66,6 +86,17 @@
               integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
               crossorigin="anonymous" referrerpolicy="no-referrer">
     </noscript>
+    <link rel="stylesheet" href="{{ asset('assets/css/profile.css') }}">
+    <!-- E-SPORT-UI & CHECKBOX FORM-->
+    <link rel="stylesheet" href="{{ asset('assets/css/esport-ui.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/community.css') }}">
+        <!-- Font Awesome CDN -->
+
+    <!-- Font Awesome CDN -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
     {% endblock %}
 
     <style>
@@ -475,6 +506,22 @@
     </style>
 </head>
 
+<body>
+    <div class="body_bg">
+        <!--::header part start::-->
+        <header class="main_menu single_page_menu">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-12">
+                        <nav class="navbar navbar-expand-lg navbar-light">
+                            <a class="navbar-brand" href="{{ path('app_home') }}">
+                                <img src="{{ asset('assets/img/eyetwin-logo.png') }}" alt="EyeTwin Logo">
+                            </a>
+                            <button class="navbar-toggler" type="button" data-toggle="collapse"
+                                data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                                aria-expanded="false" aria-label="Toggle navigation">
+                                <span class="menu_icon"><i class="fas fa-bars"></i></span>
+                            </button>
 <body data-user-id="{{ app.user ? app.user.id : '' }}">
 
 <!-- ══ CURSOR CANVAS (unique, 80×80px) ══ -->
@@ -545,6 +592,132 @@
                             <span class="menu_icon"><i class="fas fa-bars"></i></span>
                         </button>
 
+                            <div class="collapse navbar-collapse main-menu-item" id="navbarSupportedContent">
+                                <ul class="navbar-nav">
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="{{ path('app_home') }}">Home</a>
+                                    </li>
+                                    {% if app.user %}
+
+
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="{{ path('app_planning') }}">Planning</a>
+                                        </li>
+                                         <li class="nav-item">
+                                            <a class="nav-link" href="{{ path('app_tournoi_landing') }}">Tournois</a>
+                                        </li>
+                                           <li class="nav-item">
+                                            <a class="nav-link" href="{{ path('app_video_upload') }}">Uploader</a>
+                                            </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="{{ path('app_teams_index') }}">Teams</a>
+                                        </li>
+                                        </li>
+                                                                                <li class="nav-item">
+                                            <a class="nav-link" href="{{ path('community_channels_index') }}">Community</a>
+                                        </li>
+
+                                        {# 🔔 Notifications bell dropdown #}
+                                        <li class="nav-item dropdown position-relative">
+                                            <a class="nav-link dropdown-toggle" href="#" id="notifDropdown"
+                                               role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                               style="position: relative;">
+                                                <i class="fas fa-bell"></i>
+
+                                                {% if navUnreadCount|default(0) > 0 %}
+                                                    <span class="badge badge-danger"
+                                                          style="position:absolute; top:0px; right:-6px; font-size:10px; border-radius:50%;">
+                {{ navUnreadCount }}
+            </span>
+                                                {% endif %}
+                                            </a>
+
+                                            <div class="dropdown-menu dropdown-menu-right p-0 shadow"
+                                                 aria-labelledby="notifDropdown"
+                                                 style="width: 360px; border-radius: 12px; overflow: hidden;">
+
+                                                <div class="d-flex justify-content-between align-items-center px-3 py-2"
+                                                     style="border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2);">
+                                                    <strong style="color:#fff;">Notifications</strong>
+                                                </div>
+
+                                                <div style="max-height: 420px; overflow:auto; background: rgba(15,15,20,0.98);">
+                                                    {% if navNotifications|default([])|length == 0 %}
+                                                        <div class="p-3 text-muted">No notifications ✅</div>
+                                                    {% else %}
+                                                        {% for notif in navNotifications %}
+                                                            <div class="px-3 py-2"
+                                                                 style="border-bottom: 1px solid rgba(255,255,255,0.08); color:#fff; {{ notif.read ? '' : 'background: rgba(255,255,255,0.06);' }}">
+                                                                <div style="font-size: 14px;">
+                                                                    <span class="me-2">{{ notif.type.getIcon() }}</span>
+                                                                    <span class="{{ notif.read ? 'text-muted' : '' }}">{{ notif.message }}</span>
+                                                                </div>
+                                                                <div class="small text-muted mt-1">{{ notif.createdAt|date('d/m/Y H:i') }}</div>
+
+                                                                <div class="mt-2 d-flex gap-2">
+                                                                    {% if notif.link %}
+                                                                        <a href="{{ notif.link }}" class="btn btn-sm btn-outline-light">View</a>
+                                                                    {% endif %}
+
+                                                                    {% if not notif.read %}
+                                                                        <form method="post" action="{{ path('user_notification_read', { id: notif.id }) }}">
+                                                                            <input type="hidden" name="_token" value="{{ csrf_token('notification_read_' ~ notif.id) }}">
+                                                                            <button type="submit" class="btn btn-sm btn-outline-secondary">Mark read</button>
+                                                                        </form>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </div>
+                                                        {% endfor %}
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </li>
+
+
+                                        <li class="nav-item dropdown">
+                                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
+                                                role="button" data-toggle="dropdown" aria-haspopup="true"
+                                                aria-expanded="false">
+                                                <i class="fas fa-user-circle"></i> {{ app.user.username }}
+                                            </a>
+                                            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                                <a class="dropdown-item" href="{{ path('user_profile') }}">
+                                                    <i class="fas fa-user"></i> My Profile
+                                                </a>
+
+                                                <a class="dropdown-item" href="{{ path('app_2fa_settings') }}">
+                                                    <i class="fas fa-shield-alt"></i> Two-Factor Authentication
+                                                </a>
+
+                                                {% if is_granted('ROLE_ADMIN') %}
+                                                    <div class="dropdown-divider"></div>
+                                                    <a class="dropdown-item admin-link" href="{{ path('admin_dashboard') }}">
+                                                        <i class="fas fa-user-shield"></i> Administration
+                                                    </a>
+                                                {% endif %}
+
+                                                <div class="dropdown-divider"></div>
+                                                <a class="dropdown-item" href="{{ path('app_logout') }}">
+                                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                                </a>
+                                            </div>
+                                        </li>
+                                    {% else %}
+                                        <li class="nav-item">
+                                            <a class="nav-link" href="{{ path('app_login') }}">Login</a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                            {% if not app.user %}
+                                <a href="{{ path('app_register') }}" class="btn_1 d-none d-sm-block">Sign Up</a>
+                            {% endif %}
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- Header part end-->
                         <div class="collapse navbar-collapse main-menu-item" id="navbarSupportedContent">
                             <ul class="navbar-nav">
                                 <li class="nav-item">
@@ -670,15 +843,52 @@
                 <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
                     <i class="fas fa-{{ type == 'error' ? 'exclamation-triangle' : type == 'warning' ? 'exclamation-circle' : type == 'info' ? 'info-circle' : 'check-circle' }}"></i>
                     {{ message }}
+        <!-- Flash Messages -->
+        {% for message in app.flashes('success') %}
+            <div class="container mt-4">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i> {{ message }}
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
             </div>
         {% endfor %}
-    {% endfor %}
 
-    {% block body %}{% endblock %}
+        {% for message in app.flashes('error') %}
+            <div class="container mt-4">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle"></i> {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+        {% endfor %}
+
+        {% for message in app.flashes('warning') %}
+            <div class="container mt-4">
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+        {% endfor %}
+
+        {% for message in app.flashes('info') %}
+            <div class="container mt-4">
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    <i class="fas fa-info-circle"></i> {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+        {% endfor %}
+
+        {% block body %}{% endblock %}
 
     {# ══ FOOTER ══ #}
     <footer class="footer_part">
@@ -709,6 +919,85 @@
         </div>
     </footer>
 </div>
+        <!--::footer_part start::-->
+        <footer class="footer_part">
+            <div class="footer_top">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="single_footer_part">
+                                <a href="{{ path('app_home') }}" class="footer_logo_iner">
+                                    <img src="{{ asset('assets/img/eyetwin-logo.png') }}" alt="EyeTwin">
+                                </a>
+                                <p>The leading eSport platform to improve your gaming performance with intelligent analysis and personalized coaching.</p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="single_footer_part">
+                                <h4>Contact Info</h4>
+                                <p>Address: Tunis, Tunisia</p>
+                                <p>Email: contact@eyetwin.tn</p>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="single_footer_part">
+                                <h4>Important Links</h4>
+                                <ul class="list-unstyled">
+                                    <li><a href="{{ path('app_home') }}">Home</a></li>
+                                    {% if app.user %}
+                                        <li><a href="{{ path('app_video_upload') }}">Uploader</a></li>
+                                        {% if is_granted('ROLE_ADMIN') %}
+                                            <li><a href="{{ path('admin_dashboard') }}">Dashboard</a></li>
+                                        {% endif %}
+                                    {% else %}
+                                        <li><a href="{{ path('app_register') }}">Create Account</a></li>
+                                        <li><a href="{{ path('app_login') }}">Login</a></li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="single_footer_part">
+                                <h4>Newsletter</h4>
+                                <p>Stay updated with the latest eSport news and tournaments.</p>
+                                <div id="mc_embed_signup">
+                                    <form class="subscribe_form relative mail_part">
+                                        <input type="email" name="email" placeholder="Email Address"
+                                            class="placeholder hide-on-focus">
+                                        <button type="submit" class="email_icon newsletter-submit button-contactForm">
+                                            <i class="far fa-paper-plane"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="copygight_text">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-lg-8">
+                            <div class="copyright_text">
+                                <p>Copyright &copy;<script>document.write(new Date().getFullYear());</script> EyeTwin eSport Platform - All Rights Reserved</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="footer_icon social_icon">
+                                <ul class="list-unstyled">
+                                    <li><a href="#" class="single_social_icon"><i class="fab fa-facebook-f"></i></a></li>
+                                    <li><a href="#" class="single_social_icon"><i class="fab fa-twitter"></i></a></li>
+                                    <li><a href="#" class="single_social_icon"><i class="fab fa-instagram"></i></a></li>
+                                    <li><a href="#" class="single_social_icon"><i class="fab fa-discord"></i></a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <!--::footer_part end::-->
+    </div>
 
 {% block javascripts %}
 <script src="{{ asset('assets/js/jquery-1.12.1.min.js') }}"></script>
@@ -729,11 +1018,64 @@
 <script src="{{ asset('assets/js/mail-script.js') }}" defer></script>
 <script src="{{ asset('assets/js/custom.js') }}" defer></script>
 {% endblock %}
+    {% block javascripts %}
+    <!-- jquery plugins here-->
+    <script src="{{ asset('assets/js/jquery-1.12.1.min.js') }}"></script>
+    <!-- popper js -->
+    <script src="{{ asset('assets/js/popper.min.js') }}"></script>
+    <!-- bootstrap js -->
+    <script src="{{ asset('assets/js/bootstrap.min.js') }}"></script>
+    <!-- easing js -->
+    <script src="{{ asset('assets/js/jquery.magnific-popup.js') }}"></script>
+    <!-- swiper js -->
+    <script src="{{ asset('assets/js/swiper.min.js') }}"></script>
+    <!-- masonry js -->
+    <script src="{{ asset('assets/js/masonry.pkgd.js') }}"></script>
+    <!-- owl carousel js -->
+    <script src="{{ asset('assets/js/owl.carousel.min.js') }}"></script>
+    <script src="{{ asset('assets/js/jquery.nice-select.min.js') }}"></script>
+    <!-- slick js -->
+    <script src="{{ asset('assets/js/slick.min.js') }}"></script>
+    <script src="{{ asset('assets/js/jquery.counterup.min.js') }}"></script>
+    <script src="{{ asset('assets/js/waypoints.min.js') }}"></script>
+    <script src="{{ asset('assets/js/contact.js') }}"></script>
+    <script src="{{ asset('assets/js/jquery.ajaxchimp.min.js') }}"></script>
+    <script src="{{ asset('assets/js/jquery.form.js') }}"></script>
+    <script src="{{ asset('assets/js/jquery.validate.min.js') }}"></script>
+    <script src="{{ asset('assets/js/mail-script.js') }}"></script>
+    <!-- custom js -->
+    <script src="{{ asset('assets/js/custom.js') }}"></script>
+    {% endblock %}
 
 {% if app.user %}
 <script>window.MERCURE_HUB_URL = 'http://localhost:3000/.well-known/mercure';</script>
 <script src="{{ asset('assets/js/realtime-notifications.js') }}" defer></script>
 {% endif %}
+    {# ✅ Global Confirm Modal (Bootstrap) #}
+    <div class="modal fade" id="confirmActionModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: rgba(15,15,20,0.95); border:1px solid rgba(255,255,255,0.08); border-radius:16px;">
+                <div class="modal-header" style="border-bottom:1px solid rgba(255,255,255,0.08);">
+                    <h5 class="modal-title" id="confirmActionTitle" style="color:#fff;">Confirm</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body" style="color: rgba(255,255,255,0.85);">
+                    <div id="confirmActionMessage">Are you sure?</div>
+                </div>
+
+                <div class="modal-footer" style="border-top:1px solid rgba(255,255,255,0.08);">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+
+                    {# ✅ This form is used to submit POST actions (with CSRF if provided) #}
+                    <form id="confirmActionForm" method="post" action="">
+                        <input type="hidden" name="_token" id="confirmActionToken" value="">
+                        <button type="submit" class="btn btn-danger" id="confirmActionBtn">Confirm</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <script>
 (function () {
@@ -743,11 +1085,22 @@
        EYETWIN — GAMING CURSOR SYSTEM
        4 curseurs canvas • 1 RAF loop • localStorage persistence
     ══════════════════════════════════════════════════════════ */
+    <script>
+        window.openConfirmModal = function({ title = 'Confirm', message = 'Are you sure?', action = '', method = 'post', token = '', confirmText = 'Confirm' }) {
+            document.getElementById('confirmActionTitle').textContent = title;
+            document.getElementById('confirmActionMessage').textContent = message;
 
     const STORAGE_KEY = 'et_cursor_type';
     const CURSORS     = ['crosshair', 'sword', 'energy', 'arrow'];
     const ICONS       = { crosshair:'🎯', sword:'⚔️', energy:'⚡', arrow:'🏹' };
+            const form = document.getElementById('confirmActionForm');
+            const tokenInput = document.getElementById('confirmActionToken');
+            const btn = document.getElementById('confirmActionBtn');
 
+            form.action = action;
+            form.method = method.toLowerCase() === 'get' ? 'get' : 'post';
+            tokenInput.value = token || '';
+            tokenInput.style.display = token ? 'block' : 'none';
     let cursorType  = localStorage.getItem(STORAGE_KEY) || 'crosshair';
     let mouseX = -200, mouseY = -200;
     let isHover = false, isClick = false, clickTime = 0;
@@ -761,7 +1114,10 @@
     const ctx    = canvas.getContext('2d', { alpha: true, desynchronized: true });
     ctx.imageSmoothingEnabled = false;
     const CX = 40, CY = 40; // canvas center
+            btn.textContent = confirmText;
 
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmActionModal')).show();
+        };
     // ── Hotspot offsets (canvas top-left → pointer hotspot) ──
     const HOTSPOT = {
         crosshair : { x:40, y:40 },
@@ -770,6 +1126,10 @@
         arrow     : { x:40, y:16 },
     };
 
+        // ✅ Replace any native confirm() usage
+        document.addEventListener('submit', function(e) {
+            const form = e.target;
+            if (!form.matches('[data-confirm]')) return;
     // ── Mouse events ──────────────────────────────────────────
     document.addEventListener('mousemove', e => {
         mouseX = e.clientX; mouseY = e.clientY;
@@ -1043,11 +1403,21 @@ ctx.strokeStyle = `rgba(232,55,42,${isClick?1:.85})`;
         requestAnimationFrame(continuousLoop);
     })(0);
 
+            e.preventDefault();
     // ── Picker UI ────────────────────────────────────────────
     const btn   = document.getElementById('et-cursor-btn');
     const panel = document.getElementById('et-cursor-panel');
     const opts  = document.querySelectorAll('.et-cursor-opt');
 
+            window.openConfirmModal({
+                title: form.getAttribute('data-confirm-title') || 'Confirm',
+                message: form.getAttribute('data-confirm') || 'Are you sure?',
+                action: form.getAttribute('action'),
+                method: form.getAttribute('method') || 'post',
+                token: (form.querySelector('input[name="_token"]') || {}).value || '',
+                confirmText: form.getAttribute('data-confirm-btn') || 'Confirm'
+            });
+        });
     function setCursor(type) {
         if (!CURSORS.includes(type)) return;
         cursorType = type;
@@ -1107,6 +1477,9 @@ ctx.strokeStyle = `rgba(232,55,42,${isClick?1:.85})`;
         })(0);
     }
 
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('[data-confirm-link]');
+            if (!btn) return;
     /* ══════════════════════════════════════════════════════════
        SCROLL PROGRESS BAR
     ══════════════════════════════════════════════════════════ */
@@ -1116,6 +1489,7 @@ ctx.strokeStyle = `rgba(232,55,42,${isClick?1:.85})`;
         if (sp) sp.style.width = pct+'%';
     }, { passive:true });
 
+            e.preventDefault();
     /* ══════════════════════════════════════════════════════════
        NAVBAR SCROLL SHRINK
     ══════════════════════════════════════════════════════════ */
@@ -1126,6 +1500,18 @@ ctx.strokeStyle = `rgba(232,55,42,${isClick?1:.85})`;
             navbar.style.padding    = window.scrollY>60?'0':'';
         }
     }, { passive:true });
+
+            window.openConfirmModal({
+                title: btn.getAttribute('data-confirm-title') || 'Confirm',
+                message: btn.getAttribute('data-confirm-link') || 'Are you sure?',
+                action: btn.getAttribute('href') || btn.getAttribute('data-action'),
+                method: btn.getAttribute('data-method') || 'post',
+                token: btn.getAttribute('data-token') || '',
+                confirmText: btn.getAttribute('data-confirm-btn') || 'Confirm'
+            });
+        });
+    </script>
+
 
     /* ══════════════════════════════════════════════════════════
        RIPPLE ON NAV LINKS

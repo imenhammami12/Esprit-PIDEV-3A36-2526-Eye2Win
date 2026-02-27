@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container py-4" style="max-width: 650px;">
+        <h2>Join a private channel via QR</h2>
+        <p class="text-muted">Upload the QR image shared by the channel owner.</p>
+
+        {% for label, messages in app.flashes %}
+            {% for msg in messages %}
+                <div class="alert alert-{{ label == 'error' ? 'danger' : label }}">{{ msg }}</div>
+            {% endfor %}
+        {% endfor %}
+
+        <form method="post" enctype="multipart/form-data" class="card p-3">
+            <input type="file" name="qr_image" accept="image/*" class="form-control" required>
+            <button class="btn btn-primary mt-3">Scan & Join</button>
+        </form>
+
+        <a href="{{ path('community_channels_index') }}" class="btn btn-link mt-3">Back</a>
+    </div>
+{% endblock %}

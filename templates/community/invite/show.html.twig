@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container py-4">
+        <h2>Invite created ✅</h2>
+
+        <div class="mb-2">
+            <strong>Channel:</strong> {{ invite.channel.name }}
+            <span class="badge bg-dark ms-2">Mode: {{ invite.mode }}</span>
+        </div>
+
+        <div class="card p-3 mb-3">
+            <div class="mb-2"><strong>Invite link (share this)</strong></div>
+            <input class="form-control" value="{{ openUrl }}" readonly onclick="this.select()">
+            <small class="text-muted">Click the field to select & copy.</small>
+        </div>
+
+        <div class="card p-3">
+            <div class="mb-2"><strong>QR Code</strong></div>
+            <img src="{{ path('community_invite_qr', {token: invite.token}) }}" alt="QR Code">
+            <a class="btn btn-outline-light btn-sm mt-2"
+               href="{{ path('community_invite_qr', {token: invite.token}) }}"
+               download="invite-{{ invite.channel.id }}.png">
+                Download QR
+            </a>
+            <div class="mt-2 text-muted">Scan with phone to request/join the channel.</div>
+        </div>
+
+        <a class="btn btn-link mt-3" href="{{ path('community_channels_show', {id: invite.channel.id}) }}">Back</a>
+    </div>
+{% endblock %}
