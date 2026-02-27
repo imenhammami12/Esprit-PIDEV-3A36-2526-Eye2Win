@@ -7,6 +7,7 @@
         "php": ">=8.1",
         "ext-ctype": "*",
         "ext-iconv": "*",
+        "ahmed-bhs/doctrine-doctor": "1.0",
         "cloudinary/cloudinary_php": "^3.1",
         "doctrine/doctrine-bundle": "^2.18",
         "doctrine/doctrine-migrations-bundle": "^3.7",
@@ -61,7 +62,8 @@
         "twig/string-extra": "^3.23",
         "twig/twig": "^2.12|^3.0"
         "twig/twig": "^2.12|^3.0",
-        "twilio/sdk": "^8.11"
+        "twilio/sdk": "^8.11",
+        "webmozart/assert": "1.11"
     },
     "config": {
         "allow-plugins": {
@@ -115,6 +117,7 @@
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "*",
         "fakerphp/faker": "*",
+        "phpstan/phpstan": "^2.1",
         "phpunit/phpunit": "^12.5",
         "symfony/browser-kit": "6.4.*",
         "symfony/css-selector": "6.4.*",

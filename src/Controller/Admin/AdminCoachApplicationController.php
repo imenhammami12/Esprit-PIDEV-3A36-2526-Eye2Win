@@ -2,11 +2,13 @@
 
 namespace App\Controller\Admin;
 
+use App\Entity\AuditLog;
 use App\Entity\CoachApplication;
 use App\Entity\ApplicationStatus;
-use App\Entity\AuditLog;
+use App\Entity\User;
 use App\Repository\CoachApplicationRepository;
 use App\Service\CoachApplicationEmailService;
+use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,7 +17,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use App\Service\NotificationService;
 
 #[Route('/admin/coach-applications')]
 #[IsGranted('ROLE_ADMIN')]
@@ -74,6 +75,7 @@ class AdminCoachApplicationController extends AbstractController
 
         $validSortFields = ['submittedAt', 'reviewedAt', 'status'];
         $validSortOrder  = in_array(strtoupper($sortOrder), ['ASC', 'DESC']) ? strtoupper($sortOrder) : 'DESC';
+
         if (in_array($sortBy, $validSortFields)) {
             $queryBuilder->orderBy('ca.' . $sortBy, $validSortOrder);
         } else {
@@ -106,7 +108,6 @@ class AdminCoachApplicationController extends AbstractController
 
     // ──────────────────────────────────────────────────────────────
     //  STATS AJAX
-    //  IMPORTANT: déclarée AVANT /{id} pour éviter le conflit de route
     // ──────────────────────────────────────────────────────────────
     #[Route('/stats', name: 'admin_coach_applications_stats', methods: ['GET'])]
     public function statsJson(CoachApplicationRepository $repository): JsonResponse
@@ -116,7 +117,6 @@ class AdminCoachApplicationController extends AbstractController
 
     // ──────────────────────────────────────────────────────────────
     //  COACHES LIST
-    //  Déclarée AVANT /{id} pour éviter le conflit de route
     // ──────────────────────────────────────────────────────────────
     #[Route('/coaches', name: 'admin_coaches_list')]
     public function coachesList(EntityManagerInterface $em): Response
@@ -136,7 +136,7 @@ class AdminCoachApplicationController extends AbstractController
     }
 
     // ──────────────────────────────────────────────────────────────
-    //  SHOW — requirements: id doit être un entier
+    //  SHOW
     // ──────────────────────────────────────────────────────────────
     #[Route('/{id}', name: 'admin_coach_applications_show', requirements: ['id' => '\d+'])]
     public function show(CoachApplication $application): Response
@@ -164,7 +164,7 @@ class AdminCoachApplicationController extends AbstractController
         $this->createAuditLog(
             $em, 'COACH_APPLICATION_APPROVED', 'CoachApplication',
             $application->getId(),
-            "Application from " . $application->getUser()->getUsername() . " approved"
+            'Application from ' . $application->getUser()->getUsername() . ' approved'
         );
 
         $em->flush();
@@ -200,7 +200,7 @@ class AdminCoachApplicationController extends AbstractController
         $this->createAuditLog(
             $em, 'COACH_APPLICATION_REJECTED', 'CoachApplication',
             $application->getId(),
-            "Application from " . $application->getUser()->getUsername() . " rejected: $comment"
+            'Application from ' . $application->getUser()->getUsername() . ' rejected: ' . $comment
         );
 
         $em->flush();
@@ -222,8 +222,11 @@ class AdminCoachApplicationController extends AbstractController
         ?int                   $entityId,
         string                 $details
     ): void {
+        /** @var User $currentUser */
+        $currentUser = $this->getUser();
+
         $auditLog = new AuditLog();
-        $auditLog->setUser($this->getUser());
+        $auditLog->setUser($currentUser);
         $auditLog->setAction($action);
         $auditLog->setEntityType($entityType);
         $auditLog->setEntityId($entityId);

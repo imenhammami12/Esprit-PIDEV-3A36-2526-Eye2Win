@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\PasswordResetTokenRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Ignore;
 
 #[ORM\Entity(repositoryClass: PasswordResetTokenRepository::class)]
 #[ORM\Table(name: 'password_reset_tokens')]
@@ -18,6 +19,8 @@ class PasswordResetToken
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $user = null;
 
+    // ✅ DoctrineDoctor Security fix : protect sensitive token from serialization + stack traces
+    #[Ignore]
     #[ORM\Column(length: 64, unique: true)]
     private ?string $token = null;
 
@@ -59,7 +62,8 @@ class PasswordResetToken
         return $this->token;
     }
 
-    public function setToken(string $token): static
+    // ✅ DoctrineDoctor Security fix : SensitiveParameter prevents token from appearing in stack traces
+    public function setToken(#[\SensitiveParameter] string $token): static
     {
         $this->token = $token;
         return $this;
