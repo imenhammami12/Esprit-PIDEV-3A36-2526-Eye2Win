@@ -55,7 +55,9 @@ class ComplaintController extends AbstractController
             $complaint->setSubject($request->request->get('subject'));
             $complaint->setDescription($request->request->get('description'));
             $complaint->setCategory(ComplaintCategory::from($request->request->get('category')));
-            $complaint->setSubmittedBy($this->getUser());
+                /** @var \App\Entity\User $user */
+                $user = $this->getUser();
+                $complaint->setSubmittedBy($user);
 
             // ── Analyse de sentiment via SentimentServiceComplaints ──
             $textToAnalyse = $complaint->getSubject() . ' ' . $complaint->getDescription();

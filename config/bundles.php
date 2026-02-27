@@ -21,4 +21,5 @@ return [
     Symfony\Bundle\MercureBundle\MercureBundle::class => ['all' => true],
     MeteoConcept\HCaptchaBundle\MeteoConceptHCaptchaBundle::class => ['all' => true],
     Symfony\WebpackEncoreBundle\WebpackEncoreBundle::class => ['all' => true],
+    AhmedBhs\DoctrineDoctor\DoctrineDoctorBundle::class => ['dev' => true],
 ];

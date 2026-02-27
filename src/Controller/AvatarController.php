@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -38,8 +39,6 @@ class AvatarController extends AbstractController
 
     // =========================================================================
     //  ROUTE : /avatar/describe
-    //  Analyse la photo avec Llama-3.2-Vision (précis) ou BLIP (fallback)
-    //  Retourne une description détaillée : cheveux, yeux, peau, traits, etc.
     // =========================================================================
     #[Route('/describe', name: 'avatar_describe', methods: ['POST'])]
     public function describe(Request $request, LoggerInterface $logger): JsonResponse
@@ -69,7 +68,7 @@ class AvatarController extends AbstractController
 
         $logger->info('[Avatar/Describe] Trying Llama-3.2-Vision...');
 
-        // ── Tentative 1 : Llama 3.2 Vision (description précise) ──
+        // ── Tentative 1 : Llama 3.2 Vision ──
         $llamaPayload = json_encode([
             'model'      => 'meta-llama/Llama-3.2-11B-Vision-Instruct',
             'max_tokens' => 120,
@@ -115,8 +114,6 @@ class AvatarController extends AbstractController
             $data    = json_decode((string)$response, true);
             $caption = $data['choices'][0]['message']['content'] ?? '';
             $caption = trim(strip_tags($caption));
-
-            // Nettoyer les guillemets ou préfixes éventuels
             $caption = trim($caption, '"\'');
             $caption = preg_replace('/^(description:|here is|the person is|i see)/i', '', $caption);
             $caption = trim($caption);
@@ -127,14 +124,13 @@ class AvatarController extends AbstractController
             }
         }
 
-        // ── Tentative 2 : 503 Llama → modèle en chargement ──
         if ($httpCode === 503) {
             $body = json_decode((string)$response, true);
             $wait = isset($body['estimated_time']) ? (int)ceil($body['estimated_time']) : 20;
             return new JsonResponse(['error' => 'Vision model loading', 'model_loading' => true, 'retry_after' => $wait], 503);
         }
 
-        // ── Tentative 3 : Fallback BLIP (moins précis mais fonctionnel) ──
+        // ── Tentative 2 : Fallback BLIP ──
         $logger->info('[Avatar/Describe] Llama failed (HTTP ' . $httpCode . '), trying BLIP fallback...');
 
         $ch2 = curl_init(self::BLIP_URL);
@@ -166,7 +162,6 @@ class AvatarController extends AbstractController
             }
         }
 
-        // ── Fallback final : description générique ──
         $logger->warning('[Avatar/Describe] All vision APIs failed, using generic fallback');
         return new JsonResponse([
             'success'     => true,
@@ -176,7 +171,7 @@ class AvatarController extends AbstractController
     }
 
     // =========================================================================
-    //  ROUTE : /avatar/toonify  (CODE ORIGINAL — inchangé)
+    //  ROUTE : /avatar/toonify
     // =========================================================================
     #[Route('/toonify', name: 'avatar_toonify', methods: ['POST'])]
     public function toonify(
@@ -289,7 +284,7 @@ class AvatarController extends AbstractController
         $filename = 'avatar_tmp_' . uniqid() . '.' . $ext;
         file_put_contents($uploadDir . $filename, $imageData);
 
-        $logger->info('[Avatar] ✅ Saved: ' . $filename . ' (' . strlen($imageData) . ' bytes)');
+        $logger->info('[Avatar] Saved: ' . $filename . ' (' . strlen($imageData) . ' bytes)');
 
         return new JsonResponse([
             'success'    => true,
@@ -298,7 +293,7 @@ class AvatarController extends AbstractController
     }
 
     // =========================================================================
-    //  ROUTE : /avatar/save  (CODE ORIGINAL — inchangé)
+    //  ROUTE : /avatar/save
     // =========================================================================
     #[Route('/save', name: 'avatar_save', methods: ['POST'])]
     public function save(Request $request, EntityManagerInterface $em): JsonResponse
@@ -312,6 +307,7 @@ class AvatarController extends AbstractController
             return new JsonResponse(['error' => 'Invalid image_url'], 400);
         }
 
+        /** @var User $user */
         $user      = $this->getUser();
         $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/profiles/';
         $localPath = $this->getParameter('kernel.project_dir') . '/public' . $imageUrl;

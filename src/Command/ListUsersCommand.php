@@ -25,7 +25,7 @@ class ListUsersCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        
+
         $users = $this->em->getRepository(User::class)->findAll();
 
         if (empty($users)) {
@@ -37,11 +37,10 @@ class ListUsersCommand extends Command
 
         $tableData = [];
         foreach ($users as $user) {
-            $roles = $user->getRoles();
-            // ✅ Vérifier ROLE_ADMIN ou ROLE_SUPER_ADMIN
+            $roles   = $user->getRoles();
             $isAdmin = in_array('ROLE_ADMIN', $roles) || in_array('ROLE_SUPER_ADMIN', $roles);
             $hasFace = $user->getFaceDescriptor() ? '✓ Oui' : '✗ Non';
-            
+
             $tableData[] = [
                 $user->getId(),
                 $user->getEmail(),
@@ -57,19 +56,19 @@ class ListUsersCommand extends Command
             $tableData
         );
 
-        // ✅ Compter correctement les admins
-        $adminCount = count(array_filter($users, function($u) {
+        // ✅ Fix PHPStan : typage explicite du callback
+        $adminCount = count(array_filter($users, function (User $u): bool {
             $roles = $u->getRoles();
             return in_array('ROLE_ADMIN', $roles) || in_array('ROLE_SUPER_ADMIN', $roles);
         }));
-        
-        $faceCount = count(array_filter($users, fn($u) => $u->getFaceDescriptor()));
+
+        $faceCount = count(array_filter($users, fn(User $u): bool => $u->getFaceDescriptor() !== null));
 
         $io->section('Statistiques :');
         $io->text([
-            "Total utilisateurs : " . count($users),
-            "Administrateurs (ADMIN ou SUPER_ADMIN) : " . $adminCount,
-            "Avec reconnaissance faciale : " . $faceCount,
+            'Total utilisateurs : ' . count($users),
+            'Administrateurs (ADMIN ou SUPER_ADMIN) : ' . $adminCount,
+            'Avec reconnaissance faciale : ' . $faceCount,
         ]);
 
         return Command::SUCCESS;

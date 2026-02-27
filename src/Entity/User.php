@@ -13,6 +13,7 @@ use Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Attribute\Ignore;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
@@ -48,6 +49,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     #[ORM\Column(type: 'text')]
     private string $rolesJson = '[]';
 
+    // ✅ DoctrineDoctor Security fix : protect sensitive field from serialization
+    #[Ignore]
     #[ORM\Column]
     private ?string $password = null;
 
@@ -87,6 +90,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
 
     // ===== 2FA FIELDS =====
 
+    // ✅ DoctrineDoctor Security fix : protect sensitive field from serialization
+    #[Ignore]
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $totpSecret = null;
 
@@ -140,19 +145,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
 
     public function __construct()
     {
-        $this->ownedTeams       = new ArrayCollection();
-        $this->teamMemberships  = new ArrayCollection();
+        $this->ownedTeams        = new ArrayCollection();
+        $this->teamMemberships   = new ArrayCollection();
         $this->coachApplications = new ArrayCollection();
-        $this->notifications    = new ArrayCollection();
-        $this->auditLogs        = new ArrayCollection();
-        $this->trainingSessions = new ArrayCollection();
-        $this->videos           = new ArrayCollection();
-        $this->createdAt        = new \DateTime();
-        $this->lastLogin        = new \DateTime();
-        $this->accountStatus    = AccountStatus::ACTIVE;
-        $this->rolesJson        = json_encode(['ROLE_USER']);
-        $this->isTotpEnabled    = false;
-        $this->coinBalance      = 0;
+        $this->notifications     = new ArrayCollection();
+        $this->auditLogs         = new ArrayCollection();
+        $this->trainingSessions  = new ArrayCollection();
+        $this->videos            = new ArrayCollection();
+        $this->createdAt         = new \DateTime();
+        $this->lastLogin         = new \DateTime();
+        $this->accountStatus     = AccountStatus::ACTIVE;
+        $this->rolesJson         = json_encode(['ROLE_USER']);
+        $this->isTotpEnabled     = false;
+        $this->coinBalance       = 0;
     }
 
     // ===== BASIC GETTERS / SETTERS =====
@@ -207,7 +212,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
         return $this->password;
     }
 
-    public function setPassword(string $password): static
+    // ✅ DoctrineDoctor Security fix : SensitiveParameter prevents value from appearing in stack traces
+    public function setPassword(#[\SensitiveParameter] string $password): static
     {
         $this->password = $password;
         return $this;
@@ -290,7 +296,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
 
     public function setCoinBalance(int $coinBalance): static
     {
-        $this->coinBalance = max(0, $coinBalance); // never go below 0
+        $this->coinBalance = max(0, $coinBalance);
         return $this;
     }
 
@@ -433,7 +439,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
         return $this->totpSecret;
     }
 
-    public function setTotpSecret(?string $totpSecret): static
+    // ✅ DoctrineDoctor Security fix : SensitiveParameter prevents value from appearing in stack traces
+    public function setTotpSecret(#[\SensitiveParameter] ?string $totpSecret): static
     {
         $this->totpSecret = $totpSecret;
         return $this;
