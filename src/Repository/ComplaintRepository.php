@@ -9,16 +9,39 @@ use App\Entity\ComplaintCategory;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 /**
  * @extends ServiceEntityRepository<Complaint>
  */
 class ComplaintRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
-    {
+    public function __construct(
+        ManagerRegistry $registry,
+        private readonly CacheInterface $complaintStatsCache,
+        private readonly CacheInterface $dashboardCache,
+        private readonly CacheInterface $monthlyStatsCache,
+    ) {
         parent::__construct($registry, Complaint::class);
     }
+
+    // -------------------------------------------------------------------------
+    // Cache invalidation — appeler après chaque create / update / delete
+    // -------------------------------------------------------------------------
+
+    public function invalidateStatisticsCache(): void
+    {
+        $this->complaintStatsCache->delete('complaint_statistics');
+        $this->complaintStatsCache->delete('complaint_priority_statistics');
+        $this->complaintStatsCache->delete('complaint_category_statistics');
+        $this->dashboardCache->delete('dashboard_stats');
+        $this->monthlyStatsCache->delete('monthly_statistics');
+    }
+
+    // -------------------------------------------------------------------------
+    // Queries
+    // -------------------------------------------------------------------------
 
     /**
      * Find complaints by user
@@ -26,6 +49,9 @@ class ComplaintRepository extends ServiceEntityRepository
     public function findByUser(User $user): array
     {
         return $this->createQueryBuilder('c')
+            ->leftJoin('c.submittedBy', 'u')
+            ->leftJoin('c.assignedTo', 'a')
+            ->addSelect('u', 'a')
             ->where('c.submittedBy = :user')
             ->setParameter('user', $user)
             ->orderBy('c.createdAt', 'DESC')
@@ -38,12 +64,7 @@ class ComplaintRepository extends ServiceEntityRepository
      */
     public function countPending(): int
     {
-        return $this->createQueryBuilder('c')
-            ->select('COUNT(c.id)')
-            ->where('c.status = :status')
-            ->setParameter('status', ComplaintStatus::PENDING)
-            ->getQuery()
-            ->getSingleScalarResult();
+        return $this->countByStatus(ComplaintStatus::PENDING);
     }
 
     /**
@@ -51,7 +72,7 @@ class ComplaintRepository extends ServiceEntityRepository
      */
     public function countByStatus(ComplaintStatus $status): int
     {
-        return $this->createQueryBuilder('c')
+        return (int) $this->createQueryBuilder('c')
             ->select('COUNT(c.id)')
             ->where('c.status = :status')
             ->setParameter('status', $status)
@@ -64,7 +85,7 @@ class ComplaintRepository extends ServiceEntityRepository
      */
     public function countByPriority(ComplaintPriority $priority): int
     {
-        return $this->createQueryBuilder('c')
+        return (int) $this->createQueryBuilder('c')
             ->select('COUNT(c.id)')
             ->where('c.priority = :priority')
             ->setParameter('priority', $priority)
@@ -77,7 +98,7 @@ class ComplaintRepository extends ServiceEntityRepository
      */
     public function countByCategory(ComplaintCategory $category): int
     {
-        return $this->createQueryBuilder('c')
+        return (int) $this->createQueryBuilder('c')
             ->select('COUNT(c.id)')
             ->where('c.category = :category')
             ->setParameter('category', $category)
@@ -86,111 +107,48 @@ class ComplaintRepository extends ServiceEntityRepository
     }
 
     /**
-     * Get statistics for dashboard.
-     *
-     * Uses a single DQL query that groups by status enum object.
-     * Doctrine handles all enum ↔ string mapping automatically.
+     * Count complaints created today
      */
-    public function getStatistics(): array
+    public function countToday(): int
     {
-        $stats = [
-            'total'       => 0,
-            'pending'     => 0,
-            'in_progress' => 0,
-            'resolved'    => 0,
-            'closed'      => 0,
-            'rejected'    => 0,
-        ];
-
-        // Map enum case name (lowercase) to stats key
-        $keyMap = [
-            'PENDING'     => 'pending',
-            'IN_PROGRESS' => 'in_progress',
-            'RESOLVED'    => 'resolved',
-            'CLOSED'      => 'closed',
-            'REJECTED'    => 'rejected',
-        ];
-
-        $results = $this->getEntityManager()
-            ->createQuery('SELECT c.status, COUNT(c.id) AS cnt FROM App\Entity\Complaint c GROUP BY c.status')
-            ->getResult();
-
-        foreach ($results as $row) {
-            // $row['status'] is a ComplaintStatus enum object
-            $statusValue = $row['status'] instanceof ComplaintStatus
-                ? $row['status']->value          // e.g. "PENDING"
-                : (string) $row['status'];        // fallback if string
-
-            $key = $keyMap[$statusValue] ?? strtolower(str_replace(' ', '_', $statusValue));
-
-            if (array_key_exists($key, $stats)) {
-                $stats[$key] = (int) $row['cnt'];
-            }
-            $stats['total'] += (int) $row['cnt'];
-        }
-
-        return $stats;
+        return (int) $this->createQueryBuilder('c')
+            ->select('COUNT(c.id)')
+            ->where('c.createdAt >= :today')
+            ->setParameter('today', new \DateTime('today'))
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 
     /**
-     * Get priority statistics
+     * Count complaints resolved today
      */
-    public function getPriorityStatistics(): array
+    public function countResolvedToday(): int
     {
-        $stats = [
-            'low'    => 0,
-            'medium' => 0,
-            'high'   => 0,
-            'urgent' => 0,
-        ];
-
-        $conn = $this->getEntityManager()->getConnection();
-        $sql  = 'SELECT priority, COUNT(id) AS cnt FROM complaint GROUP BY priority';
-
-        foreach ($conn->executeQuery($sql)->fetchAllAssociative() as $row) {
-            $key = strtolower($row['priority']);
-            if (array_key_exists($key, $stats)) {
-                $stats[$key] = (int) $row['cnt'];
-            }
-        }
-
-        return $stats;
+        return (int) $this->createQueryBuilder('c')
+            ->select('COUNT(c.id)')
+            ->where('c.resolvedAt >= :today')
+            ->setParameter('today', new \DateTime('today'))
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 
     /**
-     * Get category statistics
+     * Count unassigned complaints
      */
-    public function getCategoryStatistics(): array
+    public function countUnassigned(): int
     {
-        $stats = [];
-
-        $conn = $this->getEntityManager()->getConnection();
-        $sql  = 'SELECT category, COUNT(id) AS cnt FROM complaint GROUP BY category';
-
-        foreach ($conn->executeQuery($sql)->fetchAllAssociative() as $row) {
-            $key          = strtolower($row['category']);
-            $stats[$key]  = (int) $row['cnt'];
-        }
-
-        return $stats;
-    }
-
-    /**
-     * Get average resolution time in hours
-     */
-    public function getAverageResolutionTime(): ?float
-    {
-        $conn = $this->getEntityManager()->getConnection();
-
-        $sql = '
-            SELECT AVG(TIMESTAMPDIFF(HOUR, created_at, resolved_at)) AS avg_hours
-            FROM complaint
-            WHERE resolved_at IS NOT NULL
-        ';
-
-        $result = $conn->executeQuery($sql)->fetchOne();
-
-        return $result ? (float) $result : null;
+        return (int) $this->getEntityManager()
+            ->createQuery(
+                'SELECT COUNT(c.id) FROM App\Entity\Complaint c
+                 WHERE c.assignedTo IS NULL
+                 AND c.status NOT IN (:excludedStatuses)'
+            )
+            ->setParameter('excludedStatuses', [
+                ComplaintStatus::RESOLVED,
+                ComplaintStatus::CLOSED,
+                ComplaintStatus::REJECTED,
+            ])
+            ->getSingleScalarResult();
     }
 
     /**
@@ -198,11 +156,12 @@ class ComplaintRepository extends ServiceEntityRepository
      */
     public function findRecent(int $limit = 10): array
     {
-        $date = new \DateTime('-30 days');
-
         return $this->createQueryBuilder('c')
+            ->leftJoin('c.submittedBy', 'u')
+            ->leftJoin('c.assignedTo', 'a')
+            ->addSelect('u', 'a')
             ->where('c.createdAt >= :date')
-            ->setParameter('date', $date)
+            ->setParameter('date', new \DateTime('-30 days'))
             ->orderBy('c.createdAt', 'DESC')
             ->setMaxResults($limit)
             ->getQuery()
@@ -215,30 +174,19 @@ class ComplaintRepository extends ServiceEntityRepository
     public function findUnassigned(): array
     {
         return $this->createQueryBuilder('c')
+            ->leftJoin('c.submittedBy', 'u')
+            ->addSelect('u')
             ->where('c.assignedTo IS NULL')
-            ->andWhere('c.status != :resolved')
-            ->andWhere('c.status != :closed')
-            ->setParameter('resolved', ComplaintStatus::RESOLVED)
-            ->setParameter('closed', ComplaintStatus::CLOSED)
+            ->andWhere('c.status NOT IN (:finals)')
+            ->setParameter('finals', [
+                ComplaintStatus::RESOLVED,
+                ComplaintStatus::CLOSED,
+                ComplaintStatus::REJECTED,
+            ])
             ->orderBy('c.priority', 'DESC')
             ->addOrderBy('c.createdAt', 'ASC')
             ->getQuery()
             ->getResult();
-    }
-
-    /**
-     * Count unassigned complaints (efficient — no full collection load)
-     */
-    public function countUnassigned(): int
-    {
-        return (int) $this->getEntityManager()
-            ->createQuery(
-                'SELECT COUNT(c.id) FROM App\Entity\Complaint c
-                 WHERE c.assignedTo IS NULL
-                 AND c.status NOT IN (:excludedStatuses)'
-            )
-            ->setParameter('excludedStatuses', [ComplaintStatus::RESOLVED, ComplaintStatus::CLOSED])
-            ->getSingleScalarResult();
     }
 
     /**
@@ -247,6 +195,8 @@ class ComplaintRepository extends ServiceEntityRepository
     public function findByAssignedAdmin(User $admin): array
     {
         return $this->createQueryBuilder('c')
+            ->leftJoin('c.submittedBy', 'u')
+            ->addSelect('u')
             ->where('c.assignedTo = :admin')
             ->setParameter('admin', $admin)
             ->orderBy('c.priority', 'DESC')
@@ -280,6 +230,7 @@ class ComplaintRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('c')
             ->leftJoin('c.submittedBy', 'u')
+            ->addSelect('u')
             ->where('c.subject LIKE :keyword')
             ->orWhere('c.description LIKE :keyword')
             ->orWhere('u.username LIKE :keyword')
@@ -294,10 +245,10 @@ class ComplaintRepository extends ServiceEntityRepository
      * Get complaints with filters for admin panel
      */
     public function findWithFilters(
-        ?string $status = null,
-        ?string $priority = null,
-        ?string $category = null,
-        ?int $assignedToId = null
+        ?string $status       = null,
+        ?string $priority     = null,
+        ?string $category     = null,
+        ?int    $assignedToId = null
     ): array {
         $qb = $this->createQueryBuilder('c')
             ->leftJoin('c.submittedBy', 'u')
@@ -330,54 +281,134 @@ class ComplaintRepository extends ServiceEntityRepository
                   ->getResult();
     }
 
-    /**
-     * Count complaints created today
-     */
-    public function countToday(): int
-    {
-        $today = new \DateTime('today');
+    // -------------------------------------------------------------------------
+    // Statistics — cached in Redis
+    // -------------------------------------------------------------------------
 
-        return $this->createQueryBuilder('c')
-            ->select('COUNT(c.id)')
-            ->where('c.createdAt >= :today')
-            ->setParameter('today', $today)
-            ->getQuery()
-            ->getSingleScalarResult();
+    /**
+     * Dashboard statistics — CACHED 5 minutes in Redis
+     */
+    public function getStatistics(): array
+    {
+        return $this->complaintStatsCache->get('complaint_statistics', function (ItemInterface $item) {
+            $item->expiresAfter(300); // 5 minutes
+
+            $stats = [
+                'total'       => 0,
+                'pending'     => 0,
+                'in_progress' => 0,
+                'resolved'    => 0,
+                'closed'      => 0,
+                'rejected'    => 0,
+            ];
+
+            $keyMap = [
+                'PENDING'     => 'pending',
+                'IN_PROGRESS' => 'in_progress',
+                'RESOLVED'    => 'resolved',
+                'CLOSED'      => 'closed',
+                'REJECTED'    => 'rejected',
+            ];
+
+            $results = $this->getEntityManager()
+                ->createQuery('SELECT c.status, COUNT(c.id) AS cnt FROM App\Entity\Complaint c GROUP BY c.status')
+                ->getResult();
+
+            foreach ($results as $row) {
+                $statusValue = $row['status'] instanceof ComplaintStatus
+                    ? $row['status']->value
+                    : (string) $row['status'];
+
+                $key = $keyMap[$statusValue] ?? strtolower(str_replace(' ', '_', $statusValue));
+
+                if (array_key_exists($key, $stats)) {
+                    $stats[$key] = (int) $row['cnt'];
+                }
+                $stats['total'] += (int) $row['cnt'];
+            }
+
+            $stats['unassigned']           = $this->countUnassigned();
+            $stats['avg_resolution_hours'] = $this->getAverageResolutionTime();
+
+            return $stats;
+        });
     }
 
     /**
-     * Count complaints resolved today
+     * Priority statistics — CACHED 5 minutes in Redis
      */
-    public function countResolvedToday(): int
+    public function getPriorityStatistics(): array
     {
-        $today = new \DateTime('today');
+        return $this->complaintStatsCache->get('complaint_priority_statistics', function (ItemInterface $item) {
+            $item->expiresAfter(300);
 
-        return $this->createQueryBuilder('c')
-            ->select('COUNT(c.id)')
-            ->where('c.resolvedAt >= :today')
-            ->setParameter('today', $today)
-            ->getQuery()
-            ->getSingleScalarResult();
+            $stats = ['low' => 0, 'medium' => 0, 'high' => 0, 'urgent' => 0];
+            $conn  = $this->getEntityManager()->getConnection();
+
+            foreach ($conn->executeQuery('SELECT priority, COUNT(id) AS cnt FROM complaint GROUP BY priority')
+                         ->fetchAllAssociative() as $row) {
+                $key = strtolower($row['priority']);
+                if (array_key_exists($key, $stats)) {
+                    $stats[$key] = (int) $row['cnt'];
+                }
+            }
+
+            return $stats;
+        });
     }
 
     /**
-     * Get monthly statistics (last 12 months)
+     * Category statistics — CACHED 5 minutes in Redis
+     */
+    public function getCategoryStatistics(): array
+    {
+        return $this->complaintStatsCache->get('complaint_category_statistics', function (ItemInterface $item) {
+            $item->expiresAfter(300);
+
+            $stats = [];
+            $conn  = $this->getEntityManager()->getConnection();
+
+            foreach ($conn->executeQuery('SELECT category, COUNT(id) AS cnt FROM complaint GROUP BY category')
+                         ->fetchAllAssociative() as $row) {
+                $stats[strtolower($row['category'])] = (int) $row['cnt'];
+            }
+
+            return $stats;
+        });
+    }
+
+    /**
+     * Average resolution time in hours
+     */
+    public function getAverageResolutionTime(): ?float
+    {
+        $result = $this->getEntityManager()->getConnection()->executeQuery('
+            SELECT AVG(TIMESTAMPDIFF(HOUR, created_at, resolved_at)) AS avg_hours
+            FROM complaint
+            WHERE resolved_at IS NOT NULL
+        ')->fetchOne();
+
+        return $result ? (float) $result : null;
+    }
+
+    /**
+     * Monthly statistics — CACHED 1 hour in Redis
      */
     public function getMonthlyStatistics(): array
     {
-        $conn = $this->getEntityManager()->getConnection();
+        return $this->monthlyStatsCache->get('monthly_statistics', function (ItemInterface $item) {
+            $item->expiresAfter(3600); // 1 hour
 
-        $sql = '
-            SELECT
-                DATE_FORMAT(created_at, "%Y-%m") AS month,
-                COUNT(*)                          AS total,
-                SUM(CASE WHEN status = "RESOLVED" THEN 1 ELSE 0 END) AS resolved
-            FROM complaint
-            WHERE created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
-            GROUP BY month
-            ORDER BY month ASC
-        ';
-
-        return $conn->executeQuery($sql)->fetchAllAssociative();
+            return $this->getEntityManager()->getConnection()->executeQuery('
+                SELECT
+                    DATE_FORMAT(created_at, "%Y-%m") AS month,
+                    COUNT(*)                          AS total,
+                    SUM(CASE WHEN status = "RESOLVED" THEN 1 ELSE 0 END) AS resolved
+                FROM complaint
+                WHERE created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+                GROUP BY month
+                ORDER BY month ASC
+            ')->fetchAllAssociative();
+        });
     }
 }
