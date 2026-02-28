@@ -10,6 +10,13 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: VideoRepository::class)]
 class Video
 {
+    public const TYPE_UPLOAD = 'UPLOAD';
+    public const TYPE_CLIP = 'CLIP';
+    public const TYPE_HIGHLIGHT = 'HIGHLIGHT';
+
+    public const VISIBILITY_PRIVATE = 'PRIVATE';
+    public const VISIBILITY_PUBLIC = 'PUBLIC';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -45,6 +52,33 @@ class Video
     #[ORM\Column(length: 10)]
     private ?string $visibility = 'PRIVATE';
 
+    #[ORM\Column(length: 20)]
+    private string $type = self::TYPE_UPLOAD;
+
+    #[ORM\Column(length: 120, nullable: true)]
+    private ?string $matchExternalId = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $thumbnailPath = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $killInfo = null;
+
+    #[ORM\Column]
+    private int $likesCount = 0;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $metadataJson = null;
+
+    #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'clips')]
+    private ?self $highlight = null;
+
+    /**
+     * @var Collection<int, Video>
+     */
+    #[ORM\OneToMany(mappedBy: 'highlight', targetEntity: self::class)]
+    private Collection $clips;
+
     #[ORM\ManyToOne(inversedBy: 'videos')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $uploadedBy = null;
@@ -58,7 +92,8 @@ class Video
     public function __construct()
     {
         $this->playerStats = new ArrayCollection();
-        $this->visibility = 'PRIVATE';
+        $this->visibility = self::VISIBILITY_PRIVATE;
+        $this->clips = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -206,6 +241,130 @@ class Video
     public function setVisibility(string $visibility): static
     {
         $this->visibility = $visibility;
+
+        return $this;
+    }
+
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): static
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    public function getMatchExternalId(): ?string
+    {
+        return $this->matchExternalId;
+    }
+
+    public function setMatchExternalId(?string $matchExternalId): static
+    {
+        $this->matchExternalId = $matchExternalId;
+
+        return $this;
+    }
+
+    public function getThumbnailPath(): ?string
+    {
+        return $this->thumbnailPath;
+    }
+
+    public function setThumbnailPath(?string $thumbnailPath): static
+    {
+        $this->thumbnailPath = $thumbnailPath;
+
+        return $this;
+    }
+
+    public function getKillInfo(): ?string
+    {
+        return $this->killInfo;
+    }
+
+    public function setKillInfo(?string $killInfo): static
+    {
+        $this->killInfo = $killInfo;
+
+        return $this;
+    }
+
+    public function getLikesCount(): int
+    {
+        return $this->likesCount;
+    }
+
+    public function setLikesCount(int $likesCount): static
+    {
+        $this->likesCount = max(0, $likesCount);
+
+        return $this;
+    }
+
+    public function incrementLikes(): static
+    {
+        ++$this->likesCount;
+
+        return $this;
+    }
+
+    public function getMetadata(): ?array
+    {
+        if ($this->metadataJson === null || $this->metadataJson === '') {
+            return null;
+        }
+
+        $decoded = json_decode($this->metadataJson, true);
+
+        return is_array($decoded) ? $decoded : null;
+    }
+
+    public function setMetadata(?array $metadata): static
+    {
+        $this->metadataJson = $metadata === null ? null : json_encode($metadata);
+
+        return $this;
+    }
+
+    public function getHighlight(): ?self
+    {
+        return $this->highlight;
+    }
+
+    public function setHighlight(?self $highlight): static
+    {
+        $this->highlight = $highlight;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, self>
+     */
+    public function getClips(): Collection
+    {
+        return $this->clips;
+    }
+
+    public function addClip(self $clip): static
+    {
+        if (!$this->clips->contains($clip)) {
+            $this->clips->add($clip);
+            $clip->setHighlight($this);
+        }
+
+        return $this;
+    }
+
+    public function removeClip(self $clip): static
+    {
+        if ($this->clips->removeElement($clip) && $clip->getHighlight() === $this) {
+            $clip->setHighlight(null);
+        }
 
         return $this;
     }

@@ -1,0 +1,113 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Players Highlights{% endblock %}
+
+{% block body %}
+<section class="py-5 bg-body-tertiary min-vh-100">
+    <div class="container">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+            <div>
+                <p class="text-uppercase text-primary-emphasis small mb-1">Community</p>
+                <h1 class="h3 mb-1">Players Highlights</h1>
+                <p class="text-secondary mb-0">Public videos filtered by game.</p>
+            </div>
+            {% if is_granted('ROLE_USER') %}
+                <a href="{{ path('clips_import') }}" class="btn btn-primary">Import My Clips</a>
+            {% endif %}
+        </div>
+
+        <form method="get" class="card border-0 shadow-sm mb-4">
+            <div class="card-body d-flex flex-wrap gap-2 align-items-end">
+                <div>
+                    <label class="form-label mb-1">Game Filter</label>
+                    <select name="game" class="form-select">
+                        <option value="" {{ selectedGame == '' ? 'selected' : '' }}>All</option>
+                        <option value="Valorant" {{ selectedGame == 'Valorant' ? 'selected' : '' }}>Valorant</option>
+                        <option value="CS2" {{ selectedGame == 'CS2' ? 'selected' : '' }}>CS2</option>
+                        <option value="FIFA" {{ selectedGame == 'FIFA' ? 'selected' : '' }}>FIFA</option>
+                    </select>
+                </div>
+                <button class="btn btn-outline-primary" type="submit">Filter</button>
+            </div>
+        </form>
+
+        <div class="row g-4">
+            {% for highlight in highlights %}
+                <div class="col-md-6 col-xl-4">
+                    <article class="card h-100 border-0 shadow-sm overflow-hidden">
+                        <div class="position-relative">
+                            {% if highlight.thumbnailPath %}
+                                <img src="{{ highlight.thumbnailPath }}" class="w-100 public-thumb" alt="{{ highlight.title }}">
+                            {% else %}
+                                <div class="public-thumb bg-dark"></div>
+                            {% endif %}
+                            <a class="public-play" href="{{ path('clips_highlight_user', { userId: highlight.uploadedBy.id }) }}">
+                                <i class="bi bi-play-fill"></i>
+                            </a>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h2 class="h6 mb-1">{{ highlight.title }}</h2>
+                            <p class="text-secondary small mb-2">{{ highlight.uploadedBy.username }} • {{ highlight.gameType ?: 'Game' }}</p>
+                            <p class="small text-secondary mb-3">{{ highlight.clips|length }} clips • Match {{ highlight.matchExternalId ?: 'N/A' }}</p>
+                            <div class="d-flex flex-wrap gap-2 mt-auto">
+                                <a class="btn btn-sm btn-dark" href="{{ path('clips_highlight_user', { userId: highlight.uploadedBy.id }) }}">Play</a>
+                                <a class="btn btn-sm btn-outline-dark" href="{{ path('clips_download', { id: highlight.id }) }}">Download</a>
+
+                                {% if app.user and (is_granted('ROLE_ADMIN') or app.user.id == highlight.uploadedBy.id) %}
+                                    <form method="post" action="{{ path('clips_toggle_visibility', { id: highlight.id }) }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('clips_toggle_' ~ highlight.id) }}">
+                                        <button class="btn btn-sm btn-outline-primary" type="submit">
+                                            {{ highlight.visibility == 'PUBLIC' ? 'Private' : 'Publish' }}
+                                        </button>
+                                    </form>
+                                {% endif %}
+
+                                <form method="post" action="{{ path('clips_like', { id: highlight.id }) }}">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('clips_like_' ~ highlight.id) }}">
+                                    <button class="btn btn-sm btn-outline-danger" type="submit">
+                                        <i class="bi bi-heart-fill"></i> {{ highlight.likesCount }}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info">No public videos available for this filter.</div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="mt-5">
+            <h2 class="h5 mb-3">clipsData (sample)</h2>
+            <pre class="bg-dark text-light p-3 rounded small">{{ clipsData|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+        </div>
+    </div>
+</section>
+
+<style>
+    .public-thumb {
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+    }
+
+    .public-play {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 2rem;
+        background: rgba(13, 18, 33, 0.4);
+        text-decoration: none;
+        opacity: 0;
+        transition: opacity .2s ease;
+    }
+
+    article:hover .public-play {
+        opacity: 1;
+    }
+</style>
+{% endblock %}

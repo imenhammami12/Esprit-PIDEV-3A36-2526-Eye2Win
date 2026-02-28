@@ -87,6 +87,7 @@ security:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
         - { path: ^/admin/login, roles: PUBLIC_ACCESS }
+        - { path: ^/clips/public, roles: PUBLIC_ACCESS }
         
         # Admin routes - NO 2FA required
         - { path: ^/admin/audit, roles: ROLE_SUPER_ADMIN }
@@ -96,6 +97,8 @@ security:
         - { path: ^/profile, roles: ROLE_USER }
         - { path: ^/upload, roles: ROLE_USER }
         - { path: ^/video, roles: ROLE_USER }
+        - { path: ^/clips/import, roles: ROLE_USER }
+        - { path: ^/clips/\d+/(visibility|download), roles: ROLE_USER }
         - { path: ^/dashboard, roles: ROLE_USER }
         - { path: ^/valorant-tracker, roles: ROLE_USER }
 
