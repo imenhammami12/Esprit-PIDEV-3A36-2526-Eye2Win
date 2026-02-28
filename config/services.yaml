@@ -10,8 +10,6 @@ parameters:
     teams_directory: '%kernel.project_dir%/public/uploads/teams'
     tournois_directory: '%kernel.project_dir%/public/uploads/tournois'
     message_upload_dir: '%kernel.project_dir%/var/uploads/messages'
-
-
     complaints_directory: '%kernel.project_dir%/public/uploads/complaints'
     faces_directory: '%kernel.project_dir%/public/uploads/faces'
     app.huggingface_token: '%env(HUGGINGFACE_TOKEN)%'
@@ -21,8 +19,6 @@ services:
     _defaults:
         autowire: true
         autoconfigure: true
-        autowire: true      # Automatically injects dependencies in your services.
-        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
@@ -48,7 +44,6 @@ services:
             $cloudName: '%env(CLOUDINARY_CLOUD_NAME)%'
             $apiKey: '%env(CLOUDINARY_API_KEY)%'
             $apiSecret: '%env(CLOUDINARY_API_SECRET)%'
-            $defaultFolder: '%env(default::CLOUDINARY_DEFAULT_FOLDER)%'
             $defaultFolder: 'users'
 
     App\Service\CloudinaryUploaderCHAT:
@@ -57,10 +52,7 @@ services:
             $apiKey: '%env(AYA_CLOUDINARY_API_KEY)%'
             $apiSecret: '%env(AYA_CLOUDINARY_API_SECRET)%'
             $defaultFolder: '%env(default::AYA_CLOUDINARY_DEFAULT_FOLDER)%'
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
 
-    # Configuration du service d'email
     # Configuration du service d'email pour les candidatures coach
     App\Service\CoachApplicationEmailService:
         arguments:
@@ -79,7 +71,7 @@ services:
             $telegramBotToken: '%env(TELEGRAM_BOT_TOKEN)%'
             $devMode: false
 
-    # 💰 NOUVEAU — CoinController a besoin des clés Stripe injectées manuellement
+    # 💰 CoinController a besoin des clés Stripe injectées manuellement
     App\Controller\CoinController:
         arguments:
             $stripeSecretKey: '%env(STRIPE_SECRET_KEY)%'
@@ -91,3 +83,9 @@ services:
     App\Service\SentimentServiceComplaints:
         arguments:
             $huggingFaceApiKey: '%env(default::HUGGINGFACE_TOKEN)%'
+    
+    App\Repository\ComplaintRepository:
+        arguments:
+            $complaintStatsCache: '@cache.complaint_stats'
+            $dashboardCache:      '@cache.dashboard'
+            $monthlyStatsCache:   '@cache.monthly_stats'
