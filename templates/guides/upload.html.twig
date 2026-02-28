@@ -190,6 +190,21 @@
             padding-right: 50px !important;
             font-weight: 600 !important;
             color: #ffffff !important;
+            height: 52px !important;
+            min-height: 52px !important;
+            max-height: 52px !important;
+            line-height: 1.25 !important;
+            overflow: hidden !important;
+            white-space: nowrap !important;
+            text-overflow: ellipsis !important;
+        }
+
+        select.form-control[multiple] {
+            min-height: 140px !important;
+            max-height: none !important;
+            height: auto !important;
+            overflow: auto !important;
+            white-space: normal !important;
         }
 
         select.form-control:hover {
@@ -201,7 +216,9 @@
         select.form-control option {
             background: #0f1320 !important;
             color: #ffffff !important;
-            padding: 10px !important;
+            padding: 6px 10px !important;
+            line-height: 1.35 !important;
+            white-space: normal !important;
         }
 
         /* File Input Styling */
@@ -406,18 +423,97 @@
 
     <div class="form-group">
         {{ form_label(form.game) }}
-        {{ form_widget(form.game) }}
+        {% set gameSelectedLabel = '' %}
+        {% for choice in form.game.vars.choices %}
+            {% if form.game.vars.value == choice.value %}
+                {% set gameSelectedLabel = choice.label %}
+            {% endif %}
+        {% endfor %}
+
+        <input type="hidden" id="{{ form.game.vars.id }}" name="{{ form.game.vars.full_name }}" value="{{ form.game.vars.value ?? '' }}">
+        <input
+            type="text"
+            id="{{ form.game.vars.id }}_display"
+            class="form-control guide-datalist-input"
+            list="game_options"
+            value="{{ gameSelectedLabel }}"
+            placeholder="Select a game"
+            autocomplete="off"
+            required
+        >
+        <datalist id="game_options">
+            {% for choice in form.game.vars.choices %}
+                <option value="{{ choice.label }}" data-value="{{ choice.value }}"></option>
+            {% endfor %}
+        </datalist>
+        {% if form.game.vars.errors|length %}
+            <div class="form-error">
+                {% for error in form.game.vars.errors %}
+                    {{ error.message }}
+                {% endfor %}
+            </div>
+        {% endif %}
     </div>
 
     <div class="form-group">
         {{ form_label(form.agent) }}
-        {{ form_widget(form.agent) }}
+        {% set agentSelectedLabel = '' %}
+        {% for choice in form.agent.vars.choices %}
+            {% if form.agent.vars.value == choice.value %}
+                {% set agentSelectedLabel = choice.label %}
+            {% endif %}
+        {% endfor %}
+
+        <input type="hidden" id="{{ form.agent.vars.id }}" name="{{ form.agent.vars.full_name }}" value="{{ form.agent.vars.value ?? '' }}">
+        <input
+            type="text"
+            id="{{ form.agent.vars.id }}_display"
+            class="form-control guide-datalist-input"
+            list="agent_options"
+            value="{{ agentSelectedLabel }}"
+            placeholder="Select an agent/champion"
+            autocomplete="off"
+        >
+        <datalist id="agent_options">
+            {% for choice in form.agent.vars.choices %}
+                <option value="{{ choice.label }}" data-value="{{ choice.value }}"></option>
+            {% endfor %}
+        </datalist>
         <div class="form-text">Select a specific agent/champion (optional)</div>
+        {% if form.agent.vars.errors|length %}
+            <div class="form-error">
+                {% for error in form.agent.vars.errors %}
+                    {{ error.message }}
+                {% endfor %}
+            </div>
+        {% endif %}
     </div>
 
     <div class="form-group">
         {{ form_label(form.map) }}
-        {{ form_widget(form.map) }}
+        <input
+            type="text"
+            id="{{ form.map.vars.id }}"
+            name="{{ form.map.vars.full_name }}"
+            class="form-control guide-datalist-input"
+            list="map_options"
+            value="{{ form.map.vars.value ?? '' }}"
+            placeholder="Select a map"
+            autocomplete="off"
+            required
+        >
+        <datalist id="map_options">
+            {% for choice in form.map.vars.choices %}
+                <option value="{{ choice.value }}"></option>
+            {% endfor %}
+        </datalist>
+        {% if form.map.vars.errors|length %}
+            <div class="form-error">
+                {% for error in form.map.vars.errors %}
+                    {{ error.message }}
+                {% endfor %}
+            </div>
+        {% endif %}
     </div>
 
     <div class="form-group">
@@ -462,9 +558,48 @@
         {{ edit ? 'Update Guide' : 'Upload Guide' }}
     </button>
 
-    {{ form_end(form) }}
+    {% if form._token is defined %}
+        {{ form_widget(form._token) }}
+    {% endif %}
+
+    {{ form_end(form, {'render_rest': false}) }}
 
     <a href="{{ path('app_my_guides') }}" class="btn-secondary">← Back</a>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const bindDatalist = function(displayInputId, hiddenInputId, datalistId) {
+        const displayInput = document.getElementById(displayInputId);
+        const hiddenInput = document.getElementById(hiddenInputId);
+        const datalist = document.getElementById(datalistId);
+
+        if (!displayInput || !hiddenInput || !datalist) {
+            return;
+        }
+
+        const syncHidden = function () {
+            const typed = (displayInput.value || '').trim();
+            const options = Array.from(datalist.options);
+            const exactMatch = options.find(function (opt) {
+                return (opt.value || '').trim().toLowerCase() === typed.toLowerCase();
+            });
+
+            if (exactMatch) {
+                hiddenInput.value = exactMatch.dataset.value || '';
+            } else {
+                hiddenInput.value = '';
+            }
+        };
+
+        displayInput.addEventListener('input', syncHidden);
+        displayInput.addEventListener('change', syncHidden);
+        syncHidden();
+    };
+
+    bindDatalist('{{ form.game.vars.id }}_display', '{{ form.game.vars.id }}', 'game_options');
+    bindDatalist('{{ form.agent.vars.id }}_display', '{{ form.agent.vars.id }}', 'agent_options');
+});
+</script>
 
 {% endblock %}

@@ -26,6 +26,7 @@ class VideoMatchService
         $video = new Video();
         $video->setTitle($title)
             ->setGameType($gameType)
+            ->setType(Video::TYPE_UPLOAD)
             ->setVideoUrl($upload['secure_url'])
             ->setPublicId($upload['public_id'] ?? null)
             ->setDuration($upload['duration'] ?? null)

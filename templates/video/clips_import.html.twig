@@ -1,0 +1,234 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Import Clips{% endblock %}
+
+{% block body %}
+<section class="clips-import-shell">
+    <div class="container py-5">
+        <div class="clips-import-header">
+            <div>
+                <p class="clips-kicker">Auto clipping</p>
+                <h1 class="clips-title">Automatic Clip Generation</h1>
+                <p class="clips-subtitle">Select an imported Tracker.gg match to generate clips and a full highlight.</p>
+            </div>
+            <a class="btn btn-outline-light" href="{{ path('clips_public') }}">Players Highlights</a>
+        </div>
+
+        <div class="clips-panel">
+            <form method="post" action="{{ path('clips_import') }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('clips_import') }}">
+
+                <div class="clips-grid">
+                    <div>
+                        <label class="clips-label" for="matchId">Tracker.gg Match</label>
+                        <input
+                            id="matchId"
+                            name="matchId"
+                            class="clips-control"
+                            list="matchesList"
+                            placeholder="Select a match"
+                            required
+                        >
+                        <datalist id="matchesList">
+                            {% for match in matches %}
+                                {% if match.trackerMatchId %}
+                                    <option
+                                        value="{{ match.trackerMatchId }}"
+                                        label="{{ match.mapName ?: 'Unknown map' }}{% if match.playedAt %} — {{ match.playedAt|date('Y-m-d H:i') }}{% endif %}"
+                                    ></option>
+                                {% endif %}
+                            {% endfor %}
+                        </datalist>
+                    </div>
+
+                    <div>
+                        <label class="clips-label">Visibility</label>
+                        <div class="clips-visibility">
+                            <label>
+                                <input type="radio" name="visibility" value="PRIVATE" checked>
+                                <span>Private</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="visibility" value="PUBLIC">
+                                <span>Public</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="clips-action-wrap">
+                        <button class="btn btn-primary clips-submit" type="submit">Generate</button>
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <label class="clips-label" for="sourceVideoPath">Source video URL/path (optional if already linked to match)</label>
+                    <input
+                        id="sourceVideoPath"
+                        type="text"
+                        name="sourceVideoPath"
+                        class="clips-control"
+                        placeholder="https://.../match.mp4 or /uploads/match.mp4"
+                    >
+                </div>
+
+                <hr class="clips-divider">
+
+                <ul class="clips-tips">
+                    <li>Automatic clipping per kill (2 to 5 seconds)</li>
+                    <li>Automatic thumbnail generated for each clip</li>
+                    <li>Final compilation into one highlight video per match</li>
+                </ul>
+            </form>
+        </div>
+    </div>
+</section>
+
+<style>
+    .clips-import-shell {
+        min-height: 100vh;
+        background: #2f3743;
+        color: #f8fafc;
+    }
+
+    .clips-import-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.5rem;
+    }
+
+    .clips-kicker {
+        margin: 0 0 .5rem;
+        text-transform: uppercase;
+        letter-spacing: .08rem;
+        font-size: .8rem;
+        color: #22d3ee;
+        font-weight: 700;
+    }
+
+    .clips-title {
+        margin: 0 0 .5rem;
+        color: #fff;
+        font-size: 2.2rem;
+        line-height: 1.15;
+        font-weight: 700;
+    }
+
+    .clips-subtitle {
+        margin: 0;
+        color: #cbd5e1;
+    }
+
+    .clips-panel {
+        background: #111827;
+        border: 1px solid rgba(255, 255, 255, .12);
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, .25);
+    }
+
+    .clips-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) auto;
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .clips-label {
+        display: block;
+        margin-bottom: .5rem;
+        font-size: .95rem;
+        color: #e2e8f0;
+        font-weight: 600;
+        letter-spacing: normal;
+        text-transform: none;
+    }
+
+    .clips-control {
+        width: 100%;
+        min-height: 44px;
+        border: 1px solid rgba(255, 255, 255, .18);
+        border-radius: 8px;
+        padding: .55rem .75rem;
+        background: #1f2937;
+        color: #f8fafc;
+        font-size: .95rem;
+        line-height: 1.45;
+    }
+
+    .clips-visibility {
+        height: 44px;
+        border: 1px solid rgba(255, 255, 255, .18);
+        border-radius: 8px;
+        background: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0 .75rem;
+    }
+
+    .clips-visibility label {
+        margin: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        color: #f8fafc;
+        font-size: .95rem;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .clips-visibility input[type="radio"] {
+        margin: 0;
+    }
+
+    .clips-control:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 .2rem rgba(59, 130, 246, .2);
+    }
+
+    .clips-control option {
+        color: #111827;
+        background: #fff;
+    }
+
+    .clips-action-wrap {
+        display: flex;
+        align-items: end;
+    }
+
+    .clips-submit {
+        min-width: 120px;
+        height: 44px;
+        font-weight: 600;
+    }
+
+    .clips-divider {
+        border-color: rgba(255, 255, 255, .15);
+        margin: 1.25rem 0 1rem;
+    }
+
+    .clips-tips {
+        margin: 0;
+        padding-left: 1.25rem;
+        color: #cbd5e1;
+    }
+
+    .clips-tips li {
+        margin-bottom: .4rem;
+    }
+
+    @media (max-width: 992px) {
+        .clips-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .clips-submit {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}

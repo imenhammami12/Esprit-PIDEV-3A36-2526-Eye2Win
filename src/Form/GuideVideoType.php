@@ -47,6 +47,9 @@ class GuideVideoType extends AbstractType
                 'label' => 'Game',
                 'class' => Game::class,
                 'choice_label' => 'name',
+                'placeholder' => 'Select a game',
+                'multiple' => false,
+                'expanded' => false,
                 'constraints' => [
                     new Assert\NotNull(message: 'Please select a game')
                 ],
@@ -59,12 +62,18 @@ class GuideVideoType extends AbstractType
                 'class' => Agent::class,
                 'choice_label' => 'name',
                 'required' => false,
+                'placeholder' => 'Select an agent/champion',
+                'multiple' => false,
+                'expanded' => false,
                 'attr' => [
                     'class' => 'form-control'
                 ]
             ])
             ->add('map', ChoiceType::class, [
                 'label' => 'Map',
+                'placeholder' => 'Select a map',
+                'multiple' => false,
+                'expanded' => false,
                 'choices' => [
                     'All Maps' => 'All',
                     'Ascent' => 'Ascent',
