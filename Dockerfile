@@ -23,7 +23,9 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts
 # Minimal .env so Symfony's Dotenv finds a file at runtime; real values come from Render env vars.
 RUN echo 'APP_ENV=prod' > /var/www/.env
 
-RUN chown -R www-data:www-data /var/www/var /var/www/public
+# Create var dirs (gitignored, so not in image) then set permissions
+RUN mkdir -p /var/www/var/cache /var/www/var/log \
+    && chown -R www-data:www-data /var/www/var /var/www/public
 
 COPY docker/nginx.conf /etc/nginx/sites-available/default
 

@@ -74,16 +74,11 @@
     body { background: var(--dark); font-family: var(--font-body); color: var(--text); overflow-x: hidden; cursor: none; }
     *, a, button, [role="button"] { cursor: none !important; }
 
-    /* ════════════════════════════════════════
-       CURSOR CANVAS — 120x120
-    ════════════════════════════════════════ */
     #et-cursor-canvas {
         position: fixed; pointer-events: none; z-index: 99999;
         top: 0; left: 0; width: 120px; height: 120px;
         transform: translate(-300px,-300px); will-change: transform;
     }
-
-    /* ── CURSOR PICKER BUTTON ── */
     #et-cursor-btn {
         position: fixed; bottom: 24px; right: 24px; z-index: 9998;
         width: 46px; height: 46px; border-radius: 12px;
@@ -94,8 +89,6 @@
         cursor: none !important;
     }
     #et-cursor-btn:hover { transform: scale(1.1); border-color: rgba(232,55,42,0.8); box-shadow: 0 6px 30px rgba(0,0,0,0.7), 0 0 20px rgba(232,55,42,0.3); }
-
-    /* ── PICKER PANEL ── */
     #et-cursor-panel {
         position: fixed; bottom: 80px; right: 24px; z-index: 9997;
         background: rgba(8,8,16,0.96); border: 1px solid rgba(232,55,42,0.2);
@@ -119,12 +112,8 @@
     .et-cursor-opt.active .et-cursor-opt-sub { color:rgba(232,55,42,0.7); }
     .et-cursor-opt-dot { width:6px; height:6px; border-radius:50%; background:var(--red); margin-left:auto; opacity:0; box-shadow:0 0 6px rgba(232,55,42,0.8); transition:opacity .15s; }
     .et-cursor-opt.active .et-cursor-opt-dot { opacity:1; }
-
-    /* ── SPARK PARTICLES ── */
     .et-spark { position:fixed; pointer-events:none; z-index:99998; border-radius:50%; will-change:transform,opacity; animation:et-spark-fly var(--dur,.4s) ease-out forwards; }
     @keyframes et-spark-fly { 0%{opacity:1;transform:translate(-50%,-50%) translate(0,0) scale(1)} 100%{opacity:0;transform:translate(-50%,-50%) translate(var(--sx),var(--sy)) scale(0)} }
-
-    /* ── GLOBAL BACKGROUND ── */
     .body_bg { position:relative; min-height:100vh; }
     .body_bg::before {
         content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
@@ -135,10 +124,6 @@
     .body_bg::after { content:''; position:fixed; inset:0; z-index:0; pointer-events:none; background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.03) 3px,rgba(0,0,0,0.03) 4px); }
     #bgCanvas { position:fixed; inset:0; z-index:0; pointer-events:none; width:100%; height:100%; }
     header, footer, main, section, .container { position:relative; z-index:1; }
-
-    /* ═══════════════════════════════════════
-       NAVBAR
-    ═══════════════════════════════════════ */
     .main_menu {
         position:sticky; top:0; z-index:1000;
         background:rgba(8,8,16,0.85) !important; backdrop-filter:blur(16px) saturate(1.2);
@@ -189,10 +174,6 @@
     .notif-msg { font-family:var(--font-body); font-size:.85rem; color:var(--text); }
     .notif-msg.read { color:var(--muted); }
     .notif-date { font-family:var(--font-mono); font-size:.6rem; color:var(--muted); margin-top:.2rem; }
-
-    /* ════════════════════════════════════════════
-       PROFILE TRIGGER — pill in navbar
-    ════════════════════════════════════════════ */
     .et-profile-trigger {
         display:inline-flex; align-items:center; gap:9px;
         padding:5px 12px 5px 5px;
@@ -235,10 +216,6 @@
     .et-pf-name { font-family:var(--font-hud)!important; font-size:.6rem!important; font-weight:700!important; letter-spacing:.1em!important; color:var(--text)!important; text-transform:uppercase!important; line-height:1; }
     .et-pf-chevron { font-size:.45rem; color:var(--muted); transition:transform .25s,color .25s; margin-left:2px; }
     .et-profile-trigger.show .et-pf-chevron { transform:rotate(180deg); color:var(--red-hot); }
-
-    /* ════════════════════════════════════════════
-       PROFILE DROPDOWN PANEL
-    ════════════════════════════════════════════ */
     .et-profile-menu {
         min-width:280px!important; padding:0!important;
         background:rgba(7,5,16,0.98)!important;
@@ -320,10 +297,6 @@
     .et-pd-coins-val { color:#fff; }
     .et-pd-coins-btn { font-family:var(--font-hud); font-size:.46rem; letter-spacing:.1em; text-transform:uppercase; padding:4px 11px; border-radius:6px; background:rgba(246,216,96,.1); border:1px solid rgba(246,216,96,.22); color:var(--gold); transition:all .2s; text-decoration:none; display:inline-block; }
     .et-pd-coins-btn:hover { background:rgba(246,216,96,.18); border-color:rgba(246,216,96,.5); box-shadow:0 0 14px rgba(246,216,96,.18); color:var(--gold); text-decoration:none; }
-
-    /* ═══════════════════════════════════════
-       FLASH ALERTS
-    ═══════════════════════════════════════ */
     .alert { font-family:var(--font-mono)!important; font-size:.72rem!important; border-radius:10px!important; border:none!important; display:flex; align-items:center; gap:.6rem; animation:alert-in .4s cubic-bezier(.22,1,.36,1); }
     @keyframes alert-in { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:none} }
     .alert-success { background:rgba(0,230,118,.1)!important; border-left:3px solid var(--green)!important; color:var(--green)!important; }
@@ -331,10 +304,6 @@
     .alert-warning { background:rgba(246,173,85,.1)!important; border-left:3px solid var(--gold)!important;  color:var(--gold)!important; }
     .alert-info    { background:rgba(0,229,255,.08)!important; border-left:3px solid var(--cyan)!important;  color:var(--cyan)!important; }
     .alert .close  { color:var(--muted)!important; opacity:1; }
-
-    /* ═══════════════════════════════════════
-       FOOTER
-    ═══════════════════════════════════════ */
     .footer_part { position:relative; background:var(--dark2)!important; border-top:1px solid rgba(232,55,42,.15)!important; overflow:hidden; }
     .footer_part::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,var(--red),var(--orange),transparent); background-size:200% 100%; animation:shimmer-line 6s linear infinite reverse; }
     .footer_part::after { content:''; position:absolute; inset:0; pointer-events:none; background-image:linear-gradient(rgba(232,55,42,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(232,55,42,.025) 1px,transparent 1px); background-size:40px 40px; }
@@ -346,10 +315,6 @@
     .single_social_icon:hover { color:#fff!important; border-color:var(--red)!important; transform:translateY(-3px); box-shadow:0 6px 20px rgba(232,55,42,.3); }
     .single_social_icon:hover::before { opacity:1; }
     .single_social_icon i { position:relative; z-index:1; }
-
-    /* ═══════════════════════════════════════
-       GLITCH LOADER
-    ═══════════════════════════════════════ */
     #page-loader { position:fixed; inset:0; z-index:99998; background:var(--dark); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:1.5rem; animation:loader-out .4s .8s forwards; pointer-events:none; }
     @keyframes loader-out { to{opacity:0;visibility:hidden} }
     .loader-logo { font-family:var(--font-hud); font-size:1.8rem; font-weight:900; color:var(--text); letter-spacing:.2em; animation:glitch-load 1s steps(2) infinite; }
@@ -359,7 +324,6 @@
     @keyframes loader-fill { from{width:0} to{width:100%} }
     .loader-tag { font-family:var(--font-mono); font-size:.6rem; color:var(--muted); letter-spacing:.15em; text-transform:uppercase; animation:blink-text 1s step-end infinite; }
     @keyframes blink-text { 0%,100%{opacity:1} 50%{opacity:.2} }
-
     #scroll-progress { position:fixed; top:0; left:0; height:2px; z-index:9999; background:linear-gradient(90deg,var(--red),var(--orange),var(--pink)); width:0%; transition:width .1s linear; box-shadow:0 0 10px rgba(232,55,42,.6); }
     .hud-corner { position:fixed; z-index:500; pointer-events:none; width:40px; height:40px; border-color:rgba(232,55,42,.2); border-style:solid; }
     .hud-corner.tl { top:12px; left:12px; border-width:1.5px 0 0 1.5px; }
@@ -381,91 +345,280 @@
     ═══════════════════════════════════════ */
     .nav-uploader-toggle { display:inline-flex !important; align-items:center; gap:6px; }
     .nav-upload-dot {
-        width:6px; height:6px; border-radius:50;
+        width:6px; height:6px; border-radius:50%;
         background:linear-gradient(135deg,var(--red-hot),var(--orange));
         box-shadow:0 0 6px rgba(232,55,42,.7);
         flex-shrink:0;
         animation:nav-pulse 2s ease-in-out infinite;
-        border-radius: 50%;
         display: inline-block;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       A11Y — SKIP LINK + FOCUS + KEYBOARD
+    ═══════════════════════════════════════════════════════ */
+    .et-skip-nav {
+        position: absolute; top: -100%; left: 16px; z-index: 999999;
+        padding: 10px 20px;
+        background: var(--dark); color: var(--red-hot);
+        font-family: var(--font-hud); font-size: .7rem; font-weight: 700;
+        letter-spacing: .12em; text-transform: uppercase; text-decoration: none;
+        border: 1px solid var(--red); border-radius: 0 0 10px 10px;
+        box-shadow: 0 4px 20px rgba(232,55,42,.4);
+        transition: top .2s;
+    }
+    .et-skip-nav:focus { top: 0; outline: 3px solid var(--red-hot); outline-offset: 2px; }
+    *:focus-visible { outline: 2px solid var(--red-hot) !important; outline-offset: 3px !important; border-radius: 4px; }
+    *:focus:not(:focus-visible) { outline: none !important; }
+    body.et-keyboard *, body.et-keyboard a, body.et-keyboard button, body.et-keyboard [role="button"] { cursor: auto !important; }
+    body.et-keyboard #et-cursor-canvas { display: none !important; }
+    .sr-only { position:absolute!important; width:1px!important; height:1px!important; padding:0!important; margin:-1px!important; overflow:hidden!important; clip:rect(0,0,0,0)!important; white-space:nowrap!important; border:0!important; }
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+        #et-cursor-canvas, body.et-keyboard #et-cursor-canvas { display: none !important; }
+        *, a, button, [role="button"] { cursor: auto !important; }
+    }
+    @media (prefers-contrast: high) {
+        .navbar-nav .nav-link { color: #fff !important; }
+        .et-pd-ttl { color: rgba(255,255,255,.9) !important; }
+    }
+    #et-a11y-polite, #et-a11y-assertive {
+        position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+        overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       ACCESSIBILITY ASSISTANT WIDGET
+    ═══════════════════════════════════════════════════════ */
+    #et-a11y-btn {
+        position: fixed; bottom: 24px; left: 24px; z-index: 9996;
+        width: 52px; height: 52px; border-radius: 14px;
+        background: rgba(8,8,16,0.92); border: 1px solid rgba(0,229,255,0.4);
+        box-shadow: 0 4px 24px rgba(0,0,0,0.6), 0 0 16px rgba(0,229,255,0.15);
+        display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+        backdrop-filter: blur(12px);
+        transition: transform .2s, box-shadow .2s, border-color .2s;
+        cursor: none !important;
+        animation: a11y-pulse 3s ease-in-out infinite;
+    }
+    @keyframes a11y-pulse {
+        0%,100% { box-shadow: 0 4px 24px rgba(0,0,0,0.6), 0 0 16px rgba(0,229,255,0.15); }
+        50%      { box-shadow: 0 4px 24px rgba(0,0,0,0.6), 0 0 28px rgba(0,229,255,0.4), 0 0 50px rgba(0,229,255,0.1); }
+    }
+    #et-a11y-btn:hover { transform: scale(1.08); border-color: rgba(0,229,255,0.8); box-shadow: 0 6px 30px rgba(0,0,0,0.7), 0 0 24px rgba(0,229,255,0.35); animation: none; }
+    #et-a11y-panel {
+        position: fixed; bottom: 88px; left: 24px; z-index: 9995;
+        width: 340px; background: rgba(6,5,14,0.97);
+        border: 1px solid rgba(0,229,255,0.2); border-radius: 18px;
+        box-shadow: 0 20px 70px rgba(0,0,0,0.85), 0 0 0 1px rgba(0,229,255,0.06);
+        backdrop-filter: blur(20px); transform-origin: bottom left;
+        transition: opacity .25s cubic-bezier(.22,1,.36,1), transform .25s cubic-bezier(.22,1,.36,1);
+        opacity: 0; transform: scale(0.88) translateY(10px); pointer-events: none; overflow: hidden;
+    }
+    #et-a11y-panel.open { opacity: 1; transform: scale(1) translateY(0); pointer-events: all; }
+    .a11y-header {
+        padding: 14px 16px 10px;
+        background: linear-gradient(135deg, rgba(0,229,255,.08), rgba(191,90,242,.04));
+        border-bottom: 1px solid rgba(0,229,255,.1);
+        display: flex; align-items: center; justify-content: space-between;
+        position: relative; overflow: hidden;
+    }
+    .a11y-header::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,var(--cyan),transparent); background-size:200% 100%; animation:shimmer-line 3s linear infinite; }
+    .a11y-header-title { font-family:var(--font-hud); font-size:.62rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--cyan); display:flex; align-items:center; gap:8px; }
+    .a11y-close-btn { width:24px; height:24px; border-radius:6px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); color:var(--muted); font-size:.7rem; display:flex; align-items:center; justify-content:center; transition:all .15s; cursor:none !important; }
+    .a11y-close-btn:hover { background:rgba(255,80,60,.15); border-color:rgba(255,80,60,.4); color:var(--red-hot); }
+    .a11y-quick { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; padding:12px; border-bottom:1px solid rgba(255,255,255,.05); }
+    .a11y-quick-btn { display:flex; flex-direction:column; align-items:center; gap:5px; padding:10px 6px; border-radius:10px; border:1px solid rgba(255,255,255,.07); background:rgba(255,255,255,.03); transition:all .18s; cursor:none !important; }
+    .a11y-quick-btn:hover { background:rgba(0,229,255,.08); border-color:rgba(0,229,255,.3); transform:translateY(-2px); }
+    .a11y-quick-btn.active { background:rgba(0,229,255,.12); border-color:rgba(0,229,255,.5); box-shadow:0 0 12px rgba(0,229,255,.15); }
+    .a11y-quick-icon { font-size:1.1rem; }
+    .a11y-quick-label { font-family:var(--font-hud); font-size:.44rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:rgba(255,255,255,.45); text-align:center; line-height:1.2; }
+    .a11y-quick-btn.active .a11y-quick-label { color:var(--cyan); }
+    .a11y-chat { height:220px; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:8px; scrollbar-width:thin; scrollbar-color:rgba(0,229,255,.2) transparent; }
+    .a11y-chat::-webkit-scrollbar { width:3px; }
+    .a11y-chat::-webkit-scrollbar-thumb { background:rgba(0,229,255,.25); border-radius:2px; }
+    .a11y-msg { max-width:85%; padding:8px 12px; border-radius:10px; font-family:var(--font-body); font-size:.82rem; line-height:1.4; animation:msg-in .2s ease-out; }
+    @keyframes msg-in { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+    .a11y-msg-user { align-self:flex-end; background:rgba(0,229,255,.1); border:1px solid rgba(0,229,255,.25); color:rgba(255,255,255,.9); border-bottom-right-radius:3px; }
+    .a11y-msg-bot { align-self:flex-start; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); color:rgba(255,255,255,.8); border-bottom-left-radius:3px; }
+    .a11y-msg-bot.loading { color:var(--muted); font-style:italic; }
+    .a11y-msg-bot .msg-sender { font-family:var(--font-hud); font-size:.44rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--cyan); display:block; margin-bottom:3px; }
+    .a11y-input-row { display:flex; gap:6px; padding:10px 12px 12px; border-top:1px solid rgba(255,255,255,.05); align-items:center; }
+    .a11y-input { flex:1; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:8px; padding:8px 12px; font-family:var(--font-body); font-size:.82rem; color:var(--text); outline:none; transition:border-color .15s; cursor:auto !important; }
+    .a11y-input:focus { border-color:rgba(0,229,255,.4); box-shadow:0 0 0 2px rgba(0,229,255,.08); }
+    .a11y-input::placeholder { color:var(--muted); }
+    .a11y-send-btn, .a11y-mic-btn { width:34px; height:34px; border-radius:8px; border:1px solid rgba(0,229,255,.25); background:rgba(0,229,255,.08); color:var(--cyan); font-size:.85rem; display:flex; align-items:center; justify-content:center; transition:all .15s; cursor:none !important; flex-shrink:0; }
+    .a11y-send-btn:hover { background:rgba(0,229,255,.18); border-color:rgba(0,229,255,.5); transform:scale(1.05); }
+    .a11y-mic-btn { border-color:rgba(191,90,242,.25); background:rgba(191,90,242,.08); color:#bf5af2; }
+    .a11y-mic-btn:hover { background:rgba(191,90,242,.18); border-color:rgba(191,90,242,.5); transform:scale(1.05); }
+    .a11y-mic-btn.recording { background:rgba(232,55,42,.15); border-color:var(--red); color:var(--red-hot); animation:mic-pulse 1s ease-in-out infinite; }
+    @keyframes mic-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(232,55,42,.4)} 50%{box-shadow:0 0 0 6px rgba(232,55,42,0)} }
+    @media (prefers-contrast: high) {
+        #et-a11y-panel { background:#000; border-color:#00e5ff; }
+        .a11y-msg-user { background:#003040; }
+        .a11y-input { background:#111; border-color:#00e5ff; color:#fff; }
     }
     </style>
 </head>
 
 <body data-user-id="{{ app.user ? app.user.id : '' }}">
 
-<canvas id="et-cursor-canvas" width="120" height="120"></canvas>
+{# ── A11Y: Live regions ── #}
+<div id="et-a11y-polite"    role="status" aria-live="polite"    aria-atomic="true"></div>
+<div id="et-a11y-assertive" role="alert"  aria-live="assertive" aria-atomic="true"></div>
 
-<button id="et-cursor-btn" title="Change cursor" aria-label="Change cursor style">🎯</button>
+{# ── A11Y: Skip link ── #}
+<a href="#et-main" class="et-skip-nav">Skip to main content</a>
 
-<div id="et-cursor-panel" role="menu">
+<canvas id="et-cursor-canvas" width="120" height="120" aria-hidden="true"></canvas>
+
+<button id="et-cursor-btn"
+        title="Change cursor"
+        aria-label="Change cursor style"
+        aria-haspopup="true"
+        aria-controls="et-cursor-panel"
+        aria-expanded="false">🎯</button>
+
+<div id="et-cursor-panel" role="menu" aria-label="Choose cursor style" aria-hidden="true">
     <div id="et-cursor-panel-title">Cursor Style</div>
-    <div class="et-cursor-opt" data-cursor="crosshair" role="menuitem">
-        <div class="et-cursor-opt-icon">🎯</div>
+    <div class="et-cursor-opt" data-cursor="crosshair" role="menuitem" tabindex="-1">
+        <div class="et-cursor-opt-icon" aria-hidden="true">🎯</div>
         <div class="et-cursor-opt-label">Crosshair<span class="et-cursor-opt-sub">FPS Sniper</span></div>
-        <div class="et-cursor-opt-dot"></div>
+        <div class="et-cursor-opt-dot" aria-hidden="true"></div>
     </div>
-    <div class="et-cursor-opt" data-cursor="sword" role="menuitem">
-        <div class="et-cursor-opt-icon">⚔️</div>
+    <div class="et-cursor-opt" data-cursor="sword" role="menuitem" tabindex="-1">
+        <div class="et-cursor-opt-icon" aria-hidden="true">⚔️</div>
         <div class="et-cursor-opt-label">Sword<span class="et-cursor-opt-sub">RPG Blade</span></div>
-        <div class="et-cursor-opt-dot"></div>
+        <div class="et-cursor-opt-dot" aria-hidden="true"></div>
     </div>
-    <div class="et-cursor-opt" data-cursor="energy" role="menuitem">
-        <div class="et-cursor-opt-icon">⚡</div>
+    <div class="et-cursor-opt" data-cursor="energy" role="menuitem" tabindex="-1">
+        <div class="et-cursor-opt-icon" aria-hidden="true">⚡</div>
         <div class="et-cursor-opt-label">Energy<span class="et-cursor-opt-sub">Sci-Fi Plasma</span></div>
-        <div class="et-cursor-opt-dot"></div>
+        <div class="et-cursor-opt-dot" aria-hidden="true"></div>
     </div>
-    <div class="et-cursor-opt" data-cursor="arrow" role="menuitem">
-        <div class="et-cursor-opt-icon">🏹</div>
+    <div class="et-cursor-opt" data-cursor="arrow" role="menuitem" tabindex="-1">
+        <div class="et-cursor-opt-icon" aria-hidden="true">🏹</div>
         <div class="et-cursor-opt-label">Arrow<span class="et-cursor-opt-sub">Archer Precision</span></div>
-        <div class="et-cursor-opt-dot"></div>
+        <div class="et-cursor-opt-dot" aria-hidden="true"></div>
     </div>
 </div>
 
-<div id="scroll-progress"></div>
-<div class="hud-corner tl"></div><div class="hud-corner tr"></div>
-<div class="hud-corner bl"></div><div class="hud-corner br"></div>
+{# ══════════════════════════════════════════════════════════
+   ACCESSIBILITY ASSISTANT BUTTON + PANEL
+══════════════════════════════════════════════════════════ #}
+<button id="et-a11y-btn"
+        aria-label="Open accessibility assistant"
+        aria-haspopup="true"
+        aria-controls="et-a11y-panel"
+        aria-expanded="false"
+        title="Accessibility Assistant">
+    ♿
+</button>
 
-<div id="page-loader">
+<div id="et-a11y-panel" role="dialog" aria-modal="false" aria-label="EyeTwin Accessibility Assistant" aria-hidden="true">
+    <div class="a11y-header">
+        <div class="a11y-header-title">
+            <span aria-hidden="true">♿</span> Accessibility Assistant
+        </div>
+        <button class="a11y-close-btn" id="et-a11y-close" aria-label="Close assistant">
+            <i class="fas fa-times" aria-hidden="true"></i>
+        </button>
+    </div>
+    <div class="a11y-quick" role="group" aria-label="Quick accessibility actions">
+        <button class="a11y-quick-btn" data-action="contrast" aria-pressed="false" aria-label="Toggle high contrast">
+            <span class="a11y-quick-icon" aria-hidden="true">🌗</span>
+            <span class="a11y-quick-label">Contrast</span>
+        </button>
+        <button class="a11y-quick-btn" data-action="bigtext" aria-pressed="false" aria-label="Enlarge text">
+            <span class="a11y-quick-icon" aria-hidden="true">🔠</span>
+            <span class="a11y-quick-label">Text+</span>
+        </button>
+        <button class="a11y-quick-btn" data-action="dyslexia" aria-pressed="false" aria-label="Dyslexia font">
+            <span class="a11y-quick-icon" aria-hidden="true">📖</span>
+            <span class="a11y-quick-label">Dyslexia</span>
+        </button>
+        <button class="a11y-quick-btn" data-action="speak" aria-pressed="false" aria-label="Read page aloud">
+            <span class="a11y-quick-icon" aria-hidden="true">🔊</span>
+            <span class="a11y-quick-label">Read</span>
+        </button>
+        <button class="a11y-quick-btn" data-action="guide" aria-pressed="false" aria-label="Enable reading guide">
+            <span class="a11y-quick-icon" aria-hidden="true">📏</span>
+            <span class="a11y-quick-label">Guide</span>
+        </button>
+        <button class="a11y-quick-btn" data-action="focus" aria-pressed="false" aria-label="Enable keyboard focus mode">
+            <span class="a11y-quick-icon" aria-hidden="true">⌨️</span>
+            <span class="a11y-quick-label">Focus</span>
+        </button>
+    </div>
+    <div class="a11y-chat" id="a11y-chat-messages" role="log" aria-live="polite" aria-label="Conversation with assistant">
+        <div class="a11y-msg a11y-msg-bot" id="a11y-welcome-msg">
+            <span class="msg-sender">EyeTwin Assistant</span>
+            Hello! I'm your accessibility assistant. How can I help you navigate EyeTwin?
+        </div>
+    </div>
+    <div class="a11y-input-row">
+        <input type="text"
+               class="a11y-input"
+               id="a11y-input"
+               placeholder="Ask your question…"
+               aria-label="Message to assistant"
+               autocomplete="off"
+               maxlength="300">
+        <button class="a11y-mic-btn" id="a11y-mic-btn" aria-label="Dictate your message" title="Voice recognition">
+            <i class="fas fa-microphone" aria-hidden="true"></i>
+        </button>
+        <button class="a11y-send-btn" id="a11y-send-btn" aria-label="Send message">
+            <i class="fas fa-paper-plane" aria-hidden="true"></i>
+        </button>
+    </div>
+</div>
+
+<div id="scroll-progress" aria-hidden="true"></div>
+<div class="hud-corner tl" aria-hidden="true"></div><div class="hud-corner tr" aria-hidden="true"></div>
+<div class="hud-corner bl" aria-hidden="true"></div><div class="hud-corner br" aria-hidden="true"></div>
+
+<div id="page-loader" aria-hidden="true">
     <div class="loader-logo">EYETWIN</div>
     <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
     <div class="loader-tag">Initializing Platform…</div>
 </div>
 
-<canvas id="bgCanvas"></canvas>
+<canvas id="bgCanvas" aria-hidden="true"></canvas>
 
 <div class="body_bg page-content">
 
     {# ══ NAVBAR ══ #}
-    <header class="main_menu single_page_menu">
+    <header class="main_menu single_page_menu" role="banner">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-12">
-                    <nav class="navbar navbar-expand-lg navbar-light">
-                        <a class="navbar-brand" href="{{ path('app_home') }}">
+                    <nav class="navbar navbar-expand-lg navbar-light" aria-label="Main navigation">
+                        <a class="navbar-brand" href="{{ path('app_home') }}" aria-label="EyeTwin — Home">
                             <picture>
                                 <source srcset="{{ asset('assets/img/eyetwin-logo.webp') }}" type="image/webp">
-                                <img src="{{ asset('assets/img/eyetwin-logo.png') }}" alt="EyeTwin Logo" width="120" height="42" loading="eager">
+                                <img src="{{ asset('assets/img/eyetwin-logo.png') }}" alt="EyeTwin" width="120" height="42" loading="eager">
                             </picture>
                         </a>
                         <button class="navbar-toggler" type="button" data-toggle="collapse"
                             data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
                             aria-expanded="false" aria-label="Toggle navigation">
-                            <span class="menu_icon"><i class="fas fa-bars"></i></span>
+                            <span class="menu_icon"><i class="fas fa-bars" aria-hidden="true"></i></span>
                         </button>
 
                         <div class="collapse navbar-collapse main-menu-item" id="navbarSupportedContent">
                             <ul class="navbar-nav">
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{ path('app_home') }}">Home</a>
+                                    <a class="nav-link" href="{{ path('app_home') }}"
+                                       {% if app.request.attributes.get('_route') == 'app_home' %}aria-current="page"{% endif %}>Home</a>
                                 </li>
 
                                 {% if app.user %}
                                     <li class="nav-item">
-                                        <a class="nav-link" href="{{ path('app_planning') }}">Planning</a>
+                                        <a class="nav-link" href="{{ path('app_planning') }}"
+                                           {% if app.request.attributes.get('_route') starts with 'app_planning' %}aria-current="page"{% endif %}>Planning</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" href="{{ path('app_tournoi_landing') }}">Tournois</a>
+                                        <a class="nav-link" href="{{ path('app_tournoi_landing') }}"
+                                           {% if app.request.attributes.get('_route') starts with 'app_tournoi' %}aria-current="page"{% endif %}>Tournois</a>
                                     </li>
 
                                     {# ══ HIGHLIGHTS — lien direct ══ #}
@@ -479,52 +632,53 @@
                                            href="#" id="uploaderDropdown"
                                            role="button" data-toggle="dropdown"
                                            aria-haspopup="true" aria-expanded="false">
-                                            <span class="nav-upload-dot"></span>
+                                            <span class="nav-upload-dot" aria-hidden="true"></span>
                                             Uploader
                                         </a>
                                         <div class="dropdown-menu" aria-labelledby="uploaderDropdown">
                                             <a class="dropdown-item" href="{{ path('app_video_upload') }}">
-                                                <i class="fas fa-upload"></i> Uploader
+                                                <i class="fas fa-upload" aria-hidden="true"></i> Uploader
                                             </a>
                                             <a class="dropdown-item" href="{{ path('clips_import') }}">
-                                                <i class="fas fa-film"></i> My Clips
+                                                <i class="fas fa-film" aria-hidden="true"></i> My Clips
                                             </a>
                                             <div class="dropdown-divider"></div>
                                             <a class="dropdown-item" href="{{ path('app_guides') }}">
-                                                <i class="fas fa-book-open"></i> Guides
+                                                <i class="fas fa-book-open" aria-hidden="true"></i> Guides
                                             </a>
                                         </div>
                                     </li>
 
+                                    <li class="nav-item"><a class="nav-link" href="{{ path('app_teams_index') }}">Teams</a></li>
+                                    <li class="nav-item"><a class="nav-link" href="{{ path('community_channels_index') }}">Community</a></li>
                                     <li class="nav-item">
-                                        <a class="nav-link" href="{{ path('app_teams_index') }}">Teams</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="{{ path('community_channels_index') }}">Community</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link nav-live-link" href="{{ path('live_index') }}" style="display:flex;align-items:center;gap:6px;">
-                                            <span class="nav-live-dot"></span> Live
+                                        <a class="nav-link nav-live-link" href="{{ path('live_index') }}"
+                                           style="display:flex;align-items:center;gap:6px;" aria-label="Live streams">
+                                            <span class="nav-live-dot" aria-hidden="true"></span> Live
                                         </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a href="{{ path('coins_index') }}" class="nav-link" style="padding:.4rem .6rem!important;">
-                                            <span class="nav-coins-pill"><i class="fas fa-coins"></i> {{ app.user.coinBalance }}</span>
+                                        <a href="{{ path('coins_index') }}" class="nav-link" style="padding:.4rem .6rem!important;"
+                                           aria-label="Coin balance: {{ app.user.coinBalance }}">
+                                            <span class="nav-coins-pill" aria-hidden="true">
+                                                <i class="fas fa-coins" aria-hidden="true"></i> {{ app.user.coinBalance }}
+                                            </span>
                                         </a>
                                     </li>
 
                                     {# ── Bell notifications ── #}
                                     <li class="nav-item dropdown nav-bell">
                                         <a class="nav-link dropdown-toggle" href="#" id="notifDropdown"
-                                           role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            <i class="fas fa-bell"></i>
+                                           role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                           aria-label="Notifications{% if navUnreadCount|default(0) > 0 %}: {{ navUnreadCount }} unread{% endif %}">
+                                            <i class="fas fa-bell" aria-hidden="true"></i>
                                             {% if navUnreadCount|default(0) > 0 %}
-                                                <span class="badge">{{ navUnreadCount }}</span>
+                                                <span class="badge" aria-hidden="true">{{ navUnreadCount }}</span>
                                             {% endif %}
                                         </a>
                                         <div class="dropdown-menu dropdown-menu-right p-0" aria-labelledby="notifDropdown" style="width:360px;">
                                             <div class="notif-header d-flex justify-content-between align-items-center">
-                                                <span><i class="fas fa-bell" style="color:var(--red-hot);margin-right:.4rem;"></i> Notifications</span>
+                                                <span><i class="fas fa-bell" aria-hidden="true" style="color:var(--red-hot);margin-right:.4rem;"></i> Notifications</span>
                                                 {% if navUnreadCount|default(0) > 0 %}
                                                     <span style="font-size:.55rem;color:var(--red-hot);">{{ navUnreadCount }} unread</span>
                                                 {% endif %}
@@ -532,24 +686,30 @@
                                             <div class="notif-body">
                                                 {% if navNotifications|default([])|length == 0 %}
                                                     <div class="p-3" style="font-family:var(--font-mono);font-size:.68rem;color:var(--muted);text-align:center;">
-                                                        <i class="fas fa-check-circle" style="color:var(--green);display:block;font-size:1.5rem;margin-bottom:.5rem;"></i>
+                                                        <i class="fas fa-check-circle" aria-hidden="true" style="color:var(--green);display:block;font-size:1.5rem;margin-bottom:.5rem;"></i>
                                                         All caught up
                                                     </div>
                                                 {% else %}
                                                     {% for notif in navNotifications %}
                                                         <div class="notif-item {{ notif.read ? '' : 'notif-item-unread' }}">
                                                             <div class="notif-msg {{ notif.read ? 'read' : '' }}">
-                                                                <span style="margin-right:.4rem;">{{ notif.type.getIcon() }}</span>{{ notif.message }}
+                                                                <span aria-hidden="true" style="margin-right:.4rem;">{{ notif.type.getIcon() }}</span>{{ notif.message }}
                                                             </div>
-                                                            <div class="notif-date">{{ notif.createdAt|date('d/m/Y H:i') }}</div>
+                                                            <div class="notif-date">
+                                                                <time datetime="{{ notif.createdAt|date('Y-m-d\\TH:i') }}">{{ notif.createdAt|date('d/m/Y H:i') }}</time>
+                                                            </div>
                                                             <div class="mt-2 d-flex gap-2">
                                                                 {% if notif.link %}
-                                                                    <a href="{{ notif.link }}" class="btn btn-sm" style="font-family:var(--font-hud);font-size:.55rem;letter-spacing:.08em;background:rgba(232,55,42,.15);border:1px solid rgba(232,55,42,.35);color:var(--red-hot);border-radius:5px;">View</a>
+                                                                    <a href="{{ notif.link }}" class="btn btn-sm"
+                                                                       aria-label="View notification: {{ notif.message|slice(0,50) }}"
+                                                                       style="font-family:var(--font-hud);font-size:.55rem;letter-spacing:.08em;background:rgba(232,55,42,.15);border:1px solid rgba(232,55,42,.35);color:var(--red-hot);border-radius:5px;">View</a>
                                                                 {% endif %}
                                                                 {% if not notif.read %}
                                                                     <form method="post" action="{{ path('user_notification_read', { id: notif.id }) }}">
                                                                         <input type="hidden" name="_token" value="{{ csrf_token('notification_read_' ~ notif.id) }}">
-                                                                        <button type="submit" class="btn btn-sm" style="font-family:var(--font-hud);font-size:.55rem;letter-spacing:.08em;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--muted);border-radius:5px;">Mark read</button>
+                                                                        <button type="submit" class="btn btn-sm"
+                                                                                aria-label="Mark as read: {{ notif.message|slice(0,50) }}"
+                                                                                style="font-family:var(--font-hud);font-size:.55rem;letter-spacing:.08em;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--muted);border-radius:5px;">Mark read</button>
                                                                     </form>
                                                                 {% endif %}
                                                             </div>
@@ -565,20 +725,21 @@
                                         <a class="nav-link et-profile-trigger dropdown-toggle"
                                            href="#" id="etProfileDropdown"
                                            role="button" data-toggle="dropdown"
-                                           aria-haspopup="true" aria-expanded="false">
-                                            <div class="et-pf-av">
+                                           aria-haspopup="true" aria-expanded="false"
+                                           aria-label="Profile menu for {{ app.user.username }}">
+                                            <div class="et-pf-av" aria-hidden="true">
                                                 <div class="et-pf-av-ring"></div>
                                                 <div class="et-pf-av-inner">{{ app.user.username|first|upper }}</div>
                                                 <div class="et-pf-dot"></div>
                                             </div>
-                                            <span class="et-pf-name">{{ app.user.username }}</span>
-                                            <i class="fas fa-chevron-down et-pf-chevron"></i>
+                                            <span class="et-pf-name" aria-hidden="true">{{ app.user.username }}</span>
+                                            <i class="fas fa-chevron-down et-pf-chevron" aria-hidden="true"></i>
                                         </a>
 
                                         <div class="dropdown-menu dropdown-menu-right et-profile-menu p-0"
                                              aria-labelledby="etProfileDropdown">
 
-                                            <div class="et-pd-header">
+                                            <div class="et-pd-header" aria-hidden="true">
                                                 <div class="et-pd-scanline"></div>
                                                 <div class="et-pd-row">
                                                     <div class="et-pd-av-lg">
@@ -600,73 +761,73 @@
                                                 </div>
                                             </div>
 
-                                            <div class="et-pd-stats">
+                                            <div class="et-pd-stats" aria-label="Player statistics">
                                                 <div class="et-pd-stat">
                                                     <span class="et-pd-sv">{{ app.user.coinBalance }}</span>
-                                                    <span class="et-pd-sl">Coins</span>
+                                                    <span class="et-pd-sl" aria-hidden="true">Coins</span>
                                                 </div>
                                                 <div class="et-pd-stat">
                                                     <span class="et-pd-sv">—</span>
-                                                    <span class="et-pd-sl">Rank</span>
+                                                    <span class="et-pd-sl" aria-hidden="true">Rank</span>
                                                 </div>
                                                 <div class="et-pd-stat">
                                                     <span class="et-pd-sv">—</span>
-                                                    <span class="et-pd-sl">Wins</span>
+                                                    <span class="et-pd-sl" aria-hidden="true">Wins</span>
                                                 </div>
                                             </div>
 
                                             <div class="et-pd-menu">
                                                 <a class="et-pd-item" href="{{ path('user_profile') }}">
-                                                    <div class="et-pd-ic"><i class="fas fa-user"></i></div>
+                                                    <div class="et-pd-ic" aria-hidden="true"><i class="fas fa-user" aria-hidden="true"></i></div>
                                                     <div class="et-pd-txt">
                                                         <span class="et-pd-ttl">My Profile</span>
                                                         <span class="et-pd-sub">View &amp; edit your identity</span>
                                                     </div>
-                                                    <i class="fas fa-chevron-right et-pd-arr"></i>
+                                                    <i class="fas fa-chevron-right et-pd-arr" aria-hidden="true"></i>
                                                 </a>
                                                 <a class="et-pd-item et-pd-2fa" href="{{ path('app_2fa_settings') }}">
-                                                    <div class="et-pd-ic"><i class="fas fa-shield-alt"></i></div>
+                                                    <div class="et-pd-ic" aria-hidden="true"><i class="fas fa-shield-alt" aria-hidden="true"></i></div>
                                                     <div class="et-pd-txt">
                                                         <span class="et-pd-ttl">Two-Factor Auth</span>
                                                         <span class="et-pd-sub">Secure your account</span>
                                                     </div>
-                                                    <i class="fas fa-chevron-right et-pd-arr"></i>
+                                                    <i class="fas fa-chevron-right et-pd-arr" aria-hidden="true"></i>
                                                 </a>
                                                 <a class="et-pd-item et-pd-support" href="{{ path('app_complaints_index') }}">
-                                                    <div class="et-pd-ic"><i class="fas fa-headset"></i></div>
+                                                    <div class="et-pd-ic" aria-hidden="true"><i class="fas fa-headset" aria-hidden="true"></i></div>
                                                     <div class="et-pd-txt">
                                                         <span class="et-pd-ttl">Support</span>
                                                         <span class="et-pd-sub">Open a ticket</span>
                                                     </div>
-                                                    <i class="fas fa-chevron-right et-pd-arr"></i>
+                                                    <i class="fas fa-chevron-right et-pd-arr" aria-hidden="true"></i>
                                                 </a>
                                                 {% if is_granted('ROLE_ADMIN') %}
-                                                    <div class="et-pd-divider"></div>
+                                                    <div class="et-pd-divider" role="separator" aria-hidden="true"></div>
                                                     <a class="et-pd-item et-pd-admin" href="{{ path('admin_login') }}">
-                                                        <div class="et-pd-ic"><i class="fas fa-user-shield"></i></div>
+                                                        <div class="et-pd-ic" aria-hidden="true"><i class="fas fa-user-shield" aria-hidden="true"></i></div>
                                                         <div class="et-pd-txt">
                                                             <span class="et-pd-ttl">Administration</span>
                                                             <span class="et-pd-sub">Admin panel access</span>
                                                         </div>
-                                                        <i class="fas fa-chevron-right et-pd-arr"></i>
+                                                        <i class="fas fa-chevron-right et-pd-arr" aria-hidden="true"></i>
                                                     </a>
                                                 {% endif %}
-                                                <div class="et-pd-divider"></div>
+                                                <div class="et-pd-divider" role="separator" aria-hidden="true"></div>
                                                 <a class="et-pd-item et-pd-logout" href="{{ path('app_logout') }}">
-                                                    <div class="et-pd-ic"><i class="fas fa-sign-out-alt"></i></div>
+                                                    <div class="et-pd-ic" aria-hidden="true"><i class="fas fa-sign-out-alt" aria-hidden="true"></i></div>
                                                     <div class="et-pd-txt">
                                                         <span class="et-pd-ttl">Logout</span>
                                                         <span class="et-pd-sub">End your session</span>
                                                     </div>
-                                                    <i class="fas fa-chevron-right et-pd-arr"></i>
+                                                    <i class="fas fa-chevron-right et-pd-arr" aria-hidden="true"></i>
                                                 </a>
                                             </div>
 
                                             <div class="et-pd-footer">
-                                                <div class="et-pd-coins">
-                                                    <i class="fas fa-coins"></i>
-                                                    <span>Balance:</span>
-                                                    <span class="et-pd-coins-val">{{ app.user.coinBalance }}</span>
+                                                <div class="et-pd-coins" aria-label="Balance: {{ app.user.coinBalance }} coins">
+                                                    <i class="fas fa-coins" aria-hidden="true"></i>
+                                                    <span aria-hidden="true">Balance:</span>
+                                                    <span class="et-pd-coins-val" aria-hidden="true">{{ app.user.coinBalance }}</span>
                                                 </div>
                                                 <a href="{{ path('coins_index') }}" class="et-pd-coins-btn">Get More →</a>
                                             </div>
@@ -692,19 +853,26 @@
     {% for type in ['success', 'error', 'warning', 'info'] %}
         {% for message in app.flashes(type) %}
             <div class="container mt-3">
-                <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
-                    <i class="fas fa-{{ type == 'error' ? 'exclamation-triangle' : type == 'warning' ? 'exclamation-circle' : type == 'info' ? 'info-circle' : 'check-circle' }}"></i>
+                <div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show"
+                     role="{{ type == 'error' or type == 'warning' ? 'alert' : 'status' }}"
+                     aria-live="{{ type == 'error' ? 'assertive' : 'polite' }}"
+                     aria-atomic="true">
+                    <i class="fas fa-{{ type == 'error' ? 'exclamation-triangle' : type == 'warning' ? 'exclamation-circle' : type == 'info' ? 'info-circle' : 'check-circle' }}" aria-hidden="true"></i>
                     {{ message }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
             </div>
         {% endfor %}
     {% endfor %}
 
-    {% block body %}{% endblock %}
+    <main id="et-main" role="main" tabindex="-1">
+        {% block body %}{% endblock %}
+    </main>
 
     {# ══ FOOTER ══ #}
-    <footer class="footer_part">
+    <footer class="footer_part" role="contentinfo">
         <div class="footer_top"><div class="container"><div class="row"></div></div></div>
         <div class="copygight_text">
             <div class="container">
@@ -718,14 +886,16 @@
                         </div>
                     </div>
                     <div class="col-lg-4">
-                        <div class="footer_icon social_icon">
-                            <ul class="list-unstyled">
-                                <li><a href="#" class="single_social_icon"><i class="fab fa-facebook-f"></i></a></li>
-                                <li><a href="#" class="single_social_icon"><i class="fab fa-twitter"></i></a></li>
-                                <li><a href="#" class="single_social_icon"><i class="fab fa-instagram"></i></a></li>
-                                <li><a href="#" class="single_social_icon"><i class="fab fa-discord"></i></a></li>
-                            </ul>
-                        </div>
+                        <nav aria-label="Social media">
+                            <div class="footer_icon social_icon">
+                                <ul class="list-unstyled">
+                                    <li><a href="#" class="single_social_icon" aria-label="EyeTwin on Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a></li>
+                                    <li><a href="#" class="single_social_icon" aria-label="EyeTwin on Twitter"><i class="fab fa-twitter" aria-hidden="true"></i></a></li>
+                                    <li><a href="#" class="single_social_icon" aria-label="EyeTwin on Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a></li>
+                                    <li><a href="#" class="single_social_icon" aria-label="EyeTwin on Discord"><i class="fab fa-discord" aria-hidden="true"></i></a></li>
+                                </ul>
+                            </div>
+                        </nav>
                     </div>
                 </div>
             </div>
@@ -791,10 +961,10 @@
         if (!rafPending) { rafPending=true; requestAnimationFrame(loop); }
     }, { passive:true });
     document.addEventListener('mouseover', e => {
-        isHover = !!e.target.closest('a,button,[role="button"],input,select,textarea,label,.et-cursor-opt,.et-pd-item,.et-profile-trigger');
+        isHover = !!e.target.closest('a,button,[role="button"],input,select,textarea,label,.et-cursor-opt,.et-pd-item,.et-profile-trigger,.a11y-quick-btn,.a11y-send-btn,.a11y-mic-btn,.a11y-close-btn');
     }, { passive:true });
     document.addEventListener('mouseout', e => {
-        if (e.target.closest('a,button,[role="button"],input,select,textarea,label,.et-cursor-opt,.et-pd-item,.et-profile-trigger')) isHover=false;
+        if (e.target.closest('a,button,[role="button"],input,select,textarea,label,.et-cursor-opt,.et-pd-item,.et-profile-trigger,.a11y-quick-btn,.a11y-send-btn,.a11y-mic-btn,.a11y-close-btn')) isHover=false;
     }, { passive:true });
     document.addEventListener('mousedown', ()=>{ isClick=true; clickTime=performance.now(); spawnSparks(mouseX,mouseY); });
     document.addEventListener('mouseup',   ()=>{ isClick=false; });
@@ -817,7 +987,6 @@
     }
 
     let radarAngle=0, scanRot=0;
-
     function drawCrosshair(ts) {
         radarAngle = ts*.002; scanRot = ts*.0012;
         const pulse   = .5+.5*Math.sin(ts*.003);
@@ -984,12 +1153,44 @@
         opts.forEach(o=>o.classList.toggle('active',o.dataset.cursor===type));
         btn.textContent=ICONS[type];
         setTimeout(()=>panel.classList.remove('open'),220);
+        btn.setAttribute('aria-expanded','false');
+        panel.setAttribute('aria-hidden','true');
         if(!rafPending){ rafPending=true; requestAnimationFrame(loop); }
     }
-    btn.addEventListener('click',e=>{ e.stopPropagation(); panel.classList.toggle('open'); });
-    opts.forEach(o=>o.addEventListener('click',()=>setCursor(o.dataset.cursor)));
-    document.addEventListener('click',e=>{ if(!panel.contains(e.target)&&e.target!==btn) panel.classList.remove('open'); });
-    document.addEventListener('keydown',e=>{ if(e.key==='Escape') panel.classList.remove('open'); });
+    btn.addEventListener('click',e=>{
+        e.stopPropagation();
+        const opening = !panel.classList.contains('open');
+        panel.classList.toggle('open');
+        btn.setAttribute('aria-expanded', opening ? 'true' : 'false');
+        panel.setAttribute('aria-hidden',  opening ? 'false' : 'true');
+        if (opening) {
+            const firstOpt = panel.querySelector('[role="menuitem"]');
+            if (firstOpt) { firstOpt.setAttribute('tabindex','0'); firstOpt.focus(); }
+        }
+    });
+    opts.forEach(o => {
+        o.addEventListener('click', () => setCursor(o.dataset.cursor));
+        o.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setCursor(o.dataset.cursor); }
+            if (e.key === 'ArrowDown') { e.preventDefault(); o.nextElementSibling?.focus(); }
+            if (e.key === 'ArrowUp')   { e.preventDefault(); o.previousElementSibling?.focus(); }
+            if (e.key === 'Escape')    { panel.classList.remove('open'); btn.setAttribute('aria-expanded','false'); panel.setAttribute('aria-hidden','true'); btn.focus(); }
+        });
+    });
+    document.addEventListener('click',e=>{
+        if(!panel.contains(e.target)&&e.target!==btn) {
+            panel.classList.remove('open');
+            btn.setAttribute('aria-expanded','false');
+            panel.setAttribute('aria-hidden','true');
+        }
+    });
+    document.addEventListener('keydown',e=>{
+        if(e.key==='Escape') {
+            panel.classList.remove('open');
+            btn.setAttribute('aria-expanded','false');
+            panel.setAttribute('aria-hidden','true');
+        }
+    });
     setCursor(cursorType);
 
     const pfTrigger=document.querySelector('.et-profile-trigger');
@@ -1000,7 +1201,6 @@
         document.addEventListener('click',e=>{ if(!pfTrigger.closest('.dropdown').contains(e.target)) pfTrigger.classList.remove('show'); });
     }
 
-    /* ── Background particles ── */
     const bgCanvas=document.getElementById('bgCanvas');
     if(bgCanvas){
         const bctx=bgCanvas.getContext('2d',{alpha:true}); bctx.imageSmoothingEnabled=false;
@@ -1044,6 +1244,370 @@
 
     const logo=document.querySelector('.navbar-brand img');
     if(logo){ setInterval(()=>{ if(Math.random()>.88){ logo.animate([{filter:'none',transform:'none'},{filter:'hue-rotate(180deg) brightness(1.5)',transform:'skewX(-4deg) translateX(2px)'},{filter:'hue-rotate(-90deg)',transform:'skewX(3deg) translateX(-2px)'},{filter:'none',transform:'none'}],{duration:140,easing:'steps(3)'}); } },4000); }
+
+    /* ══════════════════════════════════════════════════════════
+       A11Y — KEYBOARD MODE + UTILITIES
+    ══════════════════════════════════════════════════════════ */
+    let isKeyboardUser = false;
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Tab' && !isKeyboardUser) {
+            isKeyboardUser = true;
+            document.body.classList.add('et-keyboard');
+        }
+    });
+    document.addEventListener('mousedown', () => {
+        if (isKeyboardUser) {
+            isKeyboardUser = false;
+            document.body.classList.remove('et-keyboard');
+        }
+    });
+
+    window.etAnnounce = function(msg, priority) {
+        const el = document.getElementById(priority === 'assertive' ? 'et-a11y-assertive' : 'et-a11y-polite');
+        if (!el) return;
+        el.textContent = '';
+        setTimeout(() => { el.textContent = msg; }, 80);
+    };
+
+    document.querySelectorAll('.alert').forEach(alert => {
+        const msg = alert.textContent.replace(/×/g,'').trim();
+        const isUrgent = alert.classList.contains('alert-danger') || alert.classList.contains('alert-warning');
+        etAnnounce(msg, isUrgent ? 'assertive' : 'polite');
+    });
+
+    document.querySelectorAll('i.fas, i.fab, i.far').forEach(icon => {
+        if (!icon.closest('[aria-label]') && !icon.getAttribute('aria-label')) {
+            icon.setAttribute('aria-hidden', 'true');
+        }
+    });
+
+    const skipLink = document.querySelector('.et-skip-nav');
+    const mainEl   = document.getElementById('et-main');
+    if (skipLink && mainEl) {
+        skipLink.addEventListener('click', e => {
+            e.preventDefault();
+            mainEl.focus();
+            mainEl.scrollIntoView({ behavior: 'smooth' });
+        });
+    }
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.querySelectorAll('section > .container > .row > [class*="col"]').forEach(el => {
+            el.style.opacity = '1'; el.style.transform = 'none'; el.style.transition = 'none';
+        });
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       ACCESSIBILITY ASSISTANT — AI-POWERED WIDGET (ENGLISH)
+    ══════════════════════════════════════════════════════════ */
+    (function() {
+        const a11yBtn   = document.getElementById('et-a11y-btn');
+        const a11yPanel = document.getElementById('et-a11y-panel');
+        const closeBtn  = document.getElementById('et-a11y-close');
+        const chatEl    = document.getElementById('a11y-chat-messages');
+        const inputEl   = document.getElementById('a11y-input');
+        const sendBtn   = document.getElementById('a11y-send-btn');
+        const micBtn    = document.getElementById('a11y-mic-btn');
+
+        let isOpen    = false;
+        let isLoading = false;
+        let history   = [];
+
+        const i18n = {
+            welcome:      "Hello! I'm your accessibility assistant. How can I help you navigate EyeTwin?",
+            placeholder:  "Ask your question…",
+            sender:       "EyeTwin Assistant",
+            loading:      "…",
+            noReply:      "Sorry, no response.",
+            announced:    "New response from assistant",
+            listening:    "Listening, speak now",
+            error:        "Connection error. Please check the server is running.",
+            speak_on:     "Page reading started",
+            speak_off:    "Reading stopped",
+            contrast_on:  "High contrast mode enabled",
+            contrast_off: "High contrast mode disabled",
+            bigtext_on:   "Text enlarged",
+            bigtext_off:  "Normal text size restored",
+            dyslexia_on:  "Readability font enabled",
+            dyslexia_off: "Normal font restored",
+            guide_on:     "Reading guide enabled",
+            guide_off:    "Reading guide disabled",
+            focus_on:     "Keyboard focus mode enabled",
+            focus_off:    "Keyboard focus mode disabled",
+        };
+        function t(key) { return i18n[key] || key; }
+
+        function applyLang() {
+            if (inputEl) inputEl.placeholder = t('placeholder');
+            const welcomeEl = document.getElementById('a11y-welcome-msg');
+            if (welcomeEl) {
+                welcomeEl.innerHTML = `<span class="msg-sender">${t('sender')}</span>${t('welcome')}`;
+            }
+        }
+        applyLang();
+
+        const states = { contrast:false, bigtext:false, dyslexia:false, speak:false, guide:false, focus:false };
+        let guideEl     = null;
+        let speechSynth = window.speechSynthesis;
+        let recognition = null;
+
+        function openPanel() {
+            isOpen = true;
+            a11yPanel.classList.add('open');
+            a11yBtn.setAttribute('aria-expanded','true');
+            a11yPanel.setAttribute('aria-hidden','false');
+            inputEl.focus();
+        }
+        function closePanel() {
+            isOpen = false;
+            a11yPanel.classList.remove('open');
+            a11yBtn.setAttribute('aria-expanded','false');
+            a11yPanel.setAttribute('aria-hidden','true');
+            a11yBtn.focus();
+        }
+
+        a11yBtn.addEventListener('click', e => { e.stopPropagation(); isOpen ? closePanel() : openPanel(); });
+        closeBtn.addEventListener('click', closePanel);
+        document.addEventListener('keydown', e => { if (e.key === 'Escape' && isOpen) closePanel(); });
+        document.addEventListener('click', e => {
+            if (isOpen && !a11yPanel.contains(e.target) && e.target !== a11yBtn) closePanel();
+        });
+
+        document.querySelectorAll('.a11y-quick-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.dataset.action;
+                toggleFeature(action);
+                btn.classList.toggle('active', states[action]);
+                btn.setAttribute('aria-pressed', states[action] ? 'true' : 'false');
+            });
+        });
+
+        function toggleFeature(action) {
+            switch(action) {
+                case 'contrast':
+                    states.contrast = !states.contrast;
+                    document.body.style.filter = states.contrast ? 'contrast(1.6) brightness(1.1)' : '';
+                    etAnnounce(t(states.contrast ? 'contrast_on' : 'contrast_off'));
+                    break;
+                case 'bigtext':
+                    states.bigtext = !states.bigtext;
+                    document.documentElement.style.fontSize = states.bigtext ? '120%' : '';
+                    etAnnounce(t(states.bigtext ? 'bigtext_on' : 'bigtext_off'));
+                    break;
+                case 'dyslexia':
+                    states.dyslexia = !states.dyslexia;
+                    if (states.dyslexia) {
+                        const link = document.createElement('link');
+                        link.id = 'dyslexia-font';
+                        link.rel = 'stylesheet';
+                        link.href = 'https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600&display=swap';
+                        document.head.appendChild(link);
+                        document.body.style.fontFamily = "'Lexend', sans-serif";
+                    } else {
+                        document.getElementById('dyslexia-font')?.remove();
+                        document.body.style.fontFamily = '';
+                    }
+                    etAnnounce(t(states.dyslexia ? 'dyslexia_on' : 'dyslexia_off'));
+                    break;
+                case 'speak':
+                    states.speak = !states.speak;
+                    if (states.speak) {
+                        const text = document.getElementById('et-main')?.innerText || document.body.innerText;
+                        const utt  = new SpeechSynthesisUtterance(text.substring(0, 3000));
+                        utt.lang = 'en-US';
+                        utt.rate = 0.9;
+                        utt.onend = () => {
+                            states.speak = false;
+                            document.querySelector('[data-action="speak"]')?.classList.remove('active');
+                            document.querySelector('[data-action="speak"]')?.setAttribute('aria-pressed','false');
+                        };
+                        speechSynth.speak(utt);
+                        etAnnounce(t('speak_on'));
+                    } else {
+                        speechSynth.cancel();
+                        etAnnounce(t('speak_off'));
+                    }
+                    break;
+                case 'guide':
+                    states.guide = !states.guide;
+                    if (states.guide) {
+                        guideEl = document.createElement('div');
+                        guideEl.style.cssText = 'position:fixed;left:0;right:0;height:3px;background:rgba(0,229,255,.5);pointer-events:none;z-index:99990;transition:top .1s;box-shadow:0 0 10px rgba(0,229,255,.4);';
+                        document.body.appendChild(guideEl);
+                        document.addEventListener('mousemove', moveGuide, {passive:true});
+                        etAnnounce(t('guide_on'));
+                    } else {
+                        if (guideEl) { guideEl.remove(); guideEl = null; }
+                        document.removeEventListener('mousemove', moveGuide);
+                        etAnnounce(t('guide_off'));
+                    }
+                    break;
+                case 'focus':
+                    states.focus = !states.focus;
+                    if (states.focus) {
+                        const style = document.createElement('style');
+                        style.id = 'et-focus-style';
+                        style.textContent = '*:focus{outline:3px solid #f6d860!important;outline-offset:4px!important;box-shadow:0 0 0 6px rgba(246,216,96,.2)!important;}';
+                        document.head.appendChild(style);
+                        etAnnounce(t('focus_on'));
+                    } else {
+                        document.getElementById('et-focus-style')?.remove();
+                        etAnnounce(t('focus_off'));
+                    }
+                    break;
+            }
+        }
+
+        function moveGuide(e) {
+            if (guideEl) guideEl.style.top = (e.clientY - 1) + 'px';
+        }
+
+        function executeCommands(text) {
+            const commands = {
+                '[CONTRASTE]':    () => { if (!states.contrast) toggleFeature('contrast'); document.querySelector('[data-action="contrast"]')?.classList.add('active'); document.querySelector('[data-action="contrast"]')?.setAttribute('aria-pressed','true'); },
+                '[GRAND_TEXTE]':  () => { if (!states.bigtext)  toggleFeature('bigtext');  document.querySelector('[data-action="bigtext"]')?.classList.add('active');  document.querySelector('[data-action="bigtext"]')?.setAttribute('aria-pressed','true'); },
+                '[DYSLEXIE]':     () => { if (!states.dyslexia) toggleFeature('dyslexia'); document.querySelector('[data-action="dyslexia"]')?.classList.add('active'); document.querySelector('[data-action="dyslexia"]')?.setAttribute('aria-pressed','true'); },
+                '[LECTURE]':      () => { if (!states.speak)    toggleFeature('speak');    document.querySelector('[data-action="speak"]')?.classList.add('active');    document.querySelector('[data-action="speak"]')?.setAttribute('aria-pressed','true'); },
+                '[STOP_LECTURE]': () => { speechSynth.cancel(); states.speak = false; document.querySelector('[data-action="speak"]')?.classList.remove('active'); document.querySelector('[data-action="speak"]')?.setAttribute('aria-pressed','false'); },
+                '[GUIDE]':        () => { if (!states.guide)    toggleFeature('guide');    document.querySelector('[data-action="guide"]')?.classList.add('active');    document.querySelector('[data-action="guide"]')?.setAttribute('aria-pressed','true'); },
+                '[FOCUS]':        () => { if (!states.focus)    toggleFeature('focus');    document.querySelector('[data-action="focus"]')?.classList.add('active');    document.querySelector('[data-action="focus"]')?.setAttribute('aria-pressed','true'); },
+            };
+
+            for (const [cmd, fn] of Object.entries(commands)) {
+                if (text.includes(cmd)) fn();
+            }
+
+            const navMatch = text.match(/\[NAVIGATE:([^\]]+)\]/);
+            if (navMatch) {
+                let url = navMatch[1].trim();
+                const urlFixes = {
+                    '/planing':       '/planning',
+                    '/plannig':       '/planning',
+                    '/plannnig':      '/planning',
+                    '/planing/':      '/planning',
+                    '/tournoi':       '/tournaments/landing',
+                    '/tournaments':   '/tournaments/landing',
+                    '/tournament':    '/tournaments/landing',
+                    '/tournaments/':  '/tournaments/landing',
+                    '/video/upload':  '/upload',
+                    '/video':         '/upload',
+                    '/team':          '/teams/',
+                    '/teams':         '/teams/',
+                    '/community':     '/channels',
+                    '/channel':       '/channels',
+                    '/live':          '/live/',
+                    '/coins':         '/coins/',
+                    '/profile':       '/profile/',
+                    '/complaints':    '/complaints/',
+                    '/connexion':     '/login',
+                    '/inscription':   '/register',
+                };
+                for (const [wrong, correct] of Object.entries(urlFixes)) {
+                    if (url === wrong) { url = correct; break; }
+                }
+                setTimeout(() => { window.location.href = url; }, 1200);
+            }
+
+            return text.replace(/\[CONTRASTE\]|\[GRAND_TEXTE\]|\[DYSLEXIE\]|\[LECTURE\]|\[STOP_LECTURE\]|\[GUIDE\]|\[FOCUS\]|\[NAVIGATE:[^\]]*\]/g, '').trim();
+        }
+
+        function addMessage(content, role) {
+            const div = document.createElement('div');
+            div.className = `a11y-msg a11y-msg-${role === 'user' ? 'user' : 'bot'}`;
+            if (role === 'bot') {
+                div.innerHTML = `<span class="msg-sender">${t('sender')}</span>${escapeHtml(content)}`;
+            } else {
+                div.textContent = content;
+            }
+            chatEl.appendChild(div);
+            chatEl.scrollTop = chatEl.scrollHeight;
+            return div;
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+        }
+
+        async function sendMessage(userText) {
+            if (!userText.trim() || isLoading) return;
+            isLoading = true;
+
+            addMessage(userText, 'user');
+            history.push({ role: 'user', content: userText });
+            inputEl.value = '';
+
+            const loadingDiv = addMessage(t('loading'), 'bot');
+            loadingDiv.classList.add('loading');
+
+            try {
+                const res = await fetch('/api/assistant', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ history, lang: 'en' })
+                });
+
+                const rawText = await res.text();
+
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status} — ${rawText.substring(0, 200)}`);
+                }
+
+                const data = JSON.parse(rawText);
+                if (data.error) throw new Error(data.error);
+
+                const rawReply   = data.reply || t('noReply');
+                const cleanReply = executeCommands(rawReply);
+
+                loadingDiv.classList.remove('loading');
+                loadingDiv.innerHTML = `<span class="msg-sender">${t('sender')}</span>${escapeHtml(cleanReply)}`;
+                history.push({ role: 'assistant', content: rawReply });
+                etAnnounce(t('announced'));
+
+            } catch (err) {
+                loadingDiv.classList.remove('loading');
+                loadingDiv.innerHTML = `<span class="msg-sender">${t('sender')}</span>${t('error')}`;
+                console.error('[A11Y Assistant]', err);
+            }
+
+            isLoading = false;
+        }
+
+        sendBtn.addEventListener('click', () => sendMessage(inputEl.value));
+        inputEl.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(inputEl.value); }
+        });
+
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SR();
+            recognition.lang           = 'en-US';
+            recognition.continuous     = false;
+            recognition.interimResults = false;
+
+            recognition.onresult = e => {
+                const transcript = e.results[0][0].transcript;
+                inputEl.value = transcript;
+                micBtn.classList.remove('recording');
+                sendMessage(transcript);
+            };
+            recognition.onerror = () => micBtn.classList.remove('recording');
+            recognition.onend   = () => micBtn.classList.remove('recording');
+
+            micBtn.addEventListener('click', () => {
+                if (micBtn.classList.contains('recording')) {
+                    recognition.stop();
+                    micBtn.classList.remove('recording');
+                } else {
+                    recognition.start();
+                    micBtn.classList.add('recording');
+                    etAnnounce(t('listening'));
+                }
+            });
+        } else {
+            micBtn.style.display = 'none';
+        }
+
+    })();
 
 })();
 </script>
