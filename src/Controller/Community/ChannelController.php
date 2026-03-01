@@ -15,21 +15,60 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Service\ChannelAccessService;
+use App\Repository\ChannelJoinRequestRepository;
+
+use App\Repository\ChannelMemberRepository;
 
 class ChannelController extends AbstractController
 {
     #[Route('/channels', name: 'community_channels_index')]
-    public function index(ChannelRepository $repo, NotificationRepository $notificationRepo): Response
+    public function index(ChannelRepository $repo,
+                          NotificationRepository $notificationRepo,
+                          ChannelJoinRequestRepository $reqRepo,
+                          ChannelMemberRepository $memberRepo
+    ): Response
     {
-        $channels = $repo->findVisibleForUser();
+        $channels = $repo->findVisibleForUser($this->getUser());
         $channelNotifications = [];
+
         if ($this->getUser()) {
             $channelNotifications = $notificationRepo->findChannelNotificationsForUser($this->getUser());
         }
 
+        $pendingChannelIds = [];
+
+        if ($this->getUser()) {
+            $pending = $reqRepo->createQueryBuilder('r')
+                ->select('IDENTITY(r.channel) as cid')
+                ->andWhere('r.requester = :me')
+                ->andWhere('r.status = :pending')
+                ->setParameter('me', $this->getUser())
+                ->setParameter('pending', 'pending')
+                ->getQuery()
+                ->getArrayResult();
+
+            $pendingChannelIds = array_map(fn($row) => (int) $row['cid'], $pending);
+        }
+
+        $memberChannelIds = [];
+
+        if ($this->getUser()) {
+            $memberships = $memberRepo->createQueryBuilder('m')
+                ->select('IDENTITY(m.channel) as cid')
+                ->andWhere('m.user = :me')
+                ->setParameter('me', $this->getUser())
+                ->getQuery()
+                ->getArrayResult();
+
+            $memberChannelIds = array_map(fn($row) => (int) $row['cid'], $memberships);
+        }
+
         return $this->render('community/channel/index.html.twig', [
             'channels' => $channels,
-            'channelNotifications' => $channelNotifications,
+            'channelNotifications' => $channelNotifications, //notif is now no more displayed in the page itself (icon)
+            'pendingChannelIds' => $pendingChannelIds,
+            'memberChannelIds' => $memberChannelIds,
         ]);
     }
 
@@ -52,7 +91,7 @@ class ChannelController extends AbstractController
             $em->persist($channel);
             $em->flush();
 
-            $this->addFlash('success', 'Channel créé ✅ En attente de validation admin.');
+            $this->addFlash('success', 'Channel created ✅ Waiting for admin validation.');
             return $this->redirectToRoute('community_channels_index');
         }
 
@@ -62,20 +101,39 @@ class ChannelController extends AbstractController
     }
 
     #[Route('/channels/{id}', name: 'community_channels_show', requirements: ['id' => '\d+'])]
-    public function show(
-        Channel $channel,
-        MessageRepository $messageRepo,
-        Request $request,
-        EntityManagerInterface $em,
-        ChannelRepository $channelRepo
-    ): Response
+    public function show(Channel $channel,
+                         MessageRepository $messageRepo,
+                         Request $request,
+                         EntityManagerInterface $em,
+                         ChannelRepository $channelRepo,
+                         ChannelAccessService $access,
+                         NotificationRepository $notificationRepo,
+                         ChannelJoinRequestRepository $reqRepo): Response
     {
-        // ✅ Access control: only APPROVED+active+allowed (same logic as index)
-        $visible = $channelRepo->findVisibleForUser();
+        // Access control: only APPROVED+active+allowed (same logic as index)
+        $visible = $channelRepo->findVisibleForUser($this->getUser());
         $visibleIds = array_map(fn($c) => $c->getId(), $visible);
 
         if (!in_array($channel->getId(), $visibleIds, true)) {
             throw $this->createAccessDeniedException("Channel non accessible.");
+        }
+
+        // ✅ NEW: enforce access for private
+        if (!$access->canAccess($channel, $this->getUser())) {
+            $user = $this->getUser();
+            $pending = null;
+            if ($user) {
+                $pending = $reqRepo->findOneBy([
+                    'channel' => $channel,
+                    'requester' => $user,
+                    'status' => 'pending',
+                ]);
+            }
+
+            return $this->render('community/channel/locked.html.twig', [
+                'channel' => $channel,
+                'pendingRequest' => $pending,
+            ]);
         }
 
         //$messages = $messageRepo->findForChannelVisible($channel->getId());
@@ -102,7 +160,7 @@ class ChannelController extends AbstractController
         }
 
 
-        // Message form only if logged in
+        /*/ Message form only if logged in
         $message = new Message();
         $form = $this->createForm(MessageType::class, $message);
         $form->handleRequest($request);
@@ -123,8 +181,13 @@ class ChannelController extends AbstractController
             $em->flush();
 
             return $this->redirectToRoute('community_channels_show', ['id' => $channel->getId()]);
-        }
-
+        }*/
+// Message form only if logged in  FOR REAL TIME CHAT
+        $message = new Message();
+        $form = $this->createForm(MessageType::class, $message, [
+            'action' => $this->generateUrl('community_message_send', ['id' => $channel->getId()]),
+            'method' => 'POST',
+        ]);
 
         return $this->render('community/channel/show.html.twig', [
             'channel' => $channel,
@@ -139,10 +202,10 @@ class ChannelController extends AbstractController
     #[Route('/channels/{id}/edit', name: 'community_channels_edit', requirements: ['id' => '\d+'])]
     public function edit(Channel $channel, Request $request, EntityManagerInterface $em): Response
     {
-        // ✅ only creator can edit
+        // only creator can edit
         $identifier = $this->getUser()?->getUserIdentifier();
         if ($channel->getCreatedBy() !== $identifier) {
-            throw $this->createAccessDeniedException("Vous ne pouvez pas modifier ce channel.");
+            throw $this->createAccessDeniedException("you can't modify this channel.");
         }
 
         $form = $this->createForm(ChannelType::class, $channel);
@@ -151,7 +214,7 @@ class ChannelController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em->flush();
 
-            $this->addFlash('success', 'Channel modifié ✅');
+            $this->addFlash('success', 'Channel edited ✅');
             return $this->redirectToRoute('community_channels_index');
         }
 
@@ -165,10 +228,10 @@ class ChannelController extends AbstractController
     #[Route('/channels/{id}/delete', name: 'community_channels_delete', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function delete(Channel $channel, Request $request, EntityManagerInterface $em): Response
     {
-        // ✅ only creator can delete
+        // only creator can delete
         $identifier = $this->getUser()?->getUserIdentifier();
         if ($channel->getCreatedBy() !== $identifier) {
-            throw $this->createAccessDeniedException("Vous ne pouvez pas supprimer ce channel.");
+            throw $this->createAccessDeniedException("you can't delete this channel.");
         }
 
         if (!$this->isCsrfTokenValid('delete_channel_'.$channel->getId(), $request->request->get('_token'))) {

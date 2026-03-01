@@ -15,6 +15,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
+use App\Repository\MessageRepository;
+
+
 #[Route('/admin/channels')]
 #[IsGranted('ROLE_ADMIN')]
 class AdminChannelController extends AbstractController
@@ -24,13 +27,32 @@ class AdminChannelController extends AbstractController
     {
         $q = trim((string) $request->query->get('q', ''));
         $status = (string) $request->query->get('status', 'all'); // all|approved|pending|rejected
-        $type = (string) $request->query->get('type', 'all');     // all|public|private (selon ton enum)
+        $type = (string) $request->query->get('type', 'all');     // all|public|private (enum)
         $active = (string) $request->query->get('active', 'all'); // all|1|0
 
-        $channels = $repo->findAdminList($q, $status, $type, $active);
+        // ✅ sorting
+        $sort = (string) $request->query->get('sort', 'createdAt');
+        $dir  = strtolower((string) $request->query->get('dir', 'desc'));
+        $dir  = $dir === 'asc' ? 'asc' : 'desc';
+
+        $channels = $repo->findAdminList($q, $status, $type, $active,$sort,$dir);
 
         // stats pour cards
         $pendingCount = $repo->countByStatus(Channel::STATUS_PENDING);
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->render('admin/channel/_table.html.twig', [
+                'channels' => $channels,
+                'q' => $q,
+                'status' => $status,
+                'type' => $type,
+                'active' => $active,
+                'sort' => $sort,
+                'dir' => $dir,
+                'pendingCount' => $pendingCount,
+            ]);
+        }
+
 
         return $this->render('admin/channel/index.html.twig', [
             'channels' => $channels,
@@ -39,6 +61,8 @@ class AdminChannelController extends AbstractController
             'type' => $type,
             'active' => $active,
             'pendingCount' => $pendingCount,
+            'sort' => $sort,
+            'dir' => $dir,
         ]);
     }
 
@@ -123,7 +147,7 @@ class AdminChannelController extends AbstractController
             $channel->setCreatedAt($now);
             $channel->setCreatedBy($this->getUser()->getUserIdentifier());
 
-            // ✅ Admin creates directly approved + active
+            // Admin creates directly approved + active
             $channel->setStatus(Channel::STATUS_APPROVED);
             $channel->setIsActive(true);
             $channel->setApprovedBy($this->getUser()->getUserIdentifier());
@@ -150,7 +174,7 @@ class AdminChannelController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em->flush();
-            $this->addFlash('success', 'Channel modifié ✅');
+            $this->addFlash('success', 'Channel edited ✅');
             return $this->redirectToRoute('admin_channels_index');
         }
 
@@ -171,8 +195,26 @@ class AdminChannelController extends AbstractController
         $em->remove($channel);
         $em->flush();
 
-        $this->addFlash('success', 'Channel supprimé ✅');
+        $this->addFlash('success', 'Channel deleted ✅');
         return $this->redirectToRoute('admin_channels_index');
     }
+
+    #[Route('/{id}', name: 'admin_channels_show', requirements: ['id' => '\d+'], methods: ['GET'])]
+    public function show(Channel $channel, MessageRepository $messageRepo): Response
+    {
+        $messagesCount = $messageRepo->count(['channel' => $channel]);
+        $lastMessages = $messageRepo->findBy(
+            ['channel' => $channel],
+            ['sentAt' => 'DESC'],
+            8
+        );
+
+        return $this->render('admin/channel/show.html.twig', [
+            'channel' => $channel,
+            'messagesCount' => $messagesCount,
+            'lastMessages' => $lastMessages,
+        ]);
+    }
+
 
 }

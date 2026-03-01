@@ -68,6 +68,24 @@ class Channel
     )]
     private Collection $messages;
 
+    /**
+     * @var Collection<int, ChannelMember>
+     */
+    #[ORM\OneToMany(targetEntity: ChannelMember::class, mappedBy: 'channel')]
+    private Collection $channelMembers;
+
+    /**
+     * @var Collection<int, ChannelJoinRequest>
+     */
+    #[ORM\OneToMany(targetEntity: ChannelJoinRequest::class, mappedBy: 'channel')]
+    private Collection $channelJoinRequests;
+
+    /**
+     * @var Collection<int, ChannelInvite>
+     */
+    #[ORM\OneToMany(targetEntity: ChannelInvite::class, mappedBy: 'channel')]
+    private Collection $channelInvites;
+
 
     public function getId(): ?int
     {
@@ -221,6 +239,9 @@ class Channel
     public function __construct()
     {
         $this->messages = new ArrayCollection();
+        $this->channelMembers = new ArrayCollection();
+        $this->channelJoinRequests = new ArrayCollection();
+        $this->channelInvites = new ArrayCollection();
     }
 
     public function getMessages(): Collection
@@ -243,6 +264,96 @@ class Channel
         if ($this->messages->removeElement($message)) {
             if ($message->getChannel() === $this) {
                 $message->setChannel(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ChannelMember>
+     */
+    public function getChannelMembers(): Collection
+    {
+        return $this->channelMembers;
+    }
+
+    public function addChannelMember(ChannelMember $channelMember): static
+    {
+        if (!$this->channelMembers->contains($channelMember)) {
+            $this->channelMembers->add($channelMember);
+            $channelMember->setChannel($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChannelMember(ChannelMember $channelMember): static
+    {
+        if ($this->channelMembers->removeElement($channelMember)) {
+            // set the owning side to null (unless already changed)
+            if ($channelMember->getChannel() === $this) {
+                $channelMember->setChannel(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ChannelJoinRequest>
+     */
+    public function getChannelJoinRequests(): Collection
+    {
+        return $this->channelJoinRequests;
+    }
+
+    public function addChannelJoinRequest(ChannelJoinRequest $channelJoinRequest): static
+    {
+        if (!$this->channelJoinRequests->contains($channelJoinRequest)) {
+            $this->channelJoinRequests->add($channelJoinRequest);
+            $channelJoinRequest->setChannel($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChannelJoinRequest(ChannelJoinRequest $channelJoinRequest): static
+    {
+        if ($this->channelJoinRequests->removeElement($channelJoinRequest)) {
+            // set the owning side to null (unless already changed)
+            if ($channelJoinRequest->getChannel() === $this) {
+                $channelJoinRequest->setChannel(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ChannelInvite>
+     */
+    public function getChannelInvites(): Collection
+    {
+        return $this->channelInvites;
+    }
+
+    public function addChannelInvite(ChannelInvite $channelInvite): static
+    {
+        if (!$this->channelInvites->contains($channelInvite)) {
+            $this->channelInvites->add($channelInvite);
+            $channelInvite->setChannel($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChannelInvite(ChannelInvite $channelInvite): static
+    {
+        if ($this->channelInvites->removeElement($channelInvite)) {
+            // set the owning side to null (unless already changed)
+            if ($channelInvite->getChannel() === $this) {
+                $channelInvite->setChannel(null);
             }
         }
 

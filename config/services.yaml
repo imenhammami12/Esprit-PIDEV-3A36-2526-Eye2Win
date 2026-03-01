@@ -9,13 +9,16 @@ parameters:
     cv_directory: '%kernel.project_dir%/public/uploads/cv'
     teams_directory: '%kernel.project_dir%/public/uploads/teams'
     tournois_directory: '%kernel.project_dir%/public/uploads/tournois'
-
+    message_upload_dir: '%kernel.project_dir%/var/uploads/messages'
+    complaints_directory: '%kernel.project_dir%/public/uploads/complaints'
+    faces_directory: '%kernel.project_dir%/public/uploads/faces'
+    app.huggingface_token: '%env(HUGGINGFACE_TOKEN)%'
 
 services:
     # default configuration for services in *this* file
     _defaults:
-        autowire: true      # Automatically injects dependencies in your services.
-        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        autowire: true
+        autoconfigure: true
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
@@ -26,23 +29,63 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
+    # 🔒 EventSubscriber pour la vérification faciale obligatoire
+    App\EventSubscriber\FaceAuthSubscriber:
+        tags:
+            - { name: kernel.event_subscriber }
+
+    # 🎮 CAPTCHA gaming — vérification login front office
+    App\EventSubscriber\CaptchaLoginSubscriber:
+        tags:
+            - { name: kernel.event_subscriber }
+
     App\Service\CloudinaryUploader:
         arguments:
             $cloudName: '%env(CLOUDINARY_CLOUD_NAME)%'
             $apiKey: '%env(CLOUDINARY_API_KEY)%'
             $apiSecret: '%env(CLOUDINARY_API_SECRET)%'
-            $defaultFolder: '%env(default::CLOUDINARY_DEFAULT_FOLDER)%'
+            $defaultFolder: 'users'
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
-    
-    # Configuration du service d'email
+    App\Service\CloudinaryUploaderCHAT:
+        arguments:
+            $cloudName: '%env(AYA_CLOUDINARY_CLOUD_NAME)%'
+            $apiKey: '%env(AYA_CLOUDINARY_API_KEY)%'
+            $apiSecret: '%env(AYA_CLOUDINARY_API_SECRET)%'
+            $defaultFolder: '%env(default::AYA_CLOUDINARY_DEFAULT_FOLDER)%'
+
+    # Configuration du service d'email pour les candidatures coach
     App\Service\CoachApplicationEmailService:
         arguments:
             $fromEmail: '%env(MAILER_FROM_EMAIL)%'
             $fromName: '%env(MAILER_FROM_NAME)%'
+            $projectDir: '%kernel.project_dir%'
 
-    App\Service\ValorantTracker\TrackerGgClient:
+    # Configuration du service de notification multi-canal pour reset password
+    App\Service\MultiChannelNotificationService:
         arguments:
-            $apiKey: '%env(TRACKER_GG_API_KEY)%'
-            $baseUrl: '%env(TRACKER_GG_BASE_URL)%'
+            $fromEmail: '%env(MAILER_FROM_EMAIL)%'
+            $fromName: '%env(MAILER_FROM_NAME)%'
+            $twilioAccountSid: '%env(TWILIO_ACCOUNT_SID)%'
+            $twilioAuthToken: '%env(TWILIO_AUTH_TOKEN)%'
+            $twilioPhoneNumber: '%env(TWILIO_PHONE_NUMBER)%'
+            $telegramBotToken: '%env(TELEGRAM_BOT_TOKEN)%'
+            $devMode: false
+
+    # 💰 CoinController a besoin des clés Stripe injectées manuellement
+    App\Controller\CoinController:
+        arguments:
+            $stripeSecretKey: '%env(STRIPE_SECRET_KEY)%'
+            $stripeWebhookSecret: '%env(STRIPE_WEBHOOK_SECRET)%'
+
+    # 🧠 Analyse de sentiment des réclamations (SentimentServiceComplaints)
+    # Clé HuggingFace gratuite : https://huggingface.co/settings/tokens
+    # Sans clé → fallback par mots-clés activé automatiquement
+    App\Service\SentimentServiceComplaints:
+        arguments:
+            $huggingFaceApiKey: '%env(default::HUGGINGFACE_TOKEN)%'
+    
+    App\Repository\ComplaintRepository:
+        arguments:
+            $complaintStatsCache: '@cache.complaint_stats'
+            $dashboardCache:      '@cache.dashboard'
+            $monthlyStatsCache:   '@cache.monthly_stats'

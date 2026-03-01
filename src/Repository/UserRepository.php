@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\User;
+use App\Entity\AccountStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -13,21 +14,118 @@ class UserRepository extends ServiceEntityRepository
         parent::__construct($registry, User::class);
     }
 
+    // ══════════════════════════════════════════════════════════════
+    //  STATS GLOBALES — source unique de vérité
+    //  On charge tous les users UNE SEULE fois et on calcule tout
+    //  en PHP pour éviter tout problème de nom de colonne Doctrine.
+    // ══════════════════════════════════════════════════════════════
+
     /**
-     * Find users by role
+     * Retourne toutes les statistiques globales en un seul appel.
+     * Utilisé par le controller (rendu initial) et la route AJAX /stats.
+     */
+    public function getGlobalStats(): array
+    {
+        $allUsers = $this->findAll();
+
+        $total       = count($allUsers);
+        $active      = 0;
+        $suspended   = 0;
+        $banned      = 0;
+        $coaches     = 0;
+        $admins      = 0;  // ROLE_ADMIN uniquement (sans ROLE_SUPER_ADMIN)
+        $superAdmins = 0;
+
+        foreach ($allUsers as $user) {
+            // ── Status ──────────────────────────────────────────
+            $status = $user->getAccountStatus();
+            if ($status === AccountStatus::ACTIVE)    $active++;
+            if ($status === AccountStatus::SUSPENDED) $suspended++;
+            if ($status === AccountStatus::BANNED)    $banned++;
+
+            // ── Rôles ────────────────────────────────────────────
+            $roles = $user->getRoles(); // retourne toujours au moins ['ROLE_USER']
+
+            if (in_array('ROLE_SUPER_ADMIN', $roles, true)) {
+                $superAdmins++;
+                // Un super-admin n'est PAS compté dans $admins
+            } elseif (in_array('ROLE_ADMIN', $roles, true)) {
+                $admins++;
+            }
+
+            if (in_array('ROLE_COACH', $roles, true)) {
+                $coaches++;
+            }
+        }
+
+        return [
+            'total'       => $total,
+            'active'      => $active,
+            'inactive'    => $total - $active,
+            'suspended'   => $suspended,
+            'banned'      => $banned,
+            'coaches'     => $coaches,
+            'admins'      => $admins,
+            'superAdmins' => $superAdmins,
+            'activeRate'  => $total > 0 ? (int) round(($active / $total) * 100) : 0,
+        ];
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  FIND ADMINS
+    // ══════════════════════════════════════════════════════════════
+
+    /**
+     * Retourne tous les users ROLE_ADMIN ou ROLE_SUPER_ADMIN,
+     * triés par username.
+     *
+     * @return User[]
+     */
+    public function findAdmins(): array
+    {
+        $admins = [];
+
+        foreach ($this->findAll() as $user) {
+            $roles = $user->getRoles();
+            if (in_array('ROLE_ADMIN', $roles, true) || in_array('ROLE_SUPER_ADMIN', $roles, true)) {
+                $admins[] = $user;
+            }
+        }
+
+        usort($admins, fn($a, $b) => strcmp($a->getUsername(), $b->getUsername()));
+
+        return $admins;
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  MÉTHODES UTILITAIRES
+    // ══════════════════════════════════════════════════════════════
+
+    /**
+     * Retourne les users ayant exactement ce rôle (PHP-side).
+     *
+     * @return User[]
      */
     public function findUsersByRole(string $role): array
     {
-        return $this->createQueryBuilder('u')
-            ->where('u.rolesJson LIKE :role')
-            ->setParameter('role', '%' . $role . '%')
-            ->orderBy('u.createdAt', 'DESC')
-            ->getQuery()
-            ->getResult();
+        return array_values(array_filter(
+            $this->findAll(),
+            fn(User $user) => in_array($role, $user->getRoles(), true)
+        ));
     }
 
     /**
-     * Search users by username or email (for team invitations)
+     * Compte les users ayant exactement ce rôle.
+     */
+    public function countByRole(string $role): int
+    {
+        return count($this->findUsersByRole($role));
+    }
+
+    /**
+     * Recherche pour les invitations d'équipe.
+     *
+     * @return User[]
      */
     public function searchForInvitation(string $query): array
     {
@@ -35,8 +133,57 @@ class UserRepository extends ServiceEntityRepository
             ->where('u.username LIKE :query OR u.email LIKE :query')
             ->andWhere('u.accountStatus = :status')
             ->setParameter('query', '%' . $query . '%')
-            ->setParameter('status', \App\Entity\AccountStatus::ACTIVE)
+            ->setParameter('status', AccountStatus::ACTIVE)
             ->setMaxResults(10)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return User[]
+     */
+    public function findActiveUsers(): array
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.accountStatus = :status')
+            ->setParameter('status', AccountStatus::ACTIVE)
+            ->orderBy('u.username', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * @return User[]
+     */
+    public function searchUsers(string $search): array
+    {
+        return $this->createQueryBuilder('u')
+            ->where('u.username LIKE :search OR u.email LIKE :search')
+            ->setParameter('search', '%' . $search . '%')
+            ->orderBy('u.username', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function countTotal(): int
+    {
+        return (int) $this->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
+     * @return User[]
+     */
+    public function findRecent(int $days = 30): array
+    {
+        $date = new \DateTime("-{$days} days");
+
+        return $this->createQueryBuilder('u')
+            ->where('u.createdAt >= :date')
+            ->setParameter('date', $date)
+            ->orderBy('u.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
     }

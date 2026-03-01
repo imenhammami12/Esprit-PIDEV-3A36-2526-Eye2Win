@@ -4,89 +4,263 @@
 {% block page_title %}Coach Applications Management{% endblock %}
 
 {% block body %}
-{# Stats Row #}
-<div class="row g-4 mb-4 fade-in">
-    <div class="col-md-4">
-        <div class="stat-card">
-            <div class="stat-card-icon" style="background: linear-gradient(135deg, #ffa751, #ffe259);">
-                <i class="bi bi-clock text-white"></i>
+
+
+{# ══════════════════════════════════════════════════════════════
+   MAIN STAT CARDS — PRIMARY ROW
+══════════════════════════════════════════════════════════════ #}
+<div class="xp-grid fade-in" style="animation-delay:0.05s;">
+
+    {# TOTAL #}
+    <div class="xp-card xp-total">
+        <canvas class="xp-particles" width="300" height="160"></canvas>
+        <div class="xp-noise"></div>
+        <div class="xp-top-bar"></div>
+        <div class="xp-side-accent"></div>
+        <div class="xp-body">
+            <div class="xp-icon-zone">
+                <svg class="xp-hexsvg" viewBox="0 0 60 60">
+                    <polygon points="30,2 56,16 56,44 30,58 4,44 4,16" fill="none" stroke="rgba(102,126,234,0.4)" stroke-width="1"/>
+                    <polygon points="30,8 50,20 50,40 30,52 10,40 10,20" fill="rgba(102,126,234,0.12)" stroke="rgba(102,126,234,0.6)" stroke-width="1"/>
+                </svg>
+                <i class="bi bi-clipboard-check xp-icon-glyph"></i>
             </div>
-            <div class="stat-card-title">Pending</div>
-            <div class="stat-card-value">{{ stats.pending }}</div>
-            <a href="{{ path('admin_coach_applications_index', {status: 'PENDING'}) }}" class="btn btn-sm btn-outline-primary mt-2">
-                <i class="bi bi-eye me-1"></i>View
-            </a>
-        </div>
-    </div>
-    
-    <div class="col-md-4">
-        <div class="stat-card">
-            <div class="stat-card-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
-                <i class="bi bi-check-circle text-white"></i>
+            <div class="xp-content">
+                <div class="xp-eyebrow">◈ ALL REQUESTS</div>
+                <div class="xp-num" id="statTotal">{{ stats.total }}</div>
+                <div class="xp-title">Total</div>
+                <div class="xp-progress-track">
+                    <div class="xp-progress-fill" id="progressTotal" style="width:100%"></div>
+                    <div class="xp-progress-glow"></div>
+                </div>
             </div>
-            <div class="stat-card-title">Approved</div>
-            <div class="stat-card-value">{{ stats.approved }}</div>
-            <a href="{{ path('admin_coach_applications_index', {status: 'APPROVED'}) }}" class="btn btn-sm btn-outline-success mt-2">
-                <i class="bi bi-eye me-1"></i>View
-            </a>
         </div>
+        <div class="xp-corner-tl"></div>
+        <div class="xp-corner-br"></div>
+        <div class="xp-scan-line"></div>
     </div>
-    
-    <div class="col-md-4">
-        <div class="stat-card">
-            <div class="stat-card-icon" style="background: linear-gradient(135deg, #ff6b6b, #ee5a6f);">
-                <i class="bi bi-x-circle text-white"></i>
+
+    {# PENDING #}
+    <div class="xp-card xp-pending-card">
+        <canvas class="xp-particles" width="300" height="160"></canvas>
+        <div class="xp-noise"></div>
+        <div class="xp-top-bar"></div>
+        <div class="xp-side-accent"></div>
+        <div class="xp-body">
+            <div class="xp-icon-zone">
+                <svg class="xp-hexsvg" viewBox="0 0 60 60">
+                    <polygon points="30,2 56,16 56,44 30,58 4,44 4,16" fill="none" stroke="rgba(255,167,81,0.4)" stroke-width="1"/>
+                    <polygon points="30,8 50,20 50,40 30,52 10,40 10,20" fill="rgba(255,167,81,0.12)" stroke="rgba(255,167,81,0.6)" stroke-width="1"/>
+                </svg>
+                <i class="bi bi-clock-fill xp-icon-glyph"></i>
             </div>
-            <div class="stat-card-title">Rejected</div>
-            <div class="stat-card-value">{{ stats.rejected }}</div>
-            <a href="{{ path('admin_coach_applications_index', {status: 'REJECTED'}) }}" class="btn btn-sm btn-outline-danger mt-2">
-                <i class="bi bi-eye me-1"></i>View
-            </a>
+            <div class="xp-content">
+                <div class="xp-eyebrow">⏳ AWAITING REVIEW</div>
+                <div class="xp-num" id="statPending">{{ stats.pending }}</div>
+                <div class="xp-title">Pending</div>
+                <div class="xp-progress-track">
+                    <div class="xp-progress-fill" id="progressPending"
+                         style="width:{{ stats.total > 0 ? ((stats.pending / stats.total) * 100)|round : 0 }}%"></div>
+                    <div class="xp-progress-glow"></div>
+                </div>
+            </div>
         </div>
+        <div class="xp-corner-tl"></div>
+        <div class="xp-corner-br"></div>
+        <div class="xp-scan-line"></div>
     </div>
+
+    {# APPROVED #}
+    <div class="xp-card xp-resolved">
+        <canvas class="xp-particles" width="300" height="160"></canvas>
+        <div class="xp-noise"></div>
+        <div class="xp-top-bar"></div>
+        <div class="xp-side-accent"></div>
+        <div class="xp-body">
+            <div class="xp-icon-zone">
+                <svg class="xp-hexsvg" viewBox="0 0 60 60">
+                    <polygon points="30,2 56,16 56,44 30,58 4,44 4,16" fill="none" stroke="rgba(67,233,123,0.4)" stroke-width="1"/>
+                    <polygon points="30,8 50,20 50,40 30,52 10,40 10,20" fill="rgba(67,233,123,0.12)" stroke="rgba(67,233,123,0.6)" stroke-width="1"/>
+                </svg>
+                <i class="bi bi-check-circle-fill xp-icon-glyph"></i>
+            </div>
+            <div class="xp-content">
+                <div class="xp-eyebrow xp-eyebrow-success">✓ VALIDATED</div>
+                <div class="xp-num" id="statApproved">{{ stats.approved }}</div>
+                <div class="xp-title">Approved</div>
+                <div class="xp-progress-track">
+                    <div class="xp-progress-fill" id="progressApproved"
+                         style="width:{{ stats.total > 0 ? ((stats.approved / stats.total) * 100)|round : 0 }}%"></div>
+                    <div class="xp-progress-glow"></div>
+                </div>
+            </div>
+        </div>
+        <div class="xp-corner-tl"></div>
+        <div class="xp-corner-br"></div>
+        <div class="xp-scan-line"></div>
+    </div>
+
+    {# REJECTED #}
+    <div class="xp-card xp-rejected-card">
+        <canvas class="xp-particles" width="300" height="160"></canvas>
+        <div class="xp-noise"></div>
+        <div class="xp-top-bar"></div>
+        <div class="xp-side-accent"></div>
+        <div class="xp-body">
+            <div class="xp-icon-zone">
+                <svg class="xp-hexsvg" viewBox="0 0 60 60">
+                    <polygon points="30,2 56,16 56,44 30,58 4,44 4,16" fill="none" stroke="rgba(255,107,107,0.4)" stroke-width="1"/>
+                    <polygon points="30,8 50,20 50,40 30,52 10,40 10,20" fill="rgba(255,107,107,0.12)" stroke="rgba(255,107,107,0.6)" stroke-width="1"/>
+                </svg>
+                <i class="bi bi-x-circle-fill xp-icon-glyph"></i>
+            </div>
+            <div class="xp-content">
+                <div class="xp-eyebrow">✕ DECLINED</div>
+                <div class="xp-num" id="statRejected">{{ stats.rejected }}</div>
+                <div class="xp-title">Rejected</div>
+                <div class="xp-progress-track">
+                    <div class="xp-progress-fill" id="progressRejected"
+                         style="width:{{ stats.total > 0 ? ((stats.rejected / stats.total) * 100)|round : 0 }}%"></div>
+                    <div class="xp-progress-glow"></div>
+                </div>
+            </div>
+        </div>
+        <div class="xp-corner-tl"></div>
+        <div class="xp-corner-br"></div>
+        <div class="xp-scan-line"></div>
+    </div>
+
 </div>
 
-{# Advanced Filters Card #}
-<div class="table-card mb-4 fade-in" style="animation-delay: 0.1s;">
+{# ══════════════════════════════════════════════════════════════
+   SECONDARY STATS — MINI ROW
+══════════════════════════════════════════════════════════════ #}
+<div class="mini-stat-row fade-in" style="animation-delay:0.12s;">
+
+    {# Approval rate #}
+    <div class="mini-card mini-teal">
+        <div class="mini-card-inner">
+            <div class="mini-icon"><i class="bi bi-graph-up-arrow"></i></div>
+            <div class="mini-data">
+                <div class="mini-val mini-val-text" id="statApprovalRate">
+                    {{ stats.total > 0 ? ((stats.approved / stats.total) * 100)|round : 0 }}%
+                </div>
+                <div class="mini-lbl">Approval Rate</div>
+            </div>
+            <div class="mini-graph">
+                <svg viewBox="0 0 60 30" preserveAspectRatio="none">
+                    <polyline points="0,25 10,20 20,15 30,10 40,8 50,5 60,3" fill="none" stroke="rgba(56,249,215,0.6)" stroke-width="1.5"/>
+                    <polyline points="0,25 10,20 20,15 30,10 40,8 50,5 60,3 60,30 0,30" fill="rgba(56,249,215,0.08)"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    {# Pending mini #}
+    <div class="mini-card mini-orange">
+        <div class="mini-card-inner">
+            <div class="mini-icon"><i class="bi bi-hourglass-split"></i></div>
+            <div class="mini-data">
+                <div class="mini-val" id="statPendingMini">{{ stats.pending }}</div>
+                <div class="mini-lbl">Pending</div>
+            </div>
+            <div class="mini-graph">
+                <svg viewBox="0 0 60 30" preserveAspectRatio="none">
+                    <polyline points="0,15 10,18 20,12 30,16 40,10 50,14 60,8" fill="none" stroke="rgba(255,167,81,0.6)" stroke-width="1.5"/>
+                    <polyline points="0,15 10,18 20,12 30,16 40,10 50,14 60,8 60,30 0,30" fill="rgba(255,167,81,0.08)"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    {# Rejected mini #}
+    <div class="mini-card mini-red">
+        <div class="mini-card-inner">
+            <div class="mini-icon"><i class="bi bi-slash-circle"></i></div>
+            <div class="mini-data">
+                <div class="mini-val" id="statRejectedMini">{{ stats.rejected }}</div>
+                <div class="mini-lbl">Rejected</div>
+            </div>
+            <div class="mini-graph">
+                <svg viewBox="0 0 60 30" preserveAspectRatio="none">
+                    <polyline points="0,10 10,14 20,12 30,18 40,15 50,20 60,17" fill="none" stroke="rgba(255,107,107,0.6)" stroke-width="1.5"/>
+                    <polyline points="0,10 10,14 20,12 30,18 40,15 50,20 60,17 60,30 0,30" fill="rgba(255,107,107,0.08)"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    {# Approval rate donut #}
+    <div class="mini-card mini-donut-card">
+        <div class="mini-card-inner">
+            <div class="donut-wrap">
+                <svg class="donut-svg" viewBox="0 0 60 60">
+                    <circle cx="30" cy="30" r="24" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+                    <circle id="donutCircle" cx="30" cy="30" r="24" fill="none"
+                            stroke="url(#donutGradCoach)" stroke-width="6"
+                            stroke-dasharray="{{ stats.total > 0 ? (((stats.approved / stats.total) * 150.8))|round : 0 }} 150.8"
+                            stroke-dashoffset="37.7" stroke-linecap="round"/>
+                    <defs>
+                        <linearGradient id="donutGradCoach" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#43e97b"/>
+                            <stop offset="100%" stop-color="#38f9d7"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <div class="donut-center">
+                    <span id="donutPct">{{ stats.total > 0 ? ((stats.approved / stats.total) * 100)|round : 0 }}%</span>
+                </div>
+            </div>
+            <div class="mini-data">
+                <div class="mini-lbl" style="font-size:10px; color:rgba(255,255,255,0.5);">Approval</div>
+                <div class="mini-lbl" style="font-size:10px; color:rgba(255,255,255,0.5);">Rate</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{# ══════════════════════════════════════════════════════════════
+   FILTERS & SEARCH
+══════════════════════════════════════════════════════════════ #}
+<div class="table-card mb-4 fade-in" style="animation-delay: 0.18s;">
     <div class="table-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0"><i class="bi bi-funnel me-2"></i>Filters</h5>
-        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="true">
+        <h5 class="mb-0"><i class="bi bi-funnel me-2"></i>Filters & Search</h5>
+        <button class="btn btn-sm btn-outline-secondary" type="button"
+                data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="true">
             <i class="bi bi-chevron-down"></i>
         </button>
     </div>
-    
+
     <div class="collapse show" id="filterCollapse">
         <form method="get" class="p-3" id="filterForm">
             <div class="row g-3">
-                {# Search Bar #}
+
+                {# Search #}
                 <div class="col-md-6">
-                    <label class="form-label">
-                        <i class="bi bi-search me-1"></i>Search
-                    </label>
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <input type="text" 
-                               name="search" 
-                               class="form-control" 
+                    <label class="form-label"><i class="bi bi-search me-1"></i>Search</label>
+                    <div class="search-bar voice-search-bar">
+                        <i class="search-icon bi bi-search"></i>
+                        <input type="text" name="search" id="voiceSearchInput" class="form-control"
                                placeholder="Name, username, email, certifications..."
-                               value="{{ search }}"
-                               id="searchInput">
-                        {% if search %}
-                            <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('searchInput').value=''; document.getElementById('filterForm').submit();">
-                                <i class="bi bi-x"></i>
-                            </button>
-                        {% endif %}
+                               value="{{ search }}" autocomplete="off">
+                        <button type="button" id="voiceMicBtn" class="voice-mic-btn"
+                                title="Search by voice" style="display:none;">
+                            <i class="bi bi-mic-fill"></i>
+                        </button>
+                    </div>
+                    <div id="voiceStatus" class="voice-status d-none">
+                        <span class="voice-pulse"></span>
+                        <span id="voiceStatusText">Listening… speak now</span>
                     </div>
                     <small class="text-muted">
                         <i class="bi bi-info-circle me-1"></i>Search in name, username, email, certifications, and experience
                     </small>
                 </div>
-                
-                {# Status Filter #}
-                <div class="col-md-3">
-                    <label class="form-label">
-                        <i class="bi bi-filter me-1"></i>Status
-                    </label>
+
+                {# Status #}
+                <div class="col-md-2">
+                    <label class="form-label"><i class="bi bi-filter me-1"></i>Status</label>
                     <select name="status" class="form-select" onchange="this.form.submit()">
                         <option value="">All Statuses</option>
                         {% for status in applicationStatuses %}
@@ -96,182 +270,159 @@
                         {% endfor %}
                     </select>
                 </div>
-                
-                {# Sort By #}
-                <div class="col-md-3">
-                    <label class="form-label">
-                        <i class="bi bi-sort-down me-1"></i>Sort By
-                    </label>
+
+                {# Sort #}
+                <div class="col-md-4">
+                    <label class="form-label"><i class="bi bi-sort-down me-1"></i>Sort By</label>
                     <div class="input-group">
                         <select name="sort_by" class="form-select" onchange="this.form.submit()">
                             <option value="submittedAt" {{ sortBy == 'submittedAt' ? 'selected' : '' }}>Submitted Date</option>
-                            <option value="reviewedAt" {{ sortBy == 'reviewedAt' ? 'selected' : '' }}>Reviewed Date</option>
-                            <option value="status" {{ sortBy == 'status' ? 'selected' : '' }}>Status</option>
+                            <option value="reviewedAt"  {{ sortBy == 'reviewedAt'  ? 'selected' : '' }}>Reviewed Date</option>
+                            <option value="status"      {{ sortBy == 'status'      ? 'selected' : '' }}>Status</option>
                         </select>
-                        <select name="sort_order" class="form-select" style="max-width: 100px;" onchange="this.form.submit()">
+                        <select name="sort_order" class="form-select" style="max-width:100px;" onchange="this.form.submit()">
                             <option value="DESC" {{ sortOrder == 'DESC' ? 'selected' : '' }}>↓ DESC</option>
-                            <option value="ASC" {{ sortOrder == 'ASC' ? 'selected' : '' }}>↑ ASC</option>
+                            <option value="ASC"  {{ sortOrder == 'ASC'  ? 'selected' : '' }}>↑ ASC</option>
                         </select>
                     </div>
                 </div>
-                
+
                 {# Date Range #}
                 <div class="col-md-6">
-                    <label class="form-label">
-                        <i class="bi bi-calendar-range me-1"></i>Submission Date Range
-                    </label>
+                    <label class="form-label"><i class="bi bi-calendar-range me-1"></i>Submission Date Range</label>
                     <div class="input-group">
                         <span class="input-group-text">From</span>
-                        <input type="date" 
-                               name="date_from" 
-                               class="form-control" 
-                               value="{{ dateFrom }}"
-                               onchange="this.form.submit()">
+                        <input type="date" name="date_from" class="form-control" value="{{ dateFrom }}" onchange="this.form.submit()">
                         <span class="input-group-text">To</span>
-                        <input type="date" 
-                               name="date_to" 
-                               class="form-control" 
-                               value="{{ dateTo }}"
-                               onchange="this.form.submit()">
+                        <input type="date" name="date_to"   class="form-control" value="{{ dateTo }}"   onchange="this.form.submit()">
                     </div>
                 </div>
-                
-                {# Action Buttons #}
+
+                {# Buttons #}
                 <div class="col-md-6 d-flex align-items-end gap-2">
                     {% if statusFilter or search or dateFrom or dateTo %}
                         <a href="{{ path('admin_coach_applications_index') }}" class="btn btn-outline-secondary flex-fill">
-                            <i class="bi bi-x-lg me-1"></i>Clear All Filters
+                            <i class="bi bi-x-lg me-1"></i>Clear All
                         </a>
                     {% endif %}
-                    
                     <button type="submit" class="btn btn-primary flex-fill">
                         <i class="bi bi-funnel me-2"></i>Apply Filters
                     </button>
-                    
-                    <a href="{{ path('admin_coaches_list') }}" class="btn btn-success flex-fill">
+                    <a href="{{ path('admin_coaches_list') }}" class="btn flex-fill"
+                       style="background: linear-gradient(135deg, #4a2d8f, #6a3fbf); color:#fff; border:none; box-shadow:0 4px 15px rgba(74,45,143,0.35);">
                         <i class="bi bi-award me-2"></i>View Coaches
                     </a>
                 </div>
+
             </div>
         </form>
     </div>
 </div>
 
 {# Results Summary #}
-<div class="mb-3 fade-in" style="animation-delay: 0.15s;">
-    <h6 class="text-muted mb-0">
-        <i class="bi bi-info-circle me-2"></i>
-        Found <strong>{{ applications|length }}</strong> application{{ applications|length != 1 ? 's' : '' }}
-        {% if statusFilter or search or dateFrom or dateTo %}
-            <span class="badge bg-primary">Filtered</span>
-        {% endif %}
-    </h6>
+<div class="mb-3 fade-in" style="animation-delay: 0.2s;">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h6 class="text-muted mb-0">
+            <i class="bi bi-info-circle me-2"></i>
+            Found <strong>{{ pagination.getTotalItemCount }}</strong>
+            application{{ pagination.getTotalItemCount != 1 ? 's' : '' }}
+            {% if statusFilter or search or dateFrom or dateTo %}
+                <span class="badge bg-primary ms-1">Filtered</span>
+            {% endif %}
+        </h6>
+    </div>
 </div>
 
 {# Applications Table #}
-<div class="table-card fade-in" style="animation-delay: 0.2s;">
+<div class="table-card fade-in" style="animation-delay: 0.22s;">
     <div class="table-header">
-        <h5><i class="bi bi-clipboard-check me-2"></i>Applications List</h5>
+        <h5><i class="bi bi-clipboard-check me-2"></i>Applications List ({{ pagination.getTotalItemCount }})</h5>
     </div>
-    
+
     <div class="table-responsive">
         <table class="custom-table table">
             <thead>
                 <tr>
-                    <th>Photo</th>
-                    <th>Applicant</th>
-                    <th>Email</th>
-                    <th>Submitted</th>
-                    <th>Status</th>
-                    <th>Reviewed</th>
-                    <th>Actions</th>
+                    <th style="width:70px; text-align:center;">Photo</th>
+                    <th style="width:200px;">Applicant</th>
+                    <th style="width:220px;">Email</th>
+                    <th style="width:130px;">Submitted</th>
+                    <th style="width:110px;">Status</th>
+                    <th style="width:130px;">Reviewed</th>
+                    <th style="width:150px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                {% for application in applications %}
+                {% for application in pagination %}
                     <tr class="fade-in" style="animation-delay: {{ loop.index * 0.05 }}s;">
-                        <td>
+                        <td style="width:70px; text-align:center;">
                             {% if application.user.profilePicture %}
-                                <img src="{{ asset('uploads/profiles/' ~ application.user.profilePicture) }}" 
-                                     alt="{{ application.user.username }}" 
-                                     class="user-avatar-table"
-                                     loading="lazy">
+                                <img src="{{ asset('uploads/profiles/' ~ application.user.profilePicture) }}"
+                                     alt="{{ application.user.username }}"
+                                     class="user-avatar-table" loading="lazy">
                             {% else %}
-                                <div class="user-avatar-placeholder">
+                                <div class="user-avatar-placeholder mx-auto">
                                     {{ application.user.username|slice(0, 2)|upper }}
                                 </div>
                             {% endif %}
                         </td>
-                        <td>
-                            <a href="{{ path('admin_users_show', {id: application.user.id}) }}" class="text-decoration-none" style="color: #43e97b;">
+                        <td style="width:200px;">
+                            <a href="{{ path('admin_users_show', {id: application.user.id}) }}"
+                               class="text-decoration-none" style="color:#ffffff;">
                                 <strong>{{ application.user.fullName ?? application.user.username }}</strong>
-                            </a>
-                            <br>
+                            </a><br>
                             <small class="text-muted">
                                 <i class="bi bi-at"></i>{{ application.user.username }}
                             </small>
                         </td>
-                        <td>
-                            <a href="mailto:{{ application.user.email }}" class="text-decoration-none" style="color: #4facfe;">
+                        <td style="width:220px;">
+                            <a href="mailto:{{ application.user.email }}" class="text-decoration-none" style="color:#4facfe;">
                                 <i class="bi bi-envelope me-1"></i>
-                                <span style="display: inline-block; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle;">{{ application.user.email }}</span>
+                                <span style="display:inline-block; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:middle;">
+                                    {{ application.user.email }}
+                                </span>
                             </a>
                         </td>
-                        <td>
+                        <td style="width:130px;">
                             <small class="text-muted">
-                                <i class="bi bi-calendar3 me-1"></i>
-                                {{ application.submittedAt|date('M d, Y') }}
-                                <br>
-                                <i class="bi bi-clock me-1"></i>
-                                {{ application.submittedAt|date('h:i A') }}
+                                <i class="bi bi-calendar3 me-1"></i>{{ application.submittedAt|date('M d, Y') }}<br>
+                                <i class="bi bi-clock me-1"></i>{{ application.submittedAt|date('h:i A') }}
                             </small>
                         </td>
-                        <td>
+                        <td style="width:110px;">
                             <span class="badge bg-{{ application.status.badgeClass }}">
                                 {{ application.status.label }}
                             </span>
                         </td>
-                        <td>
+                        <td style="width:130px;">
                             {% if application.reviewedAt %}
                                 <small class="text-muted">
-                                    <i class="bi bi-check2 me-1"></i>
-                                    {{ application.reviewedAt|date('M d, Y') }}
-                                    <br>
-                                    <i class="bi bi-clock me-1"></i>
-                                    {{ application.reviewedAt|date('h:i A') }}
+                                    <i class="bi bi-check2 me-1"></i>{{ application.reviewedAt|date('M d, Y') }}<br>
+                                    <i class="bi bi-clock me-1"></i>{{ application.reviewedAt|date('h:i A') }}
                                 </small>
                             {% else %}
                                 <small class="text-muted">
-                                    <i class="bi bi-dash-circle me-1"></i>
-                                    Not reviewed
+                                    <i class="bi bi-dash-circle me-1"></i>Not reviewed
                                 </small>
                             {% endif %}
                         </td>
-                        <td>
+                        <td style="width:150px;">
                             <div class="btn-group" role="group">
-                                <a href="{{ path('admin_coach_applications_show', {id: application.id}) }}" 
-                                   class="btn btn-sm btn-info"
-                                   title="View Details"
-                                   data-bs-toggle="tooltip">
+                                <a href="{{ path('admin_coach_applications_show', {id: application.id}) }}"
+                                   class="btn btn-sm btn-info" title="View Details" data-bs-toggle="tooltip">
                                     <i class="bi bi-eye"></i>
                                 </a>
-                                
                                 {% if application.status.value != 'APPROVED' %}
-                                    <button type="button" 
-                                            class="btn btn-sm btn-success"
+                                    <button type="button" class="btn btn-sm btn-success"
                                             onclick="window.location.href='{{ path('admin_coach_applications_show', {id: application.id}) }}#approve-section'"
-                                            title="Approve"
-                                            data-bs-toggle="tooltip">
+                                            title="Approve" data-bs-toggle="tooltip">
                                         <i class="bi bi-check-circle"></i>
                                     </button>
                                 {% endif %}
-                                
                                 {% if application.status.value != 'REJECTED' %}
-                                    <button type="button" 
-                                            class="btn btn-sm btn-danger"
+                                    <button type="button" class="btn btn-sm btn-danger"
                                             onclick="window.location.href='{{ path('admin_coach_applications_show', {id: application.id}) }}#reject-section'"
-                                            title="Reject"
-                                            data-bs-toggle="tooltip">
+                                            title="Reject" data-bs-toggle="tooltip">
                                         <i class="bi bi-x-circle"></i>
                                     </button>
                                 {% endif %}
@@ -282,7 +433,7 @@
                     <tr>
                         <td colspan="7" class="text-center text-muted py-5">
                             <div class="empty-state">
-                                <i class="bi bi-inbox" style="font-size: 64px; opacity: 0.2;"></i>
+                                <i class="bi bi-inbox" style="font-size:64px; opacity:0.2;"></i>
                                 <h4 class="mt-3 mb-2">No Applications Found</h4>
                                 {% if statusFilter or search or dateFrom or dateTo %}
                                     <p class="text-muted">Try adjusting your filters</p>
@@ -300,28 +451,434 @@
         </table>
     </div>
 </div>
+
+{# Pagination #}
+{% if pagination.getTotalItemCount > 20 %}
+<div class="d-flex justify-content-between align-items-center mt-4 fade-in" style="animation-delay: 0.3s;">
+    <div class="text-muted">
+        Showing {{ ((pagination.currentPageNumber - 1) * 20) + 1 }}
+        to {{ min(pagination.currentPageNumber * 20, pagination.getTotalItemCount) }}
+        of {{ pagination.getTotalItemCount }} entries
+    </div>
+    <div class="pagination-wrapper">
+        {{ knp_pagination_render(pagination, '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig', {}, {
+            'status': statusFilter, 'search': search,
+            'date_from': dateFrom, 'date_to': dateTo,
+            'sort_by': sortBy, 'sort_order': sortOrder
+        }) }}
+    </div>
+</div>
+{% endif %}
+
+{# ══════════════════════════════════════════════════════════════
+   STYLES
+══════════════════════════════════════════════════════════════ #}
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap');
+
+/* ── Command center header ── */
+.cmd-header {
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:20px; padding:8px 16px;
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:8px;
+    font-family:'Share Tech Mono',monospace; font-size:11px;
+}
+.cmd-status-dot {
+    width:7px; height:7px; border-radius:50%;
+    background:#43e97b; box-shadow:0 0 8px #43e97b;
+    animation:cmdPulse 2s ease-in-out infinite; display:inline-block;
+}
+@keyframes cmdPulse { 0%,100%{opacity:1;box-shadow:0 0 8px #43e97b;}50%{opacity:.6;box-shadow:0 0 16px #43e97b;} }
+.cmd-status-text { color:#43e97b; margin-left:8px; }
+.cmd-divider { color:rgba(255,255,255,0.2); margin:0 10px; }
+.cmd-timestamp { color:rgba(255,255,255,0.5); }
+.cmd-header-right { display:flex; gap:8px; align-items:center; }
+.cmd-badge {
+    padding:3px 10px; border-radius:4px; font-size:10px;
+    font-weight:700; letter-spacing:1px;
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.1);
+    color:rgba(255,255,255,0.6);
+}
+.cmd-badge-alert {
+    background:rgba(102,126,234,0.15); border-color:rgba(102,126,234,0.4); color:#a0aef8;
+    animation:cmdPulse 2s ease-in-out infinite;
+}
+.cmd-badge-refresh { cursor:pointer; transition:background .2s,color .2s,border-color .2s; }
+.cmd-badge-refresh:hover { background:rgba(67,233,123,0.15); border-color:rgba(67,233,123,0.4); color:#43e97b; }
+.cmd-badge-refreshing {
+    background:rgba(255,193,7,0.15)!important; border-color:rgba(255,193,7,0.4)!important;
+    color:#ffc107!important; animation:cmdPulse 0.6s ease-in-out infinite!important;
+}
+
+/* ══ XP GRID ══ */
+.xp-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:16px; }
+@media(max-width:1200px){.xp-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.xp-grid{grid-template-columns:1fr;}}
+
+.xp-card {
+    position:relative; border-radius:12px; overflow:hidden;
+    border:1px solid rgba(255,255,255,0.07);
+    background:rgba(10,5,20,0.9); min-height:155px; cursor:pointer;
+    transition:transform .4s cubic-bezier(.22,.68,0,1.2),box-shadow .4s ease,border-color .3s;
+    font-family:'Rajdhani',sans-serif;
+}
+.xp-card:hover { transform:translateY(-8px) scale(1.02); }
+.xp-particles { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; opacity:0; transition:opacity .4s; }
+.xp-card:hover .xp-particles { opacity:1; }
+.xp-noise {
+    position:absolute; inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events:none; z-index:0;
+}
+.xp-top-bar { position:absolute; top:0; left:0; right:0; height:2px; z-index:3; transition:height .3s; }
+.xp-card:hover .xp-top-bar { height:3px; }
+.xp-side-accent { position:absolute; left:0; top:0; bottom:0; width:3px; z-index:3; transition:width .3s; }
+.xp-card:hover .xp-side-accent { width:4px; }
+.xp-corner-tl { position:absolute; top:0; left:0; width:20px; height:20px; z-index:4; border-top:2px solid; border-left:2px solid; border-radius:12px 0 0 0; opacity:.5; transition:opacity .3s,width .3s,height .3s; }
+.xp-corner-br { position:absolute; bottom:0; right:0; width:20px; height:20px; z-index:4; border-bottom:2px solid; border-right:2px solid; border-radius:0 0 12px 0; opacity:.5; transition:opacity .3s,width .3s,height .3s; }
+.xp-card:hover .xp-corner-tl,.xp-card:hover .xp-corner-br { opacity:1; width:28px; height:28px; }
+.xp-scan-line { position:absolute; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent); animation:scanMove 4s linear infinite; pointer-events:none; z-index:2; }
+@keyframes scanMove { 0%{top:0;opacity:0;}10%{opacity:1;}90%{opacity:1;}100%{top:100%;opacity:0;} }
+.xp-body { display:flex; align-items:center; gap:14px; padding:20px 18px; position:relative; z-index:2; height:100%; }
+.xp-icon-zone { position:relative; flex-shrink:0; width:58px; height:58px; }
+.xp-hexsvg { position:absolute; inset:0; width:100%; height:100%; animation:hexRotate 20s linear infinite; }
+@keyframes hexRotate { to{transform:rotate(360deg);} }
+.xp-card:hover .xp-hexsvg { animation-duration:5s; }
+.xp-icon-glyph { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:22px; color:#fff; z-index:1; transition:transform .3s,text-shadow .3s; }
+.xp-card:hover .xp-icon-glyph { transform:translate(-50%,-50%) scale(1.2); }
+.xp-content { flex:1; min-width:0; }
+.xp-eyebrow { font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:1.5px; color:rgba(255,255,255,.35); text-transform:uppercase; margin-bottom:2px; }
+.xp-eyebrow-success { color:rgba(67,233,123,.7); }
+.xp-num { font-size:44px; font-weight:700; color:#fff; line-height:1; font-variant-numeric:tabular-nums; letter-spacing:-1px; transition:transform .3s; }
+.xp-card:hover .xp-num { transform:scale(1.06); }
+.xp-title { font-size:12px; font-weight:600; color:rgba(255,255,255,.5); text-transform:uppercase; letter-spacing:1px; margin-top:2px; margin-bottom:10px; }
+.xp-progress-track { height:3px; background:rgba(255,255,255,.06); border-radius:2px; position:relative; overflow:visible; }
+.xp-progress-fill { height:100%; border-radius:2px; transition:width 1.2s cubic-bezier(.4,0,.2,1); min-width:3px; }
+.xp-progress-glow { position:absolute; right:0; top:-2px; width:8px; height:7px; border-radius:50%; filter:blur(3px); }
+
+/* ── Color themes ── */
+.xp-total { border-color:rgba(102,126,234,.2); box-shadow:0 4px 30px rgba(102,126,234,.08); }
+.xp-total:hover { border-color:rgba(102,126,234,.45); box-shadow:0 16px 50px rgba(102,126,234,.2); }
+.xp-total .xp-top-bar  { background:linear-gradient(90deg,#667eea,#764ba2); }
+.xp-total .xp-side-accent { background:linear-gradient(180deg,#667eea,#764ba2); }
+.xp-total .xp-corner-tl,.xp-total .xp-corner-br { border-color:#667eea; }
+.xp-total .xp-progress-fill { background:linear-gradient(90deg,#667eea,#764ba2); }
+.xp-total .xp-progress-glow { background:#667eea; }
+.xp-total .xp-icon-glyph { text-shadow:0 0 20px rgba(102,126,234,.8); }
+
+.xp-pending-card { border-color:rgba(255,167,81,.2); box-shadow:0 4px 30px rgba(255,167,81,.08); }
+.xp-pending-card:hover { border-color:rgba(255,167,81,.45); box-shadow:0 16px 50px rgba(255,167,81,.2); }
+.xp-pending-card .xp-top-bar  { background:linear-gradient(90deg,#ffa751,#ffe259); }
+.xp-pending-card .xp-side-accent { background:linear-gradient(180deg,#ffa751,#ffe259); }
+.xp-pending-card .xp-corner-tl,.xp-pending-card .xp-corner-br { border-color:#ffa751; }
+.xp-pending-card .xp-progress-fill { background:linear-gradient(90deg,#ffa751,#ffe259); }
+.xp-pending-card .xp-progress-glow { background:#ffa751; }
+.xp-pending-card .xp-icon-glyph { text-shadow:0 0 20px rgba(255,167,81,.8); }
+
+.xp-resolved { border-color:rgba(67,233,123,.2); box-shadow:0 4px 30px rgba(67,233,123,.08); }
+.xp-resolved:hover { border-color:rgba(67,233,123,.45); box-shadow:0 16px 50px rgba(67,233,123,.2); }
+.xp-resolved .xp-top-bar  { background:linear-gradient(90deg,#43e97b,#38f9d7); }
+.xp-resolved .xp-side-accent { background:linear-gradient(180deg,#43e97b,#38f9d7); }
+.xp-resolved .xp-corner-tl,.xp-resolved .xp-corner-br { border-color:#43e97b; }
+.xp-resolved .xp-progress-fill { background:linear-gradient(90deg,#43e97b,#38f9d7); }
+.xp-resolved .xp-progress-glow { background:#43e97b; }
+.xp-resolved .xp-icon-glyph { text-shadow:0 0 20px rgba(67,233,123,.8); }
+
+.xp-rejected-card { border-color:rgba(255,107,107,.2); box-shadow:0 4px 30px rgba(255,107,107,.08); }
+.xp-rejected-card:hover { border-color:rgba(255,107,107,.45); box-shadow:0 16px 50px rgba(255,107,107,.2); }
+.xp-rejected-card .xp-top-bar  { background:linear-gradient(90deg,#ff6b6b,#ee5a6f); }
+.xp-rejected-card .xp-side-accent { background:linear-gradient(180deg,#ff6b6b,#ee5a6f); }
+.xp-rejected-card .xp-corner-tl,.xp-rejected-card .xp-corner-br { border-color:#ff6b6b; }
+.xp-rejected-card .xp-progress-fill { background:linear-gradient(90deg,#ff6b6b,#ee5a6f); }
+.xp-rejected-card .xp-progress-glow { background:#ff6b6b; }
+.xp-rejected-card .xp-icon-glyph { text-shadow:0 0 20px rgba(255,107,107,.8); }
+
+/* ══ MINI ROW ══ */
+.mini-stat-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+@media(max-width:900px){.mini-stat-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:500px){.mini-stat-row{grid-template-columns:1fr;}}
+
+.mini-card { border-radius:10px; border:1px solid rgba(255,255,255,.07); background:rgba(10,5,20,.85); overflow:hidden; transition:transform .3s ease,box-shadow .3s ease,border-color .3s; cursor:pointer; font-family:'Rajdhani',sans-serif; }
+.mini-card:hover { transform:translateY(-4px); }
+.mini-card-inner { display:flex; align-items:center; gap:12px; padding:14px 14px 0; }
+.mini-icon { font-size:20px; flex-shrink:0; width:36px; height:36px; display:flex; align-items:center; justify-content:center; border-radius:8px; background:rgba(255,255,255,.05); transition:transform .3s; }
+.mini-card:hover .mini-icon { transform:scale(1.1) rotate(5deg); }
+.mini-data { flex:1; }
+.mini-val { font-size:28px; font-weight:700; color:#fff; line-height:1; }
+.mini-val-text { font-size:20px; }
+.mini-lbl { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:rgba(255,255,255,.4); margin-top:2px; }
+.mini-graph { width:100%; height:32px; margin-top:8px; }
+.mini-graph svg { width:100%; height:100%; }
+
+.mini-teal { border-color:rgba(56,249,215,.2); }
+.mini-teal:hover { border-color:rgba(56,249,215,.4); box-shadow:0 8px 24px rgba(56,249,215,.12); }
+.mini-teal .mini-icon { color:#38f9d7; }
+.mini-orange { border-color:rgba(255,167,81,.2); }
+.mini-orange:hover { border-color:rgba(255,167,81,.4); box-shadow:0 8px 24px rgba(255,167,81,.12); }
+.mini-orange .mini-icon { color:#ffa751; }
+.mini-red { border-color:rgba(255,107,107,.2); }
+.mini-red:hover { border-color:rgba(255,107,107,.4); box-shadow:0 8px 24px rgba(255,107,107,.12); }
+.mini-red .mini-icon { color:#ff6b6b; }
+
+.mini-donut-card { border-color:rgba(67,233,123,.2); }
+.mini-donut-card:hover { border-color:rgba(67,233,123,.4); box-shadow:0 8px 24px rgba(67,233,123,.12); }
+.mini-donut-card .mini-card-inner { padding:14px; justify-content:center; gap:16px; }
+.donut-wrap { position:relative; width:52px; height:52px; flex-shrink:0; }
+.donut-svg { width:100%; height:100%; transform:rotate(-90deg); }
+.donut-center { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Rajdhani',sans-serif; font-size:12px; font-weight:700; color:#43e97b; }
+
+/* ── Voice search bar ── */
+.voice-search-bar { position:relative; display:flex; align-items:center; }
+.voice-mic-btn { position:absolute; right:.5rem; background:none; border:none; color:rgba(255,255,255,.35); font-size:.95rem; padding:.3rem .4rem; border-radius:6px; cursor:pointer; transition:color .2s,background .2s; line-height:1; z-index:5; }
+.voice-mic-btn:hover { color:#fff; background:rgba(255,255,255,.08); }
+.voice-mic-btn.is-listening { color:#ff4d4d; background:rgba(255,77,77,.12); animation:mic_glow 1.2s ease-in-out infinite; }
+@keyframes mic_glow { 0%,100%{box-shadow:0 0 0 0 rgba(255,77,77,.5);}50%{box-shadow:0 0 0 7px rgba(255,77,77,0);} }
+.voice-search-bar input { padding-right:2.4rem; }
+.voice-status { display:flex; align-items:center; gap:.45rem; margin-top:.3rem; font-size:.75rem; color:#ff7070; }
+.voice-pulse { display:inline-block; width:7px; height:7px; border-radius:50%; background:#ff4d4d; animation:v_blink 1s ease-in-out infinite; }
+@keyframes v_blink { 0%,100%{opacity:1}50%{opacity:.1} }
+</style>
+
 {% endblock %}
 
 {% block javascripts %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Bootstrap tooltips
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl, {
-            delay: { show: 300, hide: 100 }
-        });
-    });
-    
-    // Row highlight on hover
+document.addEventListener('DOMContentLoaded', function () {
+
+    /* ── Tooltips ── */
+    [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        .forEach(el => new bootstrap.Tooltip(el, { delay:{show:300,hide:100} }));
+
+    /* ── Live clock ── */
+    function updateTime() {
+        const el = document.getElementById('liveTime');
+        if (!el) return;
+        el.textContent = new Date().toLocaleTimeString('en-US', { hour12:false });
+    }
+    updateTime(); setInterval(updateTime, 1000);
+
+    /* ── Row hover ── */
     document.querySelectorAll('.custom-table tbody tr').forEach(row => {
-        row.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateX(2px)';
-        });
-        
-        row.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateX(0)';
-        });
+        row.addEventListener('mouseenter', () => row.style.transform = 'translateX(2px)');
+        row.addEventListener('mouseleave', () => row.style.transform = 'translateX(0)');
+    });
+
+    /* ════════════════════════════════════════════
+       COUNT-UP — animation initiale
+    ════════════════════════════════════════════ */
+    function animateTo(el, target, duration) {
+        if (!el) return;
+        const isPercent = typeof el.textContent === 'string' && el.id === 'statApprovalRate';
+        target = parseInt(target, 10);
+        if (isNaN(target)) return;
+        const steps = 60, delay = (duration || 1200) / steps;
+        let i = 0;
+        const timer = setInterval(() => {
+            i++;
+            el.textContent = isPercent
+                ? Math.round(target * i / steps) + '%'
+                : Math.round(target * i / steps);
+            if (i >= steps) { el.textContent = isPercent ? target + '%' : target; clearInterval(timer); }
+        }, delay);
+    }
+
+    function animateUpdate(el, newTarget, duration) {
+        if (!el) return;
+        const isPercent = el.id === 'statApprovalRate' || el.id === 'donutPct';
+        newTarget = parseInt(newTarget, 10);
+        if (isNaN(newTarget)) return;
+        const start = parseInt(el.textContent, 10) || 0;
+        if (start === newTarget) return;
+        const diff = newTarget - start, steps = 40, delay = (duration || 800) / steps;
+        let i = 0;
+        const timer = setInterval(() => {
+            i++;
+            const val = Math.round(start + (diff * i / steps));
+            el.textContent = isPercent ? val + '%' : val;
+            if (i >= steps) { el.textContent = isPercent ? newTarget + '%' : newTarget; clearInterval(timer); }
+        }, delay);
+    }
+
+    // Lecture des valeurs initiales Twig, remise à 0, puis count-up
+    const statIds = {
+        statTotal:       'total',
+        statPending:     'pending',
+        statApproved:    'approved',
+        statRejected:    'rejected',
+        statPendingMini: 'pending',
+        statRejectedMini:'rejected',
+    };
+    const initVals = {};
+    Object.keys(statIds).forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        initVals[id] = parseInt(el.textContent, 10) || 0;
+        el.textContent = '0';
+    });
+    Object.keys(statIds).forEach((id, idx) => {
+        setTimeout(() => animateTo(document.getElementById(id), initVals[id], 1000), idx * 100);
+    });
+
+    // Taux approval
+    const rateEl = document.getElementById('statApprovalRate');
+    const donutEl = document.getElementById('donutPct');
+    const initRate = rateEl ? parseInt(rateEl.textContent, 10) || 0 : 0;
+    if (rateEl)  { rateEl.textContent  = '0%'; setTimeout(() => animateTo(rateEl,  initRate, 1000), 0); }
+    if (donutEl) { donutEl.textContent = '0%'; setTimeout(() => animateTo(donutEl, initRate, 1000), 0); }
+
+    /* ════════════════════════════════════════════
+       PARTICLE SYSTEM
+    ════════════════════════════════════════════ */
+    document.querySelectorAll('.xp-card').forEach(card => {
+        const canvas = card.querySelector('.xp-particles');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let color = 'rgba(255,255,255,0.4)';
+        if (card.classList.contains('xp-total'))         color = 'rgba(102,126,234,0.6)';
+        else if (card.classList.contains('xp-pending-card'))  color = 'rgba(255,167,81,0.6)';
+        else if (card.classList.contains('xp-resolved'))      color = 'rgba(67,233,123,0.6)';
+        else if (card.classList.contains('xp-rejected-card')) color = 'rgba(255,107,107,0.6)';
+
+        const particles = Array.from({length:18}, () => ({
+            x:Math.random()*canvas.width, y:Math.random()*canvas.height,
+            r:Math.random()*1.5+0.3,
+            vx:(Math.random()-.5)*.4, vy:-Math.random()*.5-.2,
+            alpha:Math.random()
+        }));
+        let rafId = null;
+        function draw() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            particles.forEach(p => {
+                p.x+=p.vx; p.y+=p.vy; p.alpha-=0.004;
+                if(p.alpha<=0||p.y<0){p.x=Math.random()*canvas.width;p.y=canvas.height+2;p.alpha=Math.random()*.7+.3;p.vy=-Math.random()*.5-.2;p.vx=(Math.random()-.5)*.4;}
+                ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+                ctx.fillStyle=color.replace('0.6',p.alpha.toFixed(2)); ctx.fill();
+            });
+            rafId=requestAnimationFrame(draw);
+        }
+        card.addEventListener('mouseenter',()=>draw());
+        card.addEventListener('mouseleave',()=>{if(rafId){cancelAnimationFrame(rafId);rafId=null;}ctx.clearRect(0,0,canvas.width,canvas.height);});
+    });
+
+    /* ════════════════════════════════════════════
+       STATS AJAX POLLING (30s)
+    ════════════════════════════════════════════ */
+    const STATS_URL    = '{{ path("admin_coach_applications_stats") }}';
+    const refreshBadge = document.getElementById('lastRefreshBadge');
+
+    function updateDonut(pct) {
+        const circle = document.getElementById('donutCircle');
+        if (circle) circle.setAttribute('stroke-dasharray', Math.round(pct * 150.8 / 100) + ' 150.8');
+        animateUpdate(document.getElementById('donutPct'), pct);
+    }
+
+    async function refreshStats() {
+        if (refreshBadge) { refreshBadge.classList.add('cmd-badge-refreshing'); refreshBadge.textContent = 'REFRESHING…'; }
+        try {
+            const res  = await fetch(STATS_URL, { headers:{'X-Requested-With':'XMLHttpRequest'} });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+
+            animateUpdate(document.getElementById('statTotal'),        data.total);
+            animateUpdate(document.getElementById('statPending'),      data.pending);
+            animateUpdate(document.getElementById('statApproved'),     data.approved);
+            animateUpdate(document.getElementById('statRejected'),     data.rejected);
+            animateUpdate(document.getElementById('statPendingMini'),  data.pending);
+            animateUpdate(document.getElementById('statRejectedMini'), data.rejected);
+
+            const approvalRate = data.total > 0 ? Math.round((data.approved / data.total) * 100) : 0;
+            animateUpdate(document.getElementById('statApprovalRate'), approvalRate);
+            updateDonut(approvalRate);
+
+            // Progress bars
+            const pPending  = data.total > 0 ? Math.round((data.pending  / data.total) * 100) : 0;
+            const pApproved = data.total > 0 ? Math.round((data.approved / data.total) * 100) : 0;
+            const pRejected = data.total > 0 ? Math.round((data.rejected / data.total) * 100) : 0;
+            const pp = document.getElementById('progressPending');
+            const pa = document.getElementById('progressApproved');
+            const pr = document.getElementById('progressRejected');
+            if (pp) pp.style.width = pPending  + '%';
+            if (pa) pa.style.width = pApproved + '%';
+            if (pr) pr.style.width = pRejected + '%';
+
+            // Header badge
+            const hb = document.getElementById('headerTotalBadge');
+            if (hb) hb.textContent = data.total + ' APPLICATIONS';
+
+            if (refreshBadge) {
+                refreshBadge.classList.remove('cmd-badge-refreshing');
+                refreshBadge.textContent = 'UPDATED ' + new Date().toLocaleTimeString('en-US',{hour12:false});
+            }
+        } catch(e) {
+            console.warn('[CoachStats] Refresh failed:', e);
+            if (refreshBadge) { refreshBadge.classList.remove('cmd-badge-refreshing'); refreshBadge.textContent = 'RETRY'; }
+        }
+    }
+
+    if (refreshBadge) refreshBadge.addEventListener('click', refreshStats);
+    setTimeout(() => { refreshStats(); setInterval(refreshStats, 30000); }, 5000);
+
+    /* ════════════════════════════════════════════
+       VOICE SEARCH
+    ════════════════════════════════════════════ */
+    const micBtn     = document.getElementById('voiceMicBtn');
+    const statusDiv  = document.getElementById('voiceStatus');
+    const statusText = document.getElementById('voiceStatusText');
+    const searchInp  = document.getElementById('voiceSearchInput');
+    const filterForm = document.getElementById('filterForm');
+    if (!micBtn) return;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const hasNativeSTT      = !!SpeechRecognition;
+    const hasMediaRecorder  = !!(navigator.mediaDevices && window.MediaRecorder);
+    if (hasNativeSTT || hasMediaRecorder) micBtn.style.display = 'flex';
+
+    let isListening=false, recognition=null, mediaRecorder=null, audioChunks=[], micStream=null;
+
+    function setListening(on) {
+        isListening=on;
+        if(on){micBtn.classList.add('is-listening');micBtn.innerHTML='<i class="bi bi-stop-fill"></i>';statusDiv.classList.remove('d-none');statusText.textContent='Listening… speak now';}
+        else{micBtn.classList.remove('is-listening');micBtn.innerHTML='<i class="bi bi-mic-fill"></i>';statusDiv.classList.add('d-none');}
+    }
+    function applyAndSubmit(text){const c=text.trim();if(!c)return;searchInp.value=c;setTimeout(()=>filterForm.submit(),600);}
+
+    function startNativeSTT(){
+        recognition=new SpeechRecognition();recognition.lang='en-US';recognition.continuous=false;recognition.interimResults=true;
+        recognition.onstart=()=>setListening(true);
+        recognition.onresult=(e)=>{let i2='',f='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;e.results[i].isFinal?(f+=t):(i2+=t);}searchInp.value=f||i2;if(f)recognition.stop();};
+        recognition.onerror=(e)=>{setListening(false);if(e.error==='not-allowed')alert('Microphone access denied.');};
+        recognition.onend=()=>{const v=searchInp.value.trim();setListening(false);if(v)setTimeout(()=>filterForm.submit(),500);};
+        recognition.start();
+    }
+    const TRANSCRIBE_URL='{{ path("app_speech_transcribe") }}';
+    async function startMediaSTT(){
+        try{micStream=await navigator.mediaDevices.getUserMedia({audio:true});}catch{alert('Microphone access denied.');return;}
+        audioChunks=[];
+        const mime=['audio/webm;codecs=opus','audio/webm','audio/ogg',''].find(t=>t===''||MediaRecorder.isTypeSupported(t));
+        mediaRecorder=new MediaRecorder(micStream,mime?{mimeType:mime}:{});
+        mediaRecorder.ondataavailable=e=>{if(e.data?.size>0)audioChunks.push(e.data);};
+        mediaRecorder.onstop=async()=>{
+            micStream.getTracks().forEach(t=>t.stop());micStream=null;setListening(false);
+            statusDiv.classList.remove('d-none');statusDiv.querySelector('.voice-pulse').style.background='#ffc107';statusText.textContent='Transcribing…';
+            const blob=new Blob(audioChunks,{type:mediaRecorder.mimeType||'audio/webm'});audioChunks=[];mediaRecorder=null;
+            const fd=new FormData();fd.append('audio',blob,'search.webm');
+            try{
+                const res=await fetch(TRANSCRIBE_URL,{method:'POST',body:fd,credentials:'same-origin',headers:{'X-Requested-With':'XMLHttpRequest'}});
+                statusDiv.classList.add('d-none');
+                const ct=res.headers.get('content-type')||'';
+                if(!ct.includes('application/json')){alert('Session expired. Please refresh.');return;}
+                const data=await res.json();
+                if(res.ok&&data.text){applyAndSubmit(data.text);}else{alert('Could not transcribe. Please try again.');}
+            }catch(err){statusDiv.classList.add('d-none');console.error(err);alert('Server error.');}
+        };
+        mediaRecorder.start(250);setListening(true);
+    }
+    micBtn.addEventListener('click',()=>{
+        if(isListening){if(recognition)recognition.stop();if(mediaRecorder&&mediaRecorder.state!=='inactive')mediaRecorder.stop();setListening(false);return;}
+        hasNativeSTT?startNativeSTT():startMediaSTT();
     });
     
     // Real-time search (optional - debounced)
