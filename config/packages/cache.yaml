@@ -1,25 +1,20 @@
 framework:
     cache:
-        app: cache.adapter.redis
-        default_redis_provider: "%env(REDIS_URL)%"
-
+        # Default: filesystem (works on Render without Redis). Use Redis in dev via config/packages/dev/cache.yaml
+        app: cache.adapter.filesystem
         pools:
             cache.complaint_stats:
-                adapter: cache.adapter.redis
+                adapter: cache.adapter.filesystem
                 default_lifetime: 300
-
             cache.dashboard:
-                adapter: cache.adapter.redis
+                adapter: cache.adapter.filesystem
                 default_lifetime: 600
-
             cache.monthly_stats:
-                adapter: cache.adapter.redis
+                adapter: cache.adapter.filesystem
                 default_lifetime: 3600
-
             doctrine.result_cache_pool:
-                adapter: cache.adapter.redis
+                adapter: cache.adapter.filesystem
                 default_lifetime: 300
-
             doctrine.system_cache_pool:
-                adapter: cache.adapter.redis
+                adapter: cache.adapter.filesystem
                 default_lifetime: 86400

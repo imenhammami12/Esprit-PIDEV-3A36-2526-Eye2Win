@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Repository\TournoiRepository;
+use App\Repository\TeamRepository;
 use App\Repository\UserRepository;
 use App\Repository\VideoRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,14 +18,15 @@ class HomeController extends AbstractController
         VideoRepository   $videoRepository,
         UserRepository    $userRepository,
         TournoiRepository $tournoiRepository,
+        TeamRepository    $teamRepository,
     ): Response {
-        // ── Statistiques réelles ──────────────────────────────────────
-        $stats = $userRepository->getGlobalStats(); // appel unique, zéro requête extra
+        // ── Même méthode que le backoffice AdminUserController ────────
+        $stats = $userRepository->getGlobalStats();
 
-        $totalPlayers     = $stats['total'];
-        $totalCoaches     = $stats['coaches'];
-        $satisfaction     = 95; // valeur fixe tant qu'il n'y a pas de système de reviews
+        // ── Nombre de teams actives ───────────────────────────────────
+        $totalTeams = $teamRepository->count(['isActive' => true]);
 
+        // ── Nombre de tournois ────────────────────────────────────────
         $totalTournaments = $tournoiRepository->countAllTournois();
 
         // ── Vidéos de l'utilisateur connecté (6 dernières) ───────────
@@ -40,10 +42,10 @@ class HomeController extends AbstractController
 
         return $this->render('home/index.html.twig', [
             'videos'           => $videos,
-            'totalPlayers'     => $totalPlayers,
+            'totalPlayers'     => $stats['total'],
+            'totalCoaches'     => $stats['coaches'],
+            'totalTeams'       => $totalTeams,
             'totalTournaments' => $totalTournaments,
-            'totalCoaches'     => $totalCoaches,
-            'satisfaction'     => $satisfaction,
         ]);
     }
 

@@ -36,3 +36,6 @@ when@prod:
     framework:
         router:
             strict_requirements: null
+        # Use file-based sessions in prod when Redis is not available (e.g. Render without Redis)
+        session:
+            handler_id: null
