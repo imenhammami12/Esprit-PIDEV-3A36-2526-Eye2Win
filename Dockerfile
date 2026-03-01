@@ -16,7 +16,12 @@ WORKDIR /var/www
 
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader
+# Skip scripts during install so cache:clear doesn't need .env (not available at build time).
+# cache:clear runs at container start in start.sh when Render env vars are available.
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+# Minimal .env so Symfony's Dotenv finds a file at runtime; real values come from Render env vars.
+RUN echo 'APP_ENV=prod' > /var/www/.env
 
 RUN chown -R www-data:www-data /var/www/var /var/www/public
 
