@@ -16,6 +16,17 @@ class AuditLogRepository extends ServiceEntityRepository
         parent::__construct($registry, AuditLog::class);
     }
 
+        public function findByDate(\DateTime $date): array
+    {
+        return $this->createQueryBuilder('al')
+            ->andWhere('al.createdAt >= :date')
+            ->setParameter('date', $date)
+            ->getQuery()
+            ->getResult();
+    }
+
+
+
     //    /**
     //     * @return AuditLog[] Returns an array of AuditLog objects
     //     */

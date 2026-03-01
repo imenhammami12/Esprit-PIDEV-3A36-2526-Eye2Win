@@ -10,6 +10,7 @@ use App\Form\UserProfileType;
 use App\Form\CoachApplicationType;
 use App\Repository\UserRepository;
 use App\Repository\NotificationRepository;
+use App\Service\NotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,6 +22,10 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 #[Route('/profile')]
 class UserController extends AbstractController
 {
+    public function __construct(
+        private NotificationService $notificationService
+    ) {}
+
     #[Route('/', name: 'user_profile')]
     public function profile(EntityManagerInterface $em): Response
     {
@@ -67,7 +72,6 @@ class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // NIVEAU 2 : Validation côté serveur
             $newEmail = $form->get('email')->getData();
             if ($newEmail !== $user->getEmail()) {
                 $existingUser = $userRepository->findOneBy(['email' => strtolower(trim($newEmail))]);
@@ -80,7 +84,6 @@ class UserController extends AbstractController
                 }
             }
             
-            // Gérer l'upload de la photo de profil
             $profilePictureFile = $form->get('profilePictureFile')->getData();
             
             if ($profilePictureFile) {
@@ -186,6 +189,9 @@ class UserController extends AbstractController
             
             $em->persist($application);
             $em->flush();
+
+            // ✅ FIXED: Notify all admins that a new coach application was submitted
+            $this->notificationService->notifyCoachApplicationSubmitted($application);
             
             $this->addFlash('success', 'Your coach application has been submitted successfully!');
             return $this->redirectToRoute('user_profile');

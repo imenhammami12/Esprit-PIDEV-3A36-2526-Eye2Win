@@ -5,20 +5,34 @@ framework:
     http_method_override: false
     handle_all_throwables: true
 
-    # Enables session support. Note that the session will ONLY be started if you read or write from it.
-    # Remove or comment this section to explicitly disable session support.
+    router:
+        default_uri: '%env(APP_URL)%'
+
+    # ── Sessions stockées dans Redis ──────────────────────────────────────────
+    # AVANT : handler_id: null  → sessions stockées dans des fichiers PHP (lent)
+    # APRÈS : handler_id: Redis → sessions stockées en mémoire RAM (rapide)
     session:
-        handler_id: null
+        handler_id: '%env(REDIS_URL)%'
         cookie_secure: auto
         cookie_samesite: lax
+        cookie_httponly: true      # protection XSS
+        gc_maxlifetime: 3600       # expire après 1h d'inactivité
 
-    #esi: true
-    #fragments: true
     php_errors:
         log: true
+
+    # ── HTTP Cache (reverse proxy Symfony) ────────────────────────────────────
+    # Active le cache HTTP côté serveur pour les réponses avec headers Cache-Control
+    http_cache: true
 
 when@test:
     framework:
         test: true
         session:
+            handler_id: null
             storage_factory_id: session.storage.factory.mock_file
+
+when@prod:
+    framework:
+        router:
+            strict_requirements: null

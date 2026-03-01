@@ -1,0 +1,565 @@
+{% extends 'admin_layout.html.twig' %}
+
+{% block title %}Complaints Management{% endblock %}
+{% block page_title %}Complaints Management{% endblock %}
+
+{% block body %}
+
+{# ══ STAT CARDS ══ #}
+<div class="xp-grid fade-in" style="animation-delay:0.05s;">
+
+    <div class="xp-card xp-total">
+        <canvas class="xp-particles" width="300" height="160"></canvas>
+        <div class="xp-noise"></div>
+        <div class="xp-top-bar"></div>
+        <div class="xp-side-accent"></div>
+        <div class="xp-body">
+            <div class="xp-icon-zone">
+                <svg class="xp-hexsvg" viewBox="0 0 60 60">
+                    <polygon points="30,2 56,16 56,44 30,58 4,44 4,16" fill="none" stroke="rgba(102,126,234,0.4)" stroke-width="1"/>
+                    <polygon points="30,8 50,20 50,40 30,52 10,40 10,20" fill="rgba(102,126,234,0.12)" stroke="rgba(102,126,234,0.6)" stroke-width="1"/>
+                </svg>
+                <i class="bi bi-inbox-fill xp-icon-glyph"></i>
+            </div>
+            <div class="xp-content">
+                <div class="xp-eyebrow">COMMAND CENTER</div>
+                <div class="xp-num xp-countup" data-target="{{ stats.total }}">{{ stats.total }}</div>
+                <div class="xp-title">Total Complaints</div>
+                <div class="xp-progress-track">
+                    <div class="xp-progress-fill" style="width:100%"></div>
+                    <div class="xp-progress-glow"></div>
+                </div>
+            </div>
+        </div>
+        <div class="xp-corner-tl"></div>
+        <div class="xp-corner-br"></div>
+        <div class="xp-scan-line"></div>
+    </div>
+
+    <div class="xp-card xp-pending">
+        <canvas class="xp-particles" width="300" height="160"></canvas>
+        <div class="xp-noise"></div>
+        <div class="xp-top-bar"></div>
+        <div class="xp-side-accent"></div>
+        <div class="xp-body">
+            <div class="xp-icon-zone">
+                <svg class="xp-hexsvg" viewBox="0 0 60 60">
+                    <polygon points="30,2 56,16 56,44 30,58 4,44 4,16" fill="none" stroke="rgba(255,60,100,0.4)" stroke-width="1"/>
+                    <polygon points="30,8 50,20 50,40 30,52 10,40 10,20" fill="rgba(255,60,100,0.12)" stroke="rgba(255,60,100,0.6)" stroke-width="1"/>
+                </svg>
+                <i class="bi bi-hourglass-split xp-icon-glyph"></i>
+                <div class="xp-pulse-ring"></div>
+            </div>
+            <div class="xp-content">
+                <div class="xp-eyebrow xp-eyebrow-alert">⚠ NEEDS ACTION</div>
+                <div class="xp-num xp-countup" data-target="{{ stats.pending }}">{{ stats.pending }}</div>
+                <div class="xp-title">Pending</div>
+                <div class="xp-progress-track">
+                    <div class="xp-progress-fill" style="width:{{ stats.total > 0 ? ((stats.pending/stats.total)*100)|round : 0 }}%"></div>
+                    <div class="xp-progress-glow"></div>
+                </div>
+            </div>
+        </div>
+        <div class="xp-corner-tl"></div>
+        <div class="xp-corner-br"></div>
+        <div class="xp-scan-line"></div>
+        <div class="xp-alert-flash"></div>
+    </div>
+
+    <div class="xp-card xp-progress-card">
+        <canvas class="xp-particles" width="300" height="160"></canvas>
+        <div class="xp-noise"></div>
+        <div class="xp-top-bar"></div>
+        <div class="xp-side-accent"></div>
+        <div class="xp-body">
+            <div class="xp-icon-zone">
+                <svg class="xp-hexsvg" viewBox="0 0 60 60">
+                    <polygon points="30,2 56,16 56,44 30,58 4,44 4,16" fill="none" stroke="rgba(79,172,254,0.4)" stroke-width="1"/>
+                    <polygon points="30,8 50,20 50,40 30,52 10,40 10,20" fill="rgba(79,172,254,0.12)" stroke="rgba(79,172,254,0.6)" stroke-width="1"/>
+                </svg>
+                <i class="bi bi-lightning-charge-fill xp-icon-glyph"></i>
+            </div>
+            <div class="xp-content">
+                <div class="xp-eyebrow">◈ LIVE PROCESSING</div>
+                <div class="xp-num xp-countup" data-target="{{ stats.in_progress }}">{{ stats.in_progress }}</div>
+                <div class="xp-title">In Progress</div>
+                <div class="xp-progress-track">
+                    <div class="xp-progress-fill" style="width:{{ stats.total > 0 ? ((stats.in_progress/stats.total)*100)|round : 0 }}%"></div>
+                    <div class="xp-progress-glow"></div>
+                </div>
+            </div>
+        </div>
+        <div class="xp-corner-tl"></div>
+        <div class="xp-corner-br"></div>
+        <div class="xp-scan-line"></div>
+    </div>
+
+    <div class="xp-card xp-resolved">
+        <canvas class="xp-particles" width="300" height="160"></canvas>
+        <div class="xp-noise"></div>
+        <div class="xp-top-bar"></div>
+        <div class="xp-side-accent"></div>
+        <div class="xp-body">
+            <div class="xp-icon-zone">
+                <svg class="xp-hexsvg" viewBox="0 0 60 60">
+                    <polygon points="30,2 56,16 56,44 30,58 4,44 4,16" fill="none" stroke="rgba(67,233,123,0.4)" stroke-width="1"/>
+                    <polygon points="30,8 50,20 50,40 30,52 10,40 10,20" fill="rgba(67,233,123,0.12)" stroke="rgba(67,233,123,0.6)" stroke-width="1"/>
+                </svg>
+                <i class="bi bi-shield-check xp-icon-glyph"></i>
+            </div>
+            <div class="xp-content">
+                <div class="xp-eyebrow xp-eyebrow-success">✓ MISSION COMPLETE</div>
+                <div class="xp-num xp-countup" data-target="{{ stats.resolved }}">{{ stats.resolved }}</div>
+                <div class="xp-title">Resolved</div>
+                <div class="xp-progress-track">
+                    <div class="xp-progress-fill" style="width:{{ stats.total > 0 ? ((stats.resolved/stats.total)*100)|round : 0 }}%"></div>
+                    <div class="xp-progress-glow"></div>
+                </div>
+            </div>
+        </div>
+        <div class="xp-corner-tl"></div>
+        <div class="xp-corner-br"></div>
+        <div class="xp-scan-line"></div>
+    </div>
+
+</div>
+
+{# ══ MINI STATS ══ #}
+<div class="mini-stat-row fade-in" style="animation-delay:0.12s;">
+
+    <div class="mini-card mini-orange">
+        <div class="mini-card-inner">
+            <div class="mini-icon"><i class="bi bi-person-slash"></i></div>
+            <div class="mini-data">
+                <div class="mini-val xp-countup" data-target="{{ stats.unassigned }}">{{ stats.unassigned }}</div>
+                <div class="mini-lbl">Unassigned</div>
+            </div>
+            <div class="mini-graph">
+                <svg viewBox="0 0 60 30" preserveAspectRatio="none">
+                    <polyline points="0,25 10,20 20,22 30,15 40,18 50,10 60,12" fill="none" stroke="rgba(255,167,81,0.6)" stroke-width="1.5"/>
+                    <polyline points="0,25 10,20 20,22 30,15 40,18 50,10 60,12 60,30 0,30" fill="rgba(255,167,81,0.08)"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="mini-card mini-red">
+        <div class="mini-card-inner">
+            <div class="mini-icon"><i class="bi bi-x-octagon-fill"></i></div>
+            <div class="mini-data">
+                <div class="mini-val xp-countup" data-target="{{ stats.rejected }}">{{ stats.rejected }}</div>
+                <div class="mini-lbl">Rejected</div>
+            </div>
+            <div class="mini-graph">
+                <svg viewBox="0 0 60 30" preserveAspectRatio="none">
+                    <polyline points="0,10 10,15 20,12 30,18 40,14 50,20 60,16" fill="none" stroke="rgba(255,107,107,0.6)" stroke-width="1.5"/>
+                    <polyline points="0,10 10,15 20,12 30,18 40,14 50,20 60,16 60,30 0,30" fill="rgba(255,107,107,0.08)"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="mini-card mini-teal">
+        <div class="mini-card-inner">
+            <div class="mini-icon"><i class="bi bi-stopwatch-fill"></i></div>
+            <div class="mini-data">
+                <div class="mini-val mini-val-text">{{ stats.avg_resolution_hours ? (stats.avg_resolution_hours|round(1)) ~ 'h' : 'N/A' }}</div>
+                <div class="mini-lbl">Avg Resolution</div>
+            </div>
+            <div class="mini-graph">
+                <svg viewBox="0 0 60 30" preserveAspectRatio="none">
+                    <polyline points="0,20 10,18 20,15 30,12 40,10 50,8 60,6" fill="none" stroke="rgba(56,249,215,0.6)" stroke-width="1.5"/>
+                    <polyline points="0,20 10,18 20,15 30,12 40,10 50,8 60,6 60,30 0,30" fill="rgba(56,249,215,0.08)"/>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="mini-card mini-donut-card">
+        <div class="mini-card-inner">
+            <div class="donut-wrap">
+                <svg class="donut-svg" viewBox="0 0 60 60">
+                    <circle cx="30" cy="30" r="24" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+                    <circle cx="30" cy="30" r="24" fill="none" stroke="url(#donutGrad)" stroke-width="6"
+                            stroke-dasharray="{{ stats.total > 0 ? ((stats.resolved/stats.total)*150.8)|round : 0 }} 150.8"
+                            stroke-dashoffset="37.7"
+                            stroke-linecap="round"/>
+                    <defs>
+                        <linearGradient id="donutGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#43e97b"/>
+                            <stop offset="100%" stop-color="#38f9d7"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <div class="donut-center">
+                    <span>{{ stats.total > 0 ? ((stats.resolved/stats.total)*100)|round : 0 }}%</span>
+                </div>
+            </div>
+            <div class="mini-data">
+                <div class="mini-lbl" style="font-size:10px; color:rgba(255,255,255,0.5);">Resolution</div>
+                <div class="mini-lbl" style="font-size:10px; color:rgba(255,255,255,0.5);">Rate</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{# ══ FILTERS ══ #}
+<div class="table-card mb-4 fade-in" style="animation-delay: 0.18s;">
+    <div class="table-header">
+        <h5><i class="bi bi-funnel me-2"></i>Filters & Search</h5>
+    </div>
+    <form method="get" class="p-3">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label"><i class="bi bi-search me-1"></i>Search</label>
+                <div class="search-bar">
+                    <i class="search-icon bi bi-search"></i>
+                    <input type="text" name="search" class="form-control" placeholder="Search complaints..." value="{{ search }}" autocomplete="off">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label"><i class="bi bi-toggle-on me-1"></i>Status</label>
+                <select class="form-select" name="status">
+                    <option value="">All Statuses</option>
+                    <option value="PENDING"     {% if statusFilter == 'PENDING' %}selected{% endif %}>Pending</option>
+                    <option value="IN_PROGRESS" {% if statusFilter == 'IN_PROGRESS' %}selected{% endif %}>In Progress</option>
+                    <option value="RESOLVED"    {% if statusFilter == 'RESOLVED' %}selected{% endif %}>Resolved</option>
+                    <option value="CLOSED"      {% if statusFilter == 'CLOSED' %}selected{% endif %}>Closed</option>
+                    <option value="REJECTED"    {% if statusFilter == 'REJECTED' %}selected{% endif %}>Rejected</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label"><i class="bi bi-flag me-1"></i>Priority</label>
+                <select class="form-select" name="priority">
+                    <option value="">All Priorities</option>
+                    <option value="LOW"    {% if priorityFilter == 'LOW' %}selected{% endif %}>Low</option>
+                    <option value="MEDIUM" {% if priorityFilter == 'MEDIUM' %}selected{% endif %}>Medium</option>
+                    <option value="HIGH"   {% if priorityFilter == 'HIGH' %}selected{% endif %}>High</option>
+                    <option value="URGENT" {% if priorityFilter == 'URGENT' %}selected{% endif %}>Urgent</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label"><i class="bi bi-tag me-1"></i>Category</label>
+                <select class="form-select" name="category">
+                    <option value="">All Categories</option>
+                    <option value="TECHNICAL"  {% if categoryFilter == 'TECHNICAL' %}selected{% endif %}>Technical</option>
+                    <option value="ACCOUNT"    {% if categoryFilter == 'ACCOUNT' %}selected{% endif %}>Account</option>
+                    <option value="TOURNAMENT" {% if categoryFilter == 'TOURNAMENT' %}selected{% endif %}>Tournament</option>
+                    <option value="TEAM"       {% if categoryFilter == 'TEAM' %}selected{% endif %}>Team</option>
+                    <option value="PAYMENT"    {% if categoryFilter == 'PAYMENT' %}selected{% endif %}>Payment</option>
+                    <option value="CONTENT"    {% if categoryFilter == 'CONTENT' %}selected{% endif %}>Content</option>
+                    <option value="HARASSMENT" {% if categoryFilter == 'HARASSMENT' %}selected{% endif %}>Harassment</option>
+                    <option value="BUG"        {% if categoryFilter == 'BUG' %}selected{% endif %}>Bug</option>
+                    <option value="OTHER"      {% if categoryFilter == 'OTHER' %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <label class="form-label"><i class="bi bi-emoji-expressionless me-1"></i>Sentiment</label>
+                <select class="form-select" name="sentiment">
+                    <option value="">All</option>
+                    <option value="NEGATIVE" {% if sentimentFilter is defined and sentimentFilter == 'NEGATIVE' %}selected{% endif %}>😡 Negative</option>
+                    <option value="NEUTRAL"  {% if sentimentFilter is defined and sentimentFilter == 'NEUTRAL' %}selected{% endif %}>😐 Neutral</option>
+                    <option value="POSITIVE" {% if sentimentFilter is defined and sentimentFilter == 'POSITIVE' %}selected{% endif %}>😊 Positive</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary flex-grow-1"><i class="bi bi-search me-1"></i>Filter</button>
+                {% if search or statusFilter or priorityFilter or categoryFilter %}
+                    <a href="{{ path('admin_complaints_index') }}" class="btn btn-outline-secondary" title="Clear"><i class="bi bi-x-lg"></i></a>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="mb-3 fade-in" style="animation-delay: 0.2s;">
+    <h6 class="text-muted mb-0">
+        <i class="bi bi-info-circle me-2"></i>
+        Found <strong>{{ pagination.getTotalItemCount }}</strong> complaint{{ pagination.getTotalItemCount != 1 ? 's' : '' }}
+    </h6>
+</div>
+
+{# ══ TABLE ══ #}
+<div class="table-card fade-in" style="animation-delay: 0.22s;">
+    <div class="table-header">
+        <h5><i class="bi bi-headset me-2"></i>Complaints List ({{ pagination.getTotalItemCount }})</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="custom-table table">
+            <thead>
+                <tr>
+                    <th style="width:140px;">User</th>
+                    <th style="width:250px;">Subject</th>
+                    <th style="width:120px;">Category</th>
+                    <th style="width:100px;">Priority</th>
+                    <th style="width:110px;">Status</th>
+                    <th style="width:110px;">Sentiment</th>
+                    <th style="width:130px;">Assigned To</th>
+                    <th style="width:120px;">Created</th>
+                    <th style="width:80px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for complaint in pagination %}
+                <tr class="fade-in" style="animation-delay: {{ loop.index * 0.05 }}s;">
+                    <td style="vertical-align:middle;">
+                        <a href="{{ path('admin_users_show', {id: complaint.submittedBy.id}) }}" class="text-decoration-none" style="color:#43e97b;">
+                            <i class="bi bi-person me-1"></i><strong>{{ complaint.submittedBy.username }}</strong>
+                        </a>
+                    </td>
+                    <td style="vertical-align:middle;">
+                        <div style="max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="{{ complaint.subject }}">
+                            {{ complaint.subject }}
+                        </div>
+                    </td>
+                    <td style="vertical-align:middle;">
+                        <span class="badge bg-secondary">
+                            <i class="{{ complaint.category.icon }} me-1"></i>{{ complaint.category.label }}
+                        </span>
+                    </td>
+                    <td style="vertical-align:middle;">
+                        <span class="badge bg-{{ complaint.priority.badgeClass }}">
+                            <i class="{{ complaint.priority.icon }} me-1"></i>{{ complaint.priority.label }}
+                        </span>
+                    </td>
+                    <td style="vertical-align:middle;">
+                        <span class="badge bg-{{ complaint.status.badgeClass }}">
+                            <i class="{{ complaint.status.icon }} me-1"></i>{{ complaint.status.label }}
+                        </span>
+                    </td>
+
+                    {# ── Colonne Sentiment (SentimentServiceComplaints) ── #}
+                    <td style="vertical-align:middle;">
+                        {{ include('components/_complaint_sentiment_badge.html.twig', {
+                            complaint: complaint,
+                            compact: true
+                        }) }}
+                    </td>
+
+                    <td style="vertical-align:middle;">
+                        {% if complaint.assignedTo %}
+                            <span style="color:#4facfe;"><i class="bi bi-person-check me-1"></i>{{ complaint.assignedTo.username }}</span>
+                        {% else %}
+                            <span class="text-muted"><i class="bi bi-person-x me-1"></i>Unassigned</span>
+                        {% endif %}
+                    </td>
+                    <td style="vertical-align:middle;">
+                        <small class="text-muted">
+                            <i class="bi bi-calendar3 me-1"></i>{{ complaint.createdAt|date('M d, Y') }}<br>
+                            <i class="bi bi-clock me-1"></i>{{ complaint.createdAt|date('H:i') }}
+                        </small>
+                    </td>
+                    <td style="vertical-align:middle;">
+                        <a href="{{ path('admin_complaints_show', {id: complaint.id}) }}" class="btn btn-sm btn-info" title="View Details" data-bs-toggle="tooltip">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" class="text-center text-muted py-5">
+                        <div class="empty-state">
+                            <i class="bi bi-inbox" style="font-size:64px; opacity:0.2;"></i>
+                            <h4 class="mt-3 mb-2">No Complaints Found</h4>
+                            <p class="text-muted">Try adjusting your search criteria</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if pagination.pageCount > 1 %}
+<div class="d-flex justify-content-between align-items-center mt-4 fade-in" style="animation-delay:0.3s;">
+    <div class="text-muted">
+        Showing {{ ((pagination.currentPageNumber - 1) * pagination.itemNumberPerPage) + 1 }}
+        to {{ min(pagination.currentPageNumber * pagination.itemNumberPerPage, pagination.getTotalItemCount) }}
+        of {{ pagination.getTotalItemCount }} entries
+    </div>
+    <div class="pagination-wrapper">
+        {{ knp_pagination_render(pagination, '@KnpPaginator/Pagination/bootstrap_v5_pagination.html.twig', {}, {
+            'search': search, 'status': statusFilter, 'priority': priorityFilter, 'category': categoryFilter
+        }) }}
+    </div>
+</div>
+{% endif %}
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap');
+
+.xp-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:16px; }
+@media(max-width:1200px){.xp-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.xp-grid{grid-template-columns:1fr;}}
+
+.xp-card { position:relative; border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,0.07); background:rgba(10,5,20,0.9); min-height:155px; cursor:pointer; transition:transform .4s cubic-bezier(.22,.68,0,1.2),box-shadow .4s,border-color .3s; font-family:'Rajdhani',sans-serif; }
+.xp-card:hover { transform:translateY(-8px) scale(1.02); }
+.xp-particles { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; opacity:0; transition:opacity .4s; }
+.xp-card:hover .xp-particles { opacity:1; }
+.xp-noise { position:absolute; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events:none; z-index:0; }
+.xp-top-bar { position:absolute; top:0; left:0; right:0; height:2px; z-index:3; transition:height .3s; }
+.xp-card:hover .xp-top-bar { height:3px; }
+.xp-side-accent { position:absolute; left:0; top:0; bottom:0; width:3px; z-index:3; transition:width .3s; }
+.xp-card:hover .xp-side-accent { width:4px; }
+.xp-corner-tl { position:absolute; top:0; left:0; width:20px; height:20px; z-index:4; border-top:2px solid; border-left:2px solid; border-radius:12px 0 0 0; opacity:.5; transition:opacity .3s,width .3s,height .3s; }
+.xp-corner-br { position:absolute; bottom:0; right:0; width:20px; height:20px; z-index:4; border-bottom:2px solid; border-right:2px solid; border-radius:0 0 12px 0; opacity:.5; transition:opacity .3s,width .3s,height .3s; }
+.xp-card:hover .xp-corner-tl,.xp-card:hover .xp-corner-br { opacity:1; width:28px; height:28px; }
+.xp-scan-line { position:absolute; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent); animation:scanMove 4s linear infinite; pointer-events:none; z-index:2; }
+@keyframes scanMove{0%{top:0;opacity:0}10%{opacity:1}90%{opacity:1}100%{top:100%;opacity:0}}
+.xp-alert-flash { position:absolute; inset:0; border-radius:12px; pointer-events:none; animation:alertFlash 3s ease-in-out infinite; z-index:0; }
+@keyframes alertFlash{0%,70%,100%{box-shadow:inset 0 0 0 1px rgba(255,60,100,0)}85%{box-shadow:inset 0 0 0 1px rgba(255,60,100,0.4)}}
+.xp-pulse-ring { position:absolute; inset:-8px; border-radius:50%; border:1.5px solid rgba(255,60,100,0.4); animation:pulseRing 2s ease-out infinite; pointer-events:none; }
+@keyframes pulseRing{0%{transform:scale(.8);opacity:1}100%{transform:scale(1.6);opacity:0}}
+.xp-body { display:flex; align-items:center; gap:14px; padding:20px 18px; position:relative; z-index:2; height:100%; }
+.xp-icon-zone { position:relative; flex-shrink:0; width:58px; height:58px; }
+.xp-hexsvg { position:absolute; inset:0; width:100%; height:100%; animation:hexRotate 20s linear infinite; }
+@keyframes hexRotate{to{transform:rotate(360deg)}}
+.xp-card:hover .xp-hexsvg { animation-duration:5s; }
+.xp-icon-glyph { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:22px; color:#fff; z-index:1; transition:transform .3s,text-shadow .3s; }
+.xp-card:hover .xp-icon-glyph { transform:translate(-50%,-50%) scale(1.2); }
+.xp-content { flex:1; min-width:0; }
+.xp-eyebrow { font-family:'Share Tech Mono',monospace; font-size:9px; letter-spacing:1.5px; color:rgba(255,255,255,0.35); text-transform:uppercase; margin-bottom:2px; }
+.xp-eyebrow-alert { color:rgba(255,80,100,0.7); }
+.xp-eyebrow-success { color:rgba(67,233,123,0.7); }
+.xp-num { font-size:44px; font-weight:700; color:#fff; line-height:1; letter-spacing:-1px; transition:transform .3s; }
+.xp-card:hover .xp-num { transform:scale(1.06); }
+.xp-title { font-size:12px; font-weight:600; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1px; margin-top:2px; margin-bottom:10px; }
+.xp-progress-track { height:3px; background:rgba(255,255,255,0.06); border-radius:2px; position:relative; overflow:visible; }
+.xp-progress-fill { height:100%; border-radius:2px; transition:width 1.2s cubic-bezier(.4,0,.2,1); min-width:3px; }
+.xp-progress-glow { position:absolute; right:0; top:-2px; width:8px; height:7px; border-radius:50%; filter:blur(3px); }
+
+.xp-total{border-color:rgba(102,126,234,0.2);box-shadow:0 4px 30px rgba(102,126,234,0.08);}
+.xp-total:hover{border-color:rgba(102,126,234,0.45);box-shadow:0 16px 50px rgba(102,126,234,0.2);}
+.xp-total .xp-top-bar{background:linear-gradient(90deg,#667eea,#764ba2);}
+.xp-total .xp-side-accent{background:linear-gradient(180deg,#667eea,#764ba2);}
+.xp-total .xp-corner-tl,.xp-total .xp-corner-br{border-color:#667eea;}
+.xp-total .xp-progress-fill{background:linear-gradient(90deg,#667eea,#764ba2);}
+.xp-total .xp-progress-glow{background:#667eea;}
+.xp-total .xp-icon-glyph{text-shadow:0 0 20px rgba(102,126,234,0.8);}
+
+.xp-pending{border-color:rgba(255,60,100,0.2);box-shadow:0 4px 30px rgba(255,60,100,0.08);}
+.xp-pending:hover{border-color:rgba(255,60,100,0.45);box-shadow:0 16px 50px rgba(255,60,100,0.25);}
+.xp-pending .xp-top-bar{background:linear-gradient(90deg,#f093fb,#f5576c);}
+.xp-pending .xp-side-accent{background:linear-gradient(180deg,#f093fb,#f5576c);}
+.xp-pending .xp-corner-tl,.xp-pending .xp-corner-br{border-color:#f5576c;}
+.xp-pending .xp-progress-fill{background:linear-gradient(90deg,#f093fb,#f5576c);}
+.xp-pending .xp-progress-glow{background:#f5576c;}
+.xp-pending .xp-icon-glyph{text-shadow:0 0 20px rgba(255,60,100,0.8);}
+
+.xp-progress-card{border-color:rgba(79,172,254,0.2);box-shadow:0 4px 30px rgba(79,172,254,0.08);}
+.xp-progress-card:hover{border-color:rgba(79,172,254,0.45);box-shadow:0 16px 50px rgba(79,172,254,0.2);}
+.xp-progress-card .xp-top-bar{background:linear-gradient(90deg,#4facfe,#00f2fe);}
+.xp-progress-card .xp-side-accent{background:linear-gradient(180deg,#4facfe,#00f2fe);}
+.xp-progress-card .xp-corner-tl,.xp-progress-card .xp-corner-br{border-color:#4facfe;}
+.xp-progress-card .xp-progress-fill{background:linear-gradient(90deg,#4facfe,#00f2fe);}
+.xp-progress-card .xp-progress-glow{background:#4facfe;}
+.xp-progress-card .xp-icon-glyph{text-shadow:0 0 20px rgba(79,172,254,0.8);}
+
+.xp-resolved{border-color:rgba(67,233,123,0.2);box-shadow:0 4px 30px rgba(67,233,123,0.08);}
+.xp-resolved:hover{border-color:rgba(67,233,123,0.45);box-shadow:0 16px 50px rgba(67,233,123,0.2);}
+.xp-resolved .xp-top-bar{background:linear-gradient(90deg,#43e97b,#38f9d7);}
+.xp-resolved .xp-side-accent{background:linear-gradient(180deg,#43e97b,#38f9d7);}
+.xp-resolved .xp-corner-tl,.xp-resolved .xp-corner-br{border-color:#43e97b;}
+.xp-resolved .xp-progress-fill{background:linear-gradient(90deg,#43e97b,#38f9d7);}
+.xp-resolved .xp-progress-glow{background:#43e97b;}
+.xp-resolved .xp-icon-glyph{text-shadow:0 0 20px rgba(67,233,123,0.8);}
+
+.mini-stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+@media(max-width:900px){.mini-stat-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:500px){.mini-stat-row{grid-template-columns:1fr;}}
+.mini-card{border-radius:10px;border:1px solid rgba(255,255,255,0.07);background:rgba(10,5,20,0.85);overflow:hidden;transition:transform .3s,box-shadow .3s,border-color .3s;cursor:pointer;font-family:'Rajdhani',sans-serif;}
+.mini-card:hover{transform:translateY(-4px);}
+.mini-card-inner{display:flex;align-items:center;gap:12px;padding:14px 14px 0;}
+.mini-icon{font-size:20px;flex-shrink:0;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:rgba(255,255,255,0.05);transition:transform .3s;}
+.mini-card:hover .mini-icon{transform:scale(1.1) rotate(5deg);}
+.mini-data{flex:1;}
+.mini-val{font-size:28px;font-weight:700;color:#fff;line-height:1;}
+.mini-val-text{font-size:20px;}
+.mini-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.4);margin-top:2px;}
+.mini-graph{width:100%;height:32px;margin-top:8px;}
+.mini-graph svg{width:100%;height:100%;}
+.mini-orange{border-color:rgba(255,167,81,0.2);}
+.mini-orange:hover{border-color:rgba(255,167,81,0.4);box-shadow:0 8px 24px rgba(255,167,81,0.12);}
+.mini-orange .mini-icon{color:#ffa751;}
+.mini-red{border-color:rgba(255,107,107,0.2);}
+.mini-red:hover{border-color:rgba(255,107,107,0.4);box-shadow:0 8px 24px rgba(255,107,107,0.12);}
+.mini-red .mini-icon{color:#ff6b6b;}
+.mini-teal{border-color:rgba(56,249,215,0.2);}
+.mini-teal:hover{border-color:rgba(56,249,215,0.4);box-shadow:0 8px 24px rgba(56,249,215,0.12);}
+.mini-teal .mini-icon{color:#38f9d7;}
+.mini-donut-card{border-color:rgba(67,233,123,0.2);}
+.mini-donut-card:hover{border-color:rgba(67,233,123,0.4);box-shadow:0 8px 24px rgba(67,233,123,0.12);}
+.mini-donut-card .mini-card-inner{padding:14px;justify-content:center;gap:16px;}
+.donut-wrap{position:relative;width:52px;height:52px;flex-shrink:0;}
+.donut-svg{width:100%;height:100%;transform:rotate(-90deg);}
+.donut-center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;color:#43e97b;}
+</style>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        .forEach(el => new bootstrap.Tooltip(el, { delay: { show:300, hide:100 } }));
+
+    document.querySelectorAll('.xp-countup').forEach(function(el) {
+        var target = parseInt(el.getAttribute('data-target'), 10);
+        if (!target || target <= 0) return;
+        el.textContent = '0';
+        var current = 0, steps = 60, increment = target / steps;
+        var timer = setInterval(function() {
+            current = Math.min(current + increment, target);
+            el.textContent = Math.floor(current);
+            if (current >= target) { el.textContent = target; clearInterval(timer); }
+        }, 1200 / steps);
+    });
+
+    document.querySelectorAll('.xp-card').forEach(function(card) {
+        var canvas = card.querySelector('.xp-particles');
+        if (!canvas) return;
+        var ctx = canvas.getContext('2d');
+        var color = 'rgba(255,255,255,0.4)';
+        if      (card.classList.contains('xp-total'))         color = 'rgba(102,126,234,0.6)';
+        else if (card.classList.contains('xp-pending'))       color = 'rgba(255,80,100,0.6)';
+        else if (card.classList.contains('xp-progress-card')) color = 'rgba(79,172,254,0.6)';
+        else if (card.classList.contains('xp-resolved'))      color = 'rgba(67,233,123,0.6)';
+
+        var particles = Array.from({ length: 18 }, function() { return {
+            x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+            r: Math.random() * 1.5 + 0.3, vx: (Math.random() - 0.5) * 0.4,
+            vy: -Math.random() * 0.5 - 0.2, alpha: Math.random()
+        }; });
+
+        var rafId = null;
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(function(p) {
+                p.x += p.vx; p.y += p.vy; p.alpha -= 0.004;
+                if (p.alpha <= 0 || p.y < 0) {
+                    p.x = Math.random() * canvas.width; p.y = canvas.height + 2;
+                    p.alpha = Math.random() * 0.7 + 0.3;
+                    p.vy = -Math.random() * 0.5 - 0.2; p.vx = (Math.random() - 0.5) * 0.4;
+                }
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = color.replace('0.6', p.alpha.toFixed(2)); ctx.fill();
+            });
+            rafId = requestAnimationFrame(draw);
+        }
+        card.addEventListener('mouseenter', function() { draw(); });
+        card.addEventListener('mouseleave', function() {
+            if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+    });
+
+    document.querySelectorAll('.custom-table tbody tr').forEach(function(row) {
+        row.addEventListener('mouseenter', function() { row.style.transform = 'translateX(2px)'; });
+        row.addEventListener('mouseleave', function() { row.style.transform = 'translateX(0)'; });
+    });
+});
+</script>
+{% endblock %}

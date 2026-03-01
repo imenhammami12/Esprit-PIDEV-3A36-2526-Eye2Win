@@ -12,152 +12,201 @@
 
 <div class="row justify-content-center fade-in" style="animation-delay: 0.1s;">
     <div class="col-lg-8">
-        <div class="table-card">
-            <div class="card-header-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 1.5rem; border-radius: 16px 16px 0 0;">
-                <h5 class="mb-0 text-white"><i class="bi bi-person-plus me-2"></i>User Information</h5>
+        <div class="table-card" style="overflow:hidden; padding:0;">
+
+            {# ── Header ── #}
+            <div style="
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 1.8rem 2rem;
+                position: relative;
+                overflow: hidden;
+            ">
+                {# Decorative circles #}
+                <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.07);"></div>
+                <div style="position:absolute;bottom:-20px;right:60px;width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,0.05);"></div>
+
+                <div class="d-flex align-items-center gap-3" style="position:relative;z-index:1;">
+                    <div style="
+                        width:48px;height:48px;border-radius:14px;
+                        background:rgba(255,255,255,0.18);
+                        display:flex;align-items:center;justify-content:center;
+                        font-size:22px;color:#fff;
+                        box-shadow:0 4px 14px rgba(0,0,0,0.2);
+                    ">
+                        <i class="bi bi-person-plus-fill"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 text-white fw-700" style="font-size:1.15rem;">Create New User</h5>
+                        <p class="mb-0" style="color:rgba(255,255,255,0.7);font-size:0.8rem;margin-top:2px;">Fill in the details below to add a new member</p>
+                    </div>
+                </div>
             </div>
-            
+
+            {# ── Form ── #}
             <form method="post" class="p-4" id="createUserForm">
                 <input type="hidden" name="_token" value="{{ csrf_token('create-user') }}">
-                
+
                 <div class="row g-4">
+
                     {# Full Name #}
-                    <div class="col-md-6 form-group-enhanced">
+                    <div class="col-md-6">
                         <label class="form-label fw-bold">
-                            <i class="bi bi-person me-1"></i>
-                            First & Last Name 
-                            <span class="required-indicator" style="color: #fa709a;">*</span>
+                            <i class="bi bi-person me-1" style="color:#667eea;"></i>
+                            First & Last Name
+                            <span style="color:#fa709a;">*</span>
                         </label>
-                        <input type="text" 
-                               name="fullName" 
-                               class="form-control" 
+                        <input type="text"
+                               name="fullName"
+                               class="form-control"
                                required
                                placeholder="e.g., John Doe"
                                autocomplete="name">
-                        <small class="form-help-text text-muted">
+                        <small class="text-muted" style="font-size:0.75rem;">
                             <i class="bi bi-info-circle me-1"></i>Enter the user's full name
                         </small>
                     </div>
-                    
+
                     {# Username #}
-                    <div class="col-md-6 form-group-enhanced">
+                    <div class="col-md-6">
                         <label class="form-label fw-bold">
-                            <i class="bi bi-at me-1"></i>
-                            Username 
-                            <span class="required-indicator" style="color: #fa709a;">*</span>
+                            <i class="bi bi-at me-1" style="color:#667eea;"></i>
+                            Username
+                            <span style="color:#fa709a;">*</span>
                         </label>
                         <div class="input-group">
                             <span class="input-group-text">@</span>
-                            <input type="text" 
-                                   name="username" 
-                                   class="form-control" 
+                            <input type="text"
+                                   name="username"
+                                   class="form-control"
                                    required
                                    placeholder="e.g., johndoe"
                                    pattern="[a-zA-Z0-9_-]{3,50}"
                                    autocomplete="username">
                         </div>
-                        <small class="form-help-text text-muted">
+                        <small class="text-muted" style="font-size:0.75rem;">
                             <i class="bi bi-info-circle me-1"></i>3-50 characters: letters, numbers, - and _ only
                         </small>
                     </div>
-                    
+
                     {# Email #}
-                    <div class="col-md-6 form-group-enhanced">
+                    <div class="col-md-6">
                         <label class="form-label fw-bold">
-                            <i class="bi bi-envelope me-1"></i>
-                            Email Address 
-                            <span class="required-indicator" style="color: #fa709a;">*</span>
+                            <i class="bi bi-envelope me-1" style="color:#667eea;"></i>
+                            Email Address
+                            <span style="color:#fa709a;">*</span>
                         </label>
-                        <input type="email" 
-                               name="email" 
-                               class="form-control" 
+                        <input type="email"
+                               name="email"
+                               class="form-control"
                                required
                                placeholder="e.g., john.doe@example.com"
                                autocomplete="email">
-                        <small class="form-help-text text-muted">
+                        <small class="text-muted" style="font-size:0.75rem;">
                             <i class="bi bi-info-circle me-1"></i>Must be unique
                         </small>
                     </div>
-                    
+
                     {# Password #}
-                    <div class="col-md-6 form-group-enhanced">
+                    <div class="col-md-6">
                         <label class="form-label fw-bold">
-                            <i class="bi bi-lock me-1"></i>
-                            Password 
-                            <span class="required-indicator" style="color: #fa709a;">*</span>
+                            <i class="bi bi-lock me-1" style="color:#667eea;"></i>
+                            Password
+                            <span style="color:#fa709a;">*</span>
                         </label>
                         <div class="position-relative">
-                            <input type="password" 
-                                   name="password" 
+                            <input type="password"
+                                   name="password"
                                    id="password"
-                                   class="form-control" 
+                                   class="form-control"
                                    required
                                    minlength="6"
                                    placeholder="Minimum 6 characters"
                                    autocomplete="new-password">
-                            <button type="button" 
-                                    class="btn btn-sm position-absolute end-0 top-50 translate-middle-y me-2"
+                            <button type="button"
                                     id="togglePassword"
-                                    style="background: none; border: none; color: var(--text-muted);">
+                                    style="background:none;border:none;color:rgba(255,255,255,0.4);position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;padding:0;transition:color .2s;">
                                 <i class="bi bi-eye"></i>
                             </button>
-                            <div class="password-strength mt-2" id="passwordStrength"></div>
+                            <div id="passwordStrength" style="height:4px;border-radius:2px;margin-top:8px;transition:all .3s;width:0;"></div>
                         </div>
-                        <small class="form-help-text text-muted">
+                        <small class="text-muted" style="font-size:0.75rem;">
                             <i class="bi bi-shield-check me-1"></i>Minimum 6 characters recommended
                         </small>
                     </div>
-                    
+
                     {# Role #}
-                    <div class="col-md-12 form-group-enhanced">
+                    <div class="col-md-12">
                         <label class="form-label fw-bold">
-                            <i class="bi bi-shield-check me-1"></i>
-                            User Role 
-                            <span class="required-indicator" style="color: #fa709a;">*</span>
+                            <i class="bi bi-shield-check me-1" style="color:#667eea;"></i>
+                            User Role
+                            <span style="color:#fa709a;">*</span>
                         </label>
                         <select name="role" class="form-select" required id="roleSelect">
-                            <option value="ROLE_USER" selected>
-                                👤 User - Standard Access
-                            </option>
-                            <option value="ROLE_COACH">
-                                🏆 Coach - Can Manage Teams
-                            </option>
-                            <option value="ROLE_ADMIN">
-                                🛡️ Administrator - Full Access
-                            </option>
+                            <option value="ROLE_USER" selected>👤 User — Standard Access</option>
+                            <option value="ROLE_COACH">🏆 Coach — Can Manage Teams</option>
+                            <option value="ROLE_ADMIN">🛡️ Administrator — Full Access</option>
                         </select>
-                        <small class="form-help-text text-muted">
+                        <small class="text-muted" style="font-size:0.75rem;">
                             <i class="bi bi-info-circle me-1"></i>Defines user permissions in the system
                         </small>
-                        
-                        {# Role Description #}
-                        <div class="alert alert-info mt-3" id="roleDescription" style="display: none; border-radius: 12px; border-left: 4px solid #4facfe;">
-                            <strong id="roleTitle"></strong>
-                            <p class="mb-0 mt-1" id="roleText"></p>
+
+                        {# Role description #}
+                        <div id="roleDescription" style="
+                            display:none;
+                            margin-top:12px;
+                            padding:14px 16px;
+                            border-radius:12px;
+                            background:linear-gradient(135deg,rgba(102,126,234,0.12),rgba(118,75,162,0.12));
+                            border:1px solid rgba(102,126,234,0.3);
+                            border-left:3px solid #667eea;
+                        ">
+                            <strong id="roleTitle" style="color:#a78bfa;"></strong>
+                            <p id="roleText" class="mb-0 mt-1 text-muted" style="font-size:0.85rem;"></p>
                         </div>
                     </div>
                 </div>
-                
-                {# Info Alert #}
-                <div class="alert mt-4" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1)); border: 1px solid rgba(102, 126, 234, 0.3); border-radius: 12px;">
-                    <div class="d-flex align-items-start">
-                        <i class="bi bi-info-circle me-3" style="font-size: 24px; color: #667eea;"></i>
-                        <div>
-                            <strong style="color: #667eea;">Welcome Email</strong>
-                            <p class="mb-0 mt-1 text-muted">A welcome email will be automatically sent to the user with their login credentials.</p>
-                        </div>
+
+                {# Welcome email notice #}
+                <div style="
+                    margin-top:1.5rem;
+                    padding:14px 16px;
+                    border-radius:12px;
+                    background:linear-gradient(135deg,rgba(102,126,234,0.08),rgba(118,75,162,0.08));
+                    border:1px solid rgba(102,126,234,0.2);
+                    display:flex;align-items:flex-start;gap:12px;
+                ">
+                    <i class="bi bi-envelope-check-fill" style="font-size:22px;color:#667eea;flex-shrink:0;margin-top:2px;"></i>
+                    <div>
+                        <strong style="color:#a78bfa;">Welcome Email</strong>
+                        <p class="mb-0 mt-1 text-muted" style="font-size:0.85rem;">A welcome email will be automatically sent to the user with their login credentials.</p>
                     </div>
                 </div>
-                
-                {# Action Buttons #}
-                <div class="mt-4 d-flex gap-2">
-                    <button type="submit" class="btn btn-success" id="submitBtn">
-                        <i class="bi bi-save me-2"></i>Create User
+
+                {# Buttons #}
+                <div class="mt-4 d-flex gap-2 flex-wrap">
+                    <button type="submit" id="submitBtn" class="btn" style="
+                        background: linear-gradient(135deg, #667eea, #764ba2);
+                        color: #fff;
+                        box-shadow: 0 6px 20px rgba(102,126,234,0.35);
+                        border: none;
+                        padding: 10px 24px;
+                        font-weight: 600;
+                        transition: all .3s;
+                    ">
+                        <i class="bi bi-person-check me-2"></i>Create User
                     </button>
-                    <a href="{{ path('admin_users_index') }}" class="btn btn-outline-secondary">
+                    <a href="{{ path('admin_users_index') }}" class="btn" style="
+                        background: rgba(255,255,255,0.05);
+                        border: 1px solid rgba(255,255,255,0.15);
+                        color: rgba(255,255,255,0.7);
+                        padding: 10px 24px;
+                        font-weight: 600;
+                        transition: all .3s;
+                    ">
                         <i class="bi bi-x-circle me-2"></i>Cancel
                     </a>
                 </div>
+
             </form>
         </div>
     </div>
@@ -165,215 +214,110 @@
 {% endblock %}
 
 {% block javascripts %}
-    {{ parent() }}
-
-    <script src="{{ asset('js/admin-user-validation.js') }}"></script>
-
+{{ parent() }}
+<script src="{{ asset('js/admin-user-validation.js') }}"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Password visibility toggle
+document.addEventListener('DOMContentLoaded', function () {
+
+    /* ── Password toggle ── */
     const togglePassword = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('password');
-    
+    const passwordInput  = document.getElementById('password');
     if (togglePassword && passwordInput) {
-        togglePassword.addEventListener('click', function() {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            
-            const icon = this.querySelector('i');
-            icon.classList.toggle('bi-eye');
-            icon.classList.toggle('bi-eye-slash');
+        togglePassword.addEventListener('click', function () {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            this.querySelector('i').className = isPassword ? 'bi bi-eye-slash' : 'bi bi-eye';
         });
+        togglePassword.addEventListener('mouseenter', () => togglePassword.style.color = '#fff');
+        togglePassword.addEventListener('mouseleave', () => togglePassword.style.color = 'rgba(255,255,255,0.4)');
     }
-    
-    // Enhanced password strength indicator
-    passwordInput.addEventListener('input', function(e) {
-        const password = e.target.value;
-        const strengthBar = document.getElementById('passwordStrength');
-        
-        if (password.length === 0) {
-            strengthBar.style.width = '0%';
-            strengthBar.className = 'password-strength mt-2';
-            strengthBar.innerHTML = '';
-            return;
-        }
-        
-        let strength = 0;
-        let feedback = [];
-        
-        // Length checks
-        if (password.length >= 6) {
-            strength++;
-            feedback.push('✓ Minimum length');
-        } else {
-            feedback.push('✗ Too short');
-        }
-        
-        if (password.length >= 10) {
-            strength++;
-            feedback.push('✓ Good length');
-        }
-        
-        // Complexity checks
-        if (/[a-z]/.test(password) && /[A-Z]/.test(password)) {
-            strength++;
-            feedback.push('✓ Mixed case');
-        }
-        
-        if (/[0-9]/.test(password)) {
-            strength++;
-            feedback.push('✓ Contains numbers');
-        }
-        
-        if (/[^a-zA-Z0-9]/.test(password)) {
-            strength++;
-            feedback.push('✓ Special characters');
-        }
-        
-        // Apply strength class and styling
-        let className = 'password-strength mt-2 ';
-        let strengthText = '';
-        let color = '';
-        
-        if (strength <= 2) {
-            className += 'weak';
-            strengthText = 'Weak';
-            color = '#fa709a';
-            strengthBar.style.width = '33%';
-        } else if (strength <= 3) {
-            className += 'medium';
-            strengthText = 'Medium';
-            color = '#fee140';
-            strengthBar.style.width = '66%';
-        } else {
-            className += 'strong';
-            strengthText = 'Strong';
-            color = '#43e97b';
-            strengthBar.style.width = '100%';
-        }
-        
-        strengthBar.className = className;
-        strengthBar.style.background = color;
-        strengthBar.innerHTML = `<small style="color: white; padding: 2px 8px; font-weight: 600;">${strengthText}</small>`;
+
+    /* ── Password strength ── */
+    passwordInput.addEventListener('input', function () {
+        const bar = document.getElementById('passwordStrength');
+        const p   = this.value;
+        if (!p) { bar.style.width = '0'; return; }
+        let s = 0;
+        if (p.length >= 6)  s++;
+        if (p.length >= 10) s++;
+        if (/[a-z]/.test(p) && /[A-Z]/.test(p)) s++;
+        if (/[0-9]/.test(p)) s++;
+        if (/[^a-zA-Z0-9]/.test(p)) s++;
+        const map = [
+            { pct: '25%', color: '#ff6b6b' },
+            { pct: '50%', color: '#ffa751' },
+            { pct: '75%', color: '#fee140' },
+            { pct: '100%', color: '#43e97b' },
+        ];
+        const lvl = map[Math.min(s - 1, 3)] || map[0];
+        bar.style.width  = lvl.pct;
+        bar.style.background = lvl.color;
     });
-    
-    // Role description
-    const roleSelect = document.getElementById('roleSelect');
+
+    /* ── Role description ── */
+    const roleSelect      = document.getElementById('roleSelect');
     const roleDescription = document.getElementById('roleDescription');
-    const roleTitle = document.getElementById('roleTitle');
-    const roleText = document.getElementById('roleText');
-    
-    const roleDescriptions = {
-        'ROLE_USER': {
-            title: '👤 Standard User',
-            text: 'Can join teams, participate in activities, and manage their own profile.'
-        },
-        'ROLE_COACH': {
-            title: '🏆 Coach',
-            text: 'All user permissions plus: create teams, manage team members, organize training sessions.'
-        },
-        'ROLE_ADMIN': {
-            title: '🛡️ Administrator',
-            text: 'Full system access: manage all users, teams, content, and system settings.'
-        }
+    const roleTitle       = document.getElementById('roleTitle');
+    const roleText        = document.getElementById('roleText');
+
+    const roles = {
+        'ROLE_USER':  { title: '👤 Standard User',    text: 'Can join teams, participate in activities, and manage their own profile.' },
+        'ROLE_COACH': { title: '🏆 Coach',             text: 'All user permissions plus: create teams, manage members, organize training sessions.' },
+        'ROLE_ADMIN': { title: '🛡️ Administrator',    text: 'Full system access: manage all users, teams, content, and system settings.' },
     };
-    
-    roleSelect.addEventListener('change', function() {
-        const selectedRole = this.value;
-        const desc = roleDescriptions[selectedRole];
-        
-        if (desc) {
-            roleTitle.textContent = desc.title;
-            roleText.textContent = desc.text;
+
+    roleSelect.addEventListener('change', function () {
+        const d = roles[this.value];
+        if (d) {
+            roleTitle.textContent = d.title;
+            roleText.textContent  = d.text;
             roleDescription.style.display = 'block';
-            
-            // Animate in
-            roleDescription.style.animation = 'slideInUp 0.4s ease';
         }
     });
-    
-    // Trigger on load
     roleSelect.dispatchEvent(new Event('change'));
-    
-    // Form validation with enhanced feedback
-    const form = document.getElementById('createUserForm');
+
+    /* ── Submit button hover ── */
     const submitBtn = document.getElementById('submitBtn');
-    
-    form.addEventListener('submit', function(e) {
-        if (!form.checkValidity()) {
+    submitBtn.addEventListener('mouseenter', () => submitBtn.style.transform = 'translateY(-2px)');
+    submitBtn.addEventListener('mouseleave', () => submitBtn.style.transform = 'translateY(0)');
+
+    /* ── Form validation ── */
+    document.getElementById('createUserForm').addEventListener('submit', function (e) {
+        if (!this.checkValidity()) {
             e.preventDefault();
             e.stopPropagation();
-            
-            form.classList.add('was-validated');
-            
-            // Focus on first invalid field with smooth scroll
-            const firstInvalid = form.querySelector(':invalid');
-            if (firstInvalid) {
-                firstInvalid.focus();
-                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-            
-            // Shake animation for submit button
+            this.classList.add('was-validated');
+            const first = this.querySelector(':invalid');
+            if (first) { first.focus(); first.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
             submitBtn.style.animation = 'shake 0.5s';
-            setTimeout(() => {
-                submitBtn.style.animation = '';
-            }, 500);
+            setTimeout(() => submitBtn.style.animation = '', 500);
         } else {
-            // Show loading state
             submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Creating...';
-            submitBtn.disabled = true;
+            submitBtn.disabled  = true;
         }
     });
-    
-    // Real-time validation feedback
-    form.querySelectorAll('input, select').forEach(input => {
-        input.addEventListener('blur', function() {
-            if (this.checkValidity()) {
-                this.classList.add('is-valid');
-                this.classList.remove('is-invalid');
-            } else {
-                this.classList.add('is-invalid');
-                this.classList.remove('is-valid');
-            }
+
+    /* ── Real-time field validation ── */
+    document.querySelectorAll('#createUserForm input, #createUserForm select').forEach(input => {
+        input.addEventListener('blur', function () {
+            this.classList.toggle('is-valid',   this.checkValidity());
+            this.classList.toggle('is-invalid', !this.checkValidity());
         });
-        
-        input.addEventListener('input', function() {
+        input.addEventListener('input', function () {
             if (this.classList.contains('is-invalid') && this.checkValidity()) {
-                this.classList.remove('is-invalid');
-                this.classList.add('is-valid');
+                this.classList.replace('is-invalid', 'is-valid');
             }
         });
     });
 });
-
-// Shake animation for errors
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-10px); }
-        75% { transform: translateX(10px); }
-    }
-    
-    .password-strength {
-        height: 4px;
-        border-radius: 2px;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .form-control.is-valid {
-        border-color: #43e97b;
-        box-shadow: 0 0 0 0.15rem rgba(67, 233, 123, 0.25);
-    }
-    
-    .form-control.is-invalid {
-        border-color: #fa709a;
-        box-shadow: 0 0 0 0.15rem rgba(250, 112, 154, 0.25);
-    }
-`;
-document.head.appendChild(style);
 </script>
+<style>
+@keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25%     { transform: translateX(-8px); }
+    75%     { transform: translateX(8px); }
+}
+.form-control.is-valid   { border-color: #43e97b !important; box-shadow: 0 0 0 3px rgba(67,233,123,.15) !important; }
+.form-control.is-invalid { border-color: #fa709a !important; box-shadow: 0 0 0 3px rgba(250,112,154,.15) !important; }
+</style>
 {% endblock %}

@@ -3,7 +3,8 @@
 {% block title %}My Sessions - EyeTwin{% endblock %}
 
 {% block body %}
-    <!-- breadcrumb -->
+
+    <!-- Breadcrumb -->
     <section class="breadcrumb breadcrumb_bg" style="background: #0f172a;">
         <div class="container">
             <div class="row">
@@ -12,8 +13,8 @@
                         <div class="breadcrumb_iner_item">
                             <h2 style="font-weight: 800; color: #fff;">My Sessions</h2>
                             <p style="color: #94a3b8;">
-                                <a href="{{ path('app_home') }}" style="color: #cbd5e1;">Home</a> 
-                                <span style="color: #64748b;">-</span> 
+                                <a href="{{ path('app_home') }}" style="color: #cbd5e1;">Home</a>
+                                <span style="color: #64748b;">-</span>
                                 My Sessions
                             </p>
                         </div>
@@ -27,10 +28,15 @@
     <section class="section_padding" style="background: #0b1120; min-height: 70vh;">
         <div class="container">
             <div class="row justify-content-center">
+
                 {% for session in sessions %}
+
+                    <!-- Session Card -->
                     <div class="col-lg-8 mb-4">
                         <div class="session-card">
                             <div class="row g-0">
+
+                                <!-- Session Image -->
                                 <div class="col-md-4">
                                     {% if session.planning.image %}
                                         <img src="{{ asset('uploads/planning/' ~ session.planning.image) }}" alt="Session" class="session-image">
@@ -38,10 +44,15 @@
                                         <img src="https://via.placeholder.com/300x200?text=Session" alt="Session" class="session-image">
                                     {% endif %}
                                 </div>
+
+                                <!-- Session Content -->
                                 <div class="col-md-8">
                                     <div class="session-content">
+
+                                        <!-- Badge Row -->
                                         <div class="d-flex justify-content-between align-items-start mb-2">
                                             <span class="badge-type">{{ session.planning.type.value }}</span>
+
                                             {% if session.status == 'en attente' %}
                                                 <span class="badge-status pending">
                                                     <i class="bi bi-hourglass-split me-1"></i>Pending
@@ -56,9 +67,11 @@
                                                 </span>
                                             {% endif %}
                                         </div>
-                                        
+
+                                        <!-- Title -->
                                         <h4 class="session-title">{{ session.planning.description }}</h4>
-                                        
+
+                                        <!-- Details -->
                                         <div class="session-details">
                                             <div class="detail-item">
                                                 <i class="bi bi-signal"></i>
@@ -78,6 +91,7 @@
                                             </div>
                                         </div>
 
+                                        <!-- Meta -->
                                         <div class="session-meta">
                                             <small class="text-muted">
                                                 <i class="bi bi-clock-history me-1"></i>
@@ -85,57 +99,67 @@
                                             </small>
                                         </div>
 
+                                        <!-- Actions -->
                                         <div class="session-actions">
-                                            <button type="button" 
-                                                    class="btn-cancel-session" 
-                                                    data-toggle="modal" 
+                                            <button type="button"
+                                                    class="btn-cancel-session"
+                                                    data-toggle="modal"
                                                     data-target="#cancelModal{{ session.id }}">
                                                 <i class="bi bi-x-circle me-2"></i>Cancel Registration
                                             </button>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
-                        <!-- Cancel Confirmation Modal -->
-                        <div class="modal fade" id="cancelModal{{ session.id }}" tabindex="-1" role="dialog" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                <div class="modal-content" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;">
-                                    <div class="modal-header border-0" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 16px 16px 0 0;">
-                                        <h5 class="modal-title text-white fw-bold">
-                                            <i class="bi bi-exclamation-triangle-fill me-2"></i>Cancel Registration
-                                        </h5>
-                                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body p-4 text-center">
-                                        <div class="mb-3">
-                                            <i class="bi bi-x-circle text-danger" style="font-size: 4rem;"></i>
-                                        </div>
-                                        <h5 class="text-white mb-3">Are you sure you want to cancel this registration?</h5>
-                                        <p class="text-muted mb-0">
-                                            <strong class="text-warning">Warning:</strong> If you cancel your registration, it cannot be restored. 
-                                            You will need to register again if you change your mind.
-                                        </p>
-                                    </div>
-                                    <div class="modal-footer border-0 justify-content-center pb-4">
-                                        <button type="button" class="btn btn-secondary px-4" data-dismiss="modal">
-                                            <i class="bi bi-arrow-left me-2"></i>Keep Registration
-                                        </button>
-                                        <form method="post" action="{{ path('app_cancel_session', {id: session.id}) }}" class="d-inline">
-                                            <input type="hidden" name="_token" value="{{ csrf_token('cancel-session-' ~ session.id) }}">
-                                            <button type="submit" class="btn btn-danger px-4">
-                                                <i class="bi bi-trash me-2"></i>Yes, Cancel It
-                                            </button>
-                                        </form>
                                     </div>
                                 </div>
+
                             </div>
                         </div>
                     </div>
+
+                    <!-- Cancel Confirmation Modal -->
+                    <div class="modal fade" id="cancelModal{{ session.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;">
+
+                                <div class="modal-header border-0" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); border-radius: 16px 16px 0 0;">
+                                    <h5 class="modal-title text-white fw-bold">
+                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Cancel Registration
+                                    </h5>
+                                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+
+                                <div class="modal-body p-4 text-center">
+                                    <div class="mb-3">
+                                        <i class="bi bi-x-circle text-danger" style="font-size: 4rem;"></i>
+                                    </div>
+                                    <h5 class="text-white mb-3">Are you sure you want to cancel this registration?</h5>
+                                    <p class="text-muted mb-0">
+                                        <strong class="text-warning">Warning:</strong> If you cancel your registration, it cannot be restored.
+                                        You will need to register again if you change your mind.
+                                    </p>
+                                </div>
+
+                                <div class="modal-footer border-0 justify-content-center pb-4">
+                                    <button type="button" class="btn btn-secondary px-4" data-dismiss="modal">
+                                        <i class="bi bi-arrow-left me-2"></i>Keep Registration
+                                    </button>
+                                    <form method="post" action="{{ path('app_cancel_session', {id: session.id}) }}" class="d-inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('cancel-session-' ~ session.id) }}">
+                                        <button type="submit" class="btn btn-danger px-4">
+                                            <i class="bi bi-trash me-2"></i>Yes, Cancel It
+                                        </button>
+                                    </form>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
                 {% else %}
+
+                    <!-- Empty State -->
                     <div class="col-lg-8">
                         <div class="empty-state-card text-center p-5">
                             <div class="icon-box mb-4">
@@ -148,7 +172,9 @@
                             </a>
                         </div>
                     </div>
+
                 {% endfor %}
+
             </div>
         </div>
     </section>
@@ -302,4 +328,5 @@
             color: white;
         }
     </style>
+
 {% endblock %}

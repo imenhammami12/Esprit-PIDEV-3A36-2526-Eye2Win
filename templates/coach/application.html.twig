@@ -8,239 +8,635 @@
 {% endblock %}
 
 {% block body %}
-<!-- Breadcrumb -->
 
+{# ── Page Hero ── #}
+<div class="complaint-page-hero">
+    <div class="hero-grid-overlay"></div>
+    <div class="hero-scanline"></div>
+    <div class="container position-relative">
+        <div class="hero-inner">
+            <span class="hero-tag"><i class="fas fa-graduation-cap"></i> Coaching</span>
+            <h1 class="hero-title">Become a <span class="hero-accent">Coach</span></h1>
+            <p class="hero-sub">Share your passion and expertise with the gaming community.</p>
+        </div>
+    </div>
+</div>
 
-
-<section class="coach_application_section section_padding">
+<section class="coach-section py-5">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-10">
-                <!-- Hero Section -->
-                <div class="coach_hero_card">
-                    <div class="coach_hero_content">
-                        <div class="hero_icon">
-                            <i class="fas fa-graduation-cap"></i>
-                        </div>
-                        <div>
-                            <h2>Join our coaching team</h2>
-                            <p>Share your passion and expertise with the gaming community!</p>
-                        </div>
-                    </div>
-                </div>
 
-                <div class="row">
-                    <!-- Sidebar Info -->
+                <div class="row g-4">
+
+                    {# ══ SIDEBAR ══ #}
                     <div class="col-lg-4">
-                  
 
-                        <div class="benefits_card">
-                            <h4><i class="fas fa-star"></i> Coach Benefits</h4>
-                            <ul class="benefits_list">
-                                <li><i class="fas fa-trophy"></i> Exclusive Coach badge</li>
-                                <li><i class="fas fa-users"></i> Premium team access</li>
-                                <li><i class="fas fa-chart-line"></i> Advanced analytics tools</li>
-                                <li><i class="fas fa-dollar-sign"></i> Revenue opportunities</li>
-                                <li><i class="fas fa-network-wired"></i> Coach network</li>
+                        {# Benefits Card #}
+                        <div class="gcard mb-4">
+                            <div class="gcard-head mb-4">
+                                <span class="gstep"><i class="fas fa-star"></i></span>
+                                <div>
+                                    <div class="gcard-title">Coach Benefits</div>
+                                    <div class="gcard-sub">What you'll unlock</div>
+                                </div>
+                            </div>
+                            <ul class="benefits-list">
+                                <li class="benefit-item">
+                                    <div class="benefit-dot"><i class="fas fa-trophy"></i></div>
+                                    <span>Exclusive Coach badge</span>
+                                </li>
+                                <li class="benefit-item">
+                                    <div class="benefit-dot"><i class="fas fa-users"></i></div>
+                                    <span>Premium team access</span>
+                                </li>
+                                <li class="benefit-item">
+                                    <div class="benefit-dot"><i class="fas fa-chart-line"></i></div>
+                                    <span>Advanced analytics tools</span>
+                                </li>
+                                <li class="benefit-item">
+                                    <div class="benefit-dot"><i class="fas fa-dollar-sign"></i></div>
+                                    <span>Revenue opportunities</span>
+                                </li>
+                                <li class="benefit-item">
+                                    <div class="benefit-dot"><i class="fas fa-network-wired"></i></div>
+                                    <span>Coach network access</span>
+                                </li>
                             </ul>
                         </div>
+
+
+
                     </div>
 
-                    <!-- Application Form -->
+                    {# ══ FORM ══ #}
                     <div class="col-lg-8">
-                        <div class="application_form_card">
-                            <div class="form_header">
-                                <h3><i class="fas fa-file-alt"></i> APPLICATION FORM</h3>
+
+                        {{ form_start(form, {'attr': {'id': 'coachApplicationForm', 'novalidate': 'novalidate'}}) }}
+
+                        {# ── STEP 1 : Certifications ── #}
+                        <div class="gcard mb-4">
+                            <div class="gcard-head">
+                                <span class="gstep">01</span>
+                                <div>
+                                    <div class="gcard-title">Certifications &amp; Qualifications</div>
+                                    <div class="gcard-sub">Ranks, titles, certifications, achievements</div>
+                                </div>
                             </div>
-                            
-                            <div class="form_body">
-                                {{ form_start(form, {'attr': {'id': 'coachApplicationForm', 'novalidate': 'novalidate'}}) }}
-                                
-                                <!-- Certifications Section -->
-                                <div class="form_section">
-                                    <h4 class="section_title">
-                                        <i class="fas fa-certificate"></i> Certifications and Qualifications
-                                    </h4>
-                                    <div class="form_group">
-                                        {{ form_label(form.certifications, null, {'label_attr': {'class': 'form_label'}}) }}
-                                        <div class="textarea_wrapper">
-                                            {{ form_widget(form.certifications, {'attr': {'class': 'form_textarea', 'placeholder': '• Rank achieved: Diamond/Master/Grand Master
-• Tournaments: ESL, DreamHack, etc.
-• Certifications: Riot Games Certified Coach
-• Achievements: Top 100 EU, Regional Champion...'}}) }}
-                                            <span class="char_counter">
-                                                <span id="certifCount">0</span> / 50 min
-                                            </span>
-                                        </div>
-                                        {{ form_errors(form.certifications) }}
-                                        <div class="input_hint">
-                                            <i class="fas fa-lightbulb"></i> 
-                                            Mention your ranks, official certifications, tournament participations, major achievements
-                                        </div>
-                                    </div>
-                                </div>
 
-                                <!-- Experience Section -->
-                                <div class="form_section">
-                                    <h4 class="section_title">
-                                        <i class="fas fa-briefcase"></i> Coaching Experience
-                                    </h4>
-                                    <div class="form_group">
-                                        {{ form_label(form.experience, null, {'label_attr': {'class': 'form_label'}}) }}
-                                        <div class="textarea_wrapper">
-                                            {{ form_widget(form.experience, {'attr': {'class': 'form_textarea', 'placeholder': '• Years of experience: 3 years of esports coaching
-• Teams coached: Team X (2020-2022), solo players (50+)
-• Results: LEC qualification, average improvement +2 ranks
-• Methodology: VOD analysis, custom drills, mental coaching
-• Specialties: Mid lane, macro game, draft strategy...'}}) }}
-                                            <span class="char_counter">
-                                                <span id="expCount">0</span> / 100 min
-                                            </span>
-                                        </div>
-                                        {{ form_errors(form.experience) }}
-                                        <div class="input_hint">
-                                            <i class="fas fa-lightbulb"></i> 
-                                            Detail your background, methodology, concrete results, gaming specialties
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- CV Upload Section -->
-                                <div class="form_section">
-                                    <h4 class="section_title">
-                                        <i class="fas fa-file-upload"></i> CV / Portfolio (Optional)
-                                    </h4>
-                                    <div class="form_group">
-                                        <div class="cv_upload_area">
-                                            {{ form_widget(form.cvFileUpload, {'attr': {'class': 'file-input', 'id': 'cvFileInput'}}) }}
-                                            <label for="cvFileInput" class="cv_upload_label">
-                                                <div class="upload_icon">
-                                                    <i class="fas fa-cloud-upload-alt"></i>
-                                                </div>
-                                                <span class="upload_text">Click to select your CV</span>
-                                                <small class="upload_hint">or drag and drop your file here</small>
-                                                <div class="upload_formats">
-                                                    <i class="fas fa-file-pdf"></i> PDF
-                                                    <i class="fas fa-file-word"></i> DOC/DOCX
-                                                    <span class="file_size">• Max 5MB</span>
-                                                </div>
-                                            </label>
-                                            <div class="file_selected" id="fileSelected" style="display: none;">
-                                                <i class="fas fa-file-check"></i>
-                                                <span id="fileName"></span>
-                                                <button type="button" class="remove_file" id="removeFile">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        {{ form_errors(form.cvFileUpload) }}
-                                        <div class="input_hint">
-                                            <i class="fas fa-info-circle"></i> 
-                                            Increase your chances by adding your CV with your gaming and coaching experience
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Warning Message -->
-                                <div class="warning_card">
-                                    <div class="warning_icon">
-                                        <i class="fas fa-exclamation-triangle"></i>
-                                    </div>
-                                    <div class="warning_content">
-                                        <strong>Warning</strong>
-                                        <p>Once submitted, you will not be able to modify your application. Please verify all information before submitting.</p>
-                                    </div>
-                                </div>
-
-                                <!-- Action Buttons -->
-                                <div class="form_actions">
-                                    <a href="{{ path('user_profile') }}" class="btn_cancel">
-                                        <i class="fas fa-times"></i> Cancel
-                                    </a>
-                                    <button type="submit" class="btn_submit">
-                                        <i class="fas fa-paper-plane"></i> Submit my application
+                            <div class="form-group mt-4">
+                                {{ form_label(form.certifications, null, {'label_attr': {'class': 'g-label'}}) }}
+                                <div class="input-mic-wrapper textarea-mic-wrapper mt-2">
+                                    {{ form_widget(form.certifications, {'attr': {
+                                        'class': 'g-input',
+                                        'data-stt': 'certifications',
+                                        'rows': 5,
+                                        'placeholder': '• Rank achieved: Diamond/Master/Grand Master\n• Tournaments: ESL, DreamHack, etc.\n• Certifications: Riot Games Certified Coach\n• Achievements: Top 100 EU, Regional Champion…'
+                                    }}) }}
+                                    <button type="button" class="stt_mic_btn mic-btn mic-btn-textarea" data-stt-target="certifications" title="Dictate">
+                                        <i class="fas fa-microphone"></i>
                                     </button>
                                 </div>
-                                
-                                {{ form_end(form) }}
+                                <div class="stt-feedback d-none" id="stt-feedback-certifications">
+                                    <span class="stt-pulse"></span>
+                                    <span class="stt-label">Recording… click again to stop</span>
+                                </div>
+                                <div class="field-footer mt-2">
+                                    <div class="input-hint">
+                                        <i class="fas fa-lightbulb"></i>
+                                        Mention your ranks, official certifications, tournament participations, major achievements
+                                    </div>
+                                    <span class="char-counter" id="certifCounter">
+                                        <span id="certifCount">0</span> / <span class="min-req">50 min</span>
+                                    </span>
+                                </div>
+                                {{ form_errors(form.certifications) }}
                             </div>
                         </div>
+
+                        {# ── STEP 2 : Experience ── #}
+                        <div class="gcard mb-4">
+                            <div class="gcard-head">
+                                <span class="gstep">02</span>
+                                <div>
+                                    <div class="gcard-title">Coaching Experience</div>
+                                    <div class="gcard-sub">Background, methodology, concrete results</div>
+                                </div>
+                            </div>
+
+                            <div class="form-group mt-4">
+                                {{ form_label(form.experience, null, {'label_attr': {'class': 'g-label'}}) }}
+                                <div class="input-mic-wrapper textarea-mic-wrapper mt-2">
+                                    {{ form_widget(form.experience, {'attr': {
+                                        'class': 'g-input',
+                                        'data-stt': 'experience',
+                                        'rows': 6,
+                                        'placeholder': '• Years of experience: 3 years of esports coaching\n• Teams coached: Team X (2020-2022), solo players (50+)\n• Results: LEC qualification, average improvement +2 ranks\n• Methodology: VOD analysis, custom drills, mental coaching\n• Specialties: Mid lane, macro game, draft strategy…'
+                                    }}) }}
+                                    <button type="button" class="stt_mic_btn mic-btn mic-btn-textarea" data-stt-target="experience" title="Dictate">
+                                        <i class="fas fa-microphone"></i>
+                                    </button>
+                                </div>
+                                <div class="stt-feedback d-none" id="stt-feedback-experience">
+                                    <span class="stt-pulse"></span>
+                                    <span class="stt-label">Recording… click again to stop</span>
+                                </div>
+                                <div class="field-footer mt-2">
+                                    <div class="input-hint">
+                                        <i class="fas fa-lightbulb"></i>
+                                        Detail your background, methodology, concrete results, gaming specialties
+                                    </div>
+                                    <span class="char-counter" id="expCounter">
+                                        <span id="expCount">0</span> / <span class="min-req">100 min</span>
+                                    </span>
+                                </div>
+                                {{ form_errors(form.experience) }}
+                            </div>
+                        </div>
+
+                        {# ── STEP 3 : CV Upload ── #}
+                        <div class="gcard mb-4">
+                            <div class="gcard-head">
+                                <span class="gstep">03</span>
+                                <div>
+                                    <div class="gcard-title">CV / Portfolio <span class="opt-pill">Optional</span></div>
+                                    <div class="gcard-sub">PDF or Word — max 5 MB</div>
+                                </div>
+                            </div>
+
+                            <div class="form-group mt-4">
+                                                {{ form_widget(form.cvFileUpload, {'attr': {'id': 'cvFileInput', 'accept': '.pdf,.doc,.docx'}}) }}
+                                <div class="drop-zone" id="cv-drop-zone">
+                                    <i class="fas fa-cloud-upload-alt drop-icon"></i>
+                                    <span class="drop-text">Drop file here or <u>browse</u></span>
+                                    <span class="drop-hint">PDF · DOC · DOCX</span>
+                                </div>
+                                <div class="file-preview d-none" id="fileSelected">
+                                    <i class="fas fa-file-alt"></i>
+                                    <span id="fileName"></span>
+                                    <button type="button" class="file-rm" id="removeFile"><i class="fas fa-times"></i></button>
+                                </div>
+                                {{ form_errors(form.cvFileUpload) }}
+                                <div class="input-hint mt-2">
+                                    <i class="fas fa-info-circle"></i>
+                                    Increase your chances by adding your CV with your gaming and coaching experience
+                                </div>
+                            </div>
+                        </div>
+
+                        {# ── Warning ── #}
+                        <div class="warning-card mb-4">
+                            <div class="warning-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                            <div class="warning-content">
+                                <strong>Heads up</strong>
+                                <p>Once submitted, you will not be able to modify your application. Please verify all information before submitting.</p>
+                            </div>
+                        </div>
+
+                        {# ── Actions ── #}
+                        <div class="form-actions">
+                            <a href="{{ path('user_profile') }}" class="btn-ghost">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn-fire" id="submitBtn">
+                                <span class="btn-fire-bg"></span>
+                                <i class="fas fa-paper-plane"></i>
+                                <span>Submit Application</span>
+                            </button>
+                        </div>
+
+                        {{ form_end(form) }}
+
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
 </section>
 
+<style>
+/* ═══════════════════════════════════════════
+   EYE2WIN COACH APPLICATION — GAMING SKIN
+═══════════════════════════════════════════ */
+:root {
+    --red:      #e8372a;
+    --red-glow: rgba(232,55,42,0.35);
+    --red-dim:  rgba(232,55,42,0.12);
+    --dark:     #0d0d0f;
+    --panel:    rgba(255,255,255,0.03);
+    --border:   rgba(255,255,255,0.07);
+    --border-r: rgba(232,55,42,0.35);
+    --text:     rgba(255,255,255,0.9);
+    --muted:    rgba(255,255,255,0.4);
+    --r:        12px;
+}
+
+/* ── HERO ── */
+.complaint-page-hero {
+    position: relative;
+    background: linear-gradient(160deg, #1a0505 0%, #0d0d0f 60%);
+    border-bottom: 1px solid rgba(232,55,42,0.2);
+    padding: 3.5rem 0 3rem;
+    overflow: hidden;
+}
+.hero-grid-overlay {
+    position: absolute; inset: 0;
+    background-image:
+        linear-gradient(rgba(232,55,42,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,55,42,0.06) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+.hero-scanline {
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
+    pointer-events: none;
+}
+.hero-inner { position: relative; z-index: 1; }
+.hero-tag {
+    display: inline-flex; align-items: center; gap: .45rem;
+    background: var(--red-dim); border: 1px solid var(--border-r); color: var(--red);
+    font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    padding: .3rem .8rem; border-radius: 4px; margin-bottom: 1rem;
+}
+.hero-title {
+    font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 900; letter-spacing: -.01em;
+    color: #fff; margin: 0 0 .6rem; line-height: 1.1;
+    text-shadow: 0 0 40px rgba(232,55,42,0.3);
+}
+.hero-accent { color: var(--red); }
+.hero-sub { color: var(--muted); font-size: .92rem; max-width: 480px; margin: 0; }
+
+/* ── SECTION ── */
+.coach-section { background: var(--dark); }
+
+/* ── GLASS CARD ── */
+.gcard {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 1.75rem 2rem;
+    position: relative; overflow: hidden; transition: border-color .25s;
+}
+.gcard::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(232,55,42,0.5), transparent);
+    opacity: 0; transition: opacity .3s;
+}
+.gcard:focus-within { border-color: rgba(232,55,42,0.25); }
+.gcard:focus-within::before { opacity: 1; }
+
+.gcard-head { display: flex; align-items: flex-start; gap: 1rem; }
+.gstep {
+    flex-shrink: 0; width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--red-dim); border: 1px solid var(--border-r); border-radius: 8px;
+    font-size: .7rem; font-weight: 800; color: var(--red); letter-spacing: .08em;
+}
+.gcard-title { font-size: 1rem; font-weight: 700; color: var(--text); line-height: 1.3; }
+.gcard-sub   { font-size: .78rem; color: var(--muted); margin-top: .15rem; }
+
+/* ── BENEFITS LIST ── */
+.benefits-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .6rem; }
+.benefit-item {
+    display: flex; align-items: center; gap: .85rem;
+    font-size: .85rem; color: rgba(255,255,255,0.7);
+}
+.benefit-dot {
+    flex-shrink: 0; width: 30px; height: 30px;
+    background: var(--red-dim); border: 1px solid rgba(232,55,42,0.2);
+    border-radius: 7px; display: flex; align-items: center; justify-content: center;
+    font-size: .7rem; color: var(--red);
+}
+
+/* ── PROCESS BAR (vertical) ── */
+.process-bar {
+    background: rgba(255,255,255,0.02); border: 1px solid rgba(232,55,42,0.15);
+    border-radius: var(--r); padding: 1.4rem 1.5rem;
+}
+.pb-title { font-size: .78rem; font-weight: 700; color: rgba(232,55,42,0.85); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 1.1rem; }
+.pb-steps-v { display: flex; flex-direction: column; }
+.pb-step-v { display: flex; align-items: flex-start; gap: .75rem; }
+.pb-line-v { width: 1px; height: 18px; background: rgba(232,55,42,0.2); margin-left: 16px; }
+.pb-dot {
+    flex-shrink: 0; width: 34px; height: 34px;
+    background: rgba(232,55,42,0.12); border: 1px solid rgba(232,55,42,0.3);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-size: .75rem; color: var(--red);
+}
+.pb-text { display: flex; flex-direction: column; gap: .1rem; padding-top: .45rem; }
+.pb-text strong { font-size: .83rem; color: rgba(255,255,255,0.8); font-weight: 700; }
+.pb-text span   { font-size: .72rem; color: var(--muted); line-height: 1.4; }
+
+/* ── LABEL ── */
+.g-label {
+    font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+    color: rgba(232,55,42,0.8); margin-bottom: 0;
+    display: flex; align-items: center; gap: .35rem;
+}
+
+/* ── INPUTS / TEXTAREAS ── */
+.g-input {
+    width: 100%; background: rgba(255,255,255,0.03);
+    border: 1.5px solid rgba(255,255,255,0.08); border-radius: 9px;
+    color: var(--text); font-size: .88rem; padding: .75rem 3rem .75rem 1rem;
+    outline: none; transition: border-color .2s, box-shadow .2s, background .2s; resize: vertical;
+    font-family: inherit;
+}
+.g-input:focus {
+    background: rgba(232,55,42,0.04); border-color: rgba(232,55,42,0.5);
+    box-shadow: 0 0 0 3px rgba(232,55,42,0.1);
+}
+.g-input::placeholder { color: var(--muted); font-size: .82rem; line-height: 1.6; }
+.g-input.is-listening {
+    border-color: rgba(255,77,77,0.6) !important;
+    box-shadow: 0 0 0 3px rgba(255,77,77,0.1) !important;
+}
+
+/* ── MIC BUTTON ── */
+.input-mic-wrapper { position: relative; display: flex; align-items: center; }
+.textarea-mic-wrapper { align-items: flex-start; }
+.mic-btn {
+    position: absolute; right: .65rem; top: 50%; transform: translateY(-50%);
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.4); font-size: .85rem;
+    padding: .32rem .42rem; border-radius: 7px;
+    cursor: pointer; transition: all .2s; line-height: 1; z-index: 5;
+}
+.mic-btn-textarea { top: .65rem; transform: none; }
+.mic-btn:hover { color: #fff; background: rgba(232,55,42,0.15); border-color: rgba(232,55,42,0.4); }
+.mic-btn.is-recording { color: #ff4d4d; background: rgba(255,77,77,0.12); border-color: rgba(255,77,77,0.3); animation: mic-glow 1.4s ease-in-out infinite; }
+.mic-btn.is-transcribing { color: #ffc107; background: rgba(255,193,7,0.1); border-color: rgba(255,193,7,0.25); animation: none; }
+.mic-btn:disabled { opacity: .35; cursor: not-allowed; }
+@keyframes mic-glow { 0%,100%{box-shadow:0 0 0 0 rgba(255,77,77,.5)} 50%{box-shadow:0 0 0 7px rgba(255,77,77,0)} }
+
+.stt-feedback { display: flex; align-items: center; gap: .5rem; font-size: .75rem; color: #ff7070; }
+.stt-feedback.transcribing .stt-label { color: #ffc107; }
+.stt-pulse { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #ff4d4d; flex-shrink: 0; animation: dot-blink 1s ease-in-out infinite; }
+.stt-feedback.transcribing .stt-pulse { background: #ffc107; animation: none; }
+@keyframes dot-blink { 0%,100%{opacity:1} 50%{opacity:.1} }
+
+/* ── FIELD FOOTER ── */
+.field-footer { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; flex-wrap: wrap; }
+.input-hint { font-size: .73rem; color: var(--muted); display: flex; align-items: flex-start; gap: .35rem; line-height: 1.5; }
+.input-hint i { color: rgba(232,55,42,0.6); flex-shrink: 0; margin-top: .1rem; }
+.char-counter { font-size: .72rem; white-space: nowrap; color: #f44a40; font-weight: 600; transition: color .3s; }
+.char-counter.ok { color: #4cd3e3; }
+.min-req { opacity: .65; }
+
+/* ── OPT PILL ── */
+.opt-pill {
+    font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    color: var(--muted); padding: .15rem .5rem; border-radius: 20px;
+    margin-left: .5rem; vertical-align: middle;
+}
+
+/* ── HIDE NATIVE FILE INPUT ── */
+#cvFileInput,
+input[type="file"]#cvFileInput,
+.form-group input[type="file"],
+input[type="file"] {
+    position: absolute !important;
+    width: 1px !important; height: 1px !important;
+    opacity: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0,0,0,0) !important;
+    pointer-events: none !important;
+}
+
+/* ── DROP ZONE ── */
+.drop-zone {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: .35rem; padding: 2rem;
+    background: rgba(255,255,255,0.02);
+    border: 1.5px dashed rgba(255,255,255,0.1);
+    border-radius: 10px; cursor: pointer; text-align: center; transition: all .22s;
+}
+.drop-zone:hover, .drop-zone.drag-over { background: rgba(232,55,42,0.06); border-color: rgba(232,55,42,0.4); }
+.drop-icon { font-size: 2rem; color: rgba(255,255,255,0.2); margin-bottom: .25rem; }
+.drop-text { font-size: .85rem; color: rgba(255,255,255,0.55); }
+.drop-text u { color: var(--red); }
+.drop-hint { font-size: .72rem; color: var(--muted); }
+
+.file-preview {
+    display: flex; align-items: center; gap: .75rem; margin-top: .6rem;
+    background: rgba(232,55,42,0.08); border: 1px solid rgba(232,55,42,0.25);
+    border-radius: 8px; padding: .55rem 1rem;
+    font-size: .83rem; color: rgba(255,255,255,0.75);
+}
+.file-preview i { color: var(--red); }
+.file-rm { background: none; border: none; color: var(--muted); cursor: pointer; margin-left: auto; padding: 0; line-height: 1; transition: color .2s; }
+.file-rm:hover { color: #ff6b6b; }
+
+/* ── WARNING CARD ── */
+.warning-card {
+    display: flex; align-items: flex-start; gap: 1rem;
+    background: rgba(255,193,7,0.07); border: 1px solid rgba(255,193,7,0.2);
+    border-radius: var(--r); padding: 1.1rem 1.4rem;
+}
+.warning-icon { flex-shrink: 0; font-size: 1.2rem; color: #ffc107; margin-top: .1rem; }
+.warning-content { font-size: .83rem; line-height: 1.55; color: rgba(255,255,255,0.65); }
+.warning-content strong { color: #ffc107; display: block; margin-bottom: .3rem; }
+.warning-content p { margin: 0; }
+
+/* ── ACTIONS ── */
+.form-actions { display: flex; gap: 1rem; justify-content: flex-end; align-items: center; }
+.btn-ghost {
+    display: inline-flex; align-items: center; gap: .5rem; padding: .65rem 1.25rem;
+    background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.1);
+    border-radius: 9px; color: rgba(255,255,255,0.55);
+    font-size: .88rem; font-weight: 500; text-decoration: none; transition: all .2s;
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); color: rgba(255,255,255,0.85); }
+.btn-fire {
+    position: relative; overflow: hidden;
+    display: inline-flex; align-items: center; gap: .6rem; padding: .7rem 2rem;
+    background: linear-gradient(135deg, #c0392b, #e8372a, #ff5533);
+    border: none; border-radius: 9px; color: #fff;
+    font-size: .9rem; font-weight: 700; letter-spacing: .03em; cursor: pointer;
+    box-shadow: 0 4px 20px rgba(232,55,42,0.4); transition: transform .18s, box-shadow .18s;
+}
+.btn-fire:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(232,55,42,0.55); }
+.btn-fire:active { transform: translateY(0); }
+.btn-fire:disabled { opacity: .65; transform: none; cursor: not-allowed; }
+.btn-fire-bg { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent); pointer-events: none; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 640px) {
+    .gcard { padding: 1.25rem 1.1rem; }
+    .form-actions { flex-direction: column-reverse; }
+    .btn-ghost, .btn-fire { width: 100%; justify-content: center; }
+    .pb-steps-v { gap: 0; }
+}
+</style>
+
 {% endblock %}
 
 {% block javascripts %}
-    {{ parent() }}
-    <script>
-        // Character counters
-        const certifTextarea = document.querySelector('textarea[name*="certifications"]');
-        const certifCount = document.getElementById('certifCount');
-        const expTextarea = document.querySelector('textarea[name*="experience"]');
-        const expCount = document.getElementById('expCount');
-        
-        if (certifTextarea && certifCount) {
-            certifTextarea.addEventListener('input', function() {
-                certifCount.textContent = this.value.length;
-                if (this.value.length < 50) {
-                    certifCount.parentElement.style.color = '#f44a40';
-                } else {
-                    certifCount.parentElement.style.color = '#4cd3e3';
-                }
-            });
-            certifCount.textContent = certifTextarea.value.length;
+{{ parent() }}
+
+<script>
+(function () {
+    'use strict';
+
+    const TRANSCRIBE_URL = '{{ path("app_speech_transcribe") }}';
+
+    /* ── Character counters ── */
+    function initCounter(sttKey, countId, min) {
+        const field   = document.querySelector(`textarea[data-stt="${sttKey}"]`);
+        const countEl = document.getElementById(countId);
+        const wrapper = countEl?.closest('.char-counter');
+        if (!field || !countEl) return;
+        const update = () => {
+            const len = field.value.length;
+            countEl.textContent = len;
+            if (wrapper) wrapper.classList.toggle('ok', len >= min);
+        };
+        field.addEventListener('input', update);
+        update();
+    }
+    initCounter('certifications', 'certifCount', 50);
+    initCounter('experience',     'expCount',    100);
+
+    /* ── CV file upload + drag & drop ── */
+    const fileInput   = document.getElementById('cvFileInput');
+    const dropZone    = document.getElementById('cv-drop-zone');
+    const filePreview = document.getElementById('fileSelected');
+    const fileNameEl  = document.getElementById('fileName');
+    const removeFile  = document.getElementById('removeFile');
+
+    function showFile(file) {
+        if (file.size > 5 * 1024 * 1024) { alert('File size must be less than 5MB'); fileInput.value = ''; return; }
+        fileNameEl.textContent = file.name;
+        filePreview.classList.remove('d-none');
+        dropZone.style.display = 'none';
+    }
+    if (fileInput) {
+        fileInput.addEventListener('change', e => { if (e.target.files[0]) showFile(e.target.files[0]); });
+    }
+    if (removeFile) {
+        removeFile.addEventListener('click', () => {
+            fileInput.value = '';
+            filePreview.classList.add('d-none');
+            dropZone.style.display = '';
+        });
+    }
+    if (dropZone) {
+        dropZone.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const input = document.getElementById('cvFileInput');
+            if (input) input.click();
+        });
+        dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+        dropZone.addEventListener('dragleave', ()  => dropZone.classList.remove('drag-over'));
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault(); dropZone.classList.remove('drag-over');
+            const f = e.dataTransfer.files[0];
+            if (f) { fileInput.files = e.dataTransfer.files; showFile(f); }
+        });
+    }
+
+    /* ── Submit spinner ── */
+    const coachForm = document.getElementById('coachApplicationForm');
+    const submitBtn = document.getElementById('submitBtn');
+    if (coachForm && submitBtn) {
+        coachForm.addEventListener('submit', () => {
+            submitBtn.innerHTML = '<span class="btn-fire-bg"></span><i class="fas fa-spinner fa-spin"></i><span>Sending…</span>';
+            submitBtn.disabled  = true;
+        });
+    }
+
+    /* ── Speech-to-Text ── */
+    if (!navigator.mediaDevices || !window.MediaRecorder) {
+        document.querySelectorAll('.mic-btn').forEach(b => b.remove());
+        return;
+    }
+
+    let mediaRecorder = null, audioChunks = [], activeTarget = null, micStream = null;
+
+    const getField    = key => document.querySelector(`textarea[data-stt="${key}"]`);
+    const getMicBtn   = key => document.querySelector(`.mic-btn[data-stt-target="${key}"]`);
+    const getFeedback = key => document.getElementById('stt-feedback-' + key);
+
+    function setRecordingUI(key, on) {
+        const btn = getMicBtn(key), field = getField(key), fb = getFeedback(key);
+        if (on) {
+            btn.classList.add('is-recording'); btn.innerHTML = '<i class="fas fa-stop"></i>';
+            field.classList.add('is-listening'); fb.classList.remove('d-none', 'transcribing');
+            fb.querySelector('.stt-label').textContent = 'Recording… click again to stop';
+        } else {
+            btn.classList.remove('is-recording'); btn.innerHTML = '<i class="fas fa-microphone"></i>';
+            field.classList.remove('is-listening');
         }
-        
-        if (expTextarea && expCount) {
-            expTextarea.addEventListener('input', function() {
-                expCount.textContent = this.value.length;
-                if (this.value.length < 100) {
-                    expCount.parentElement.style.color = '#f44a40';
-                } else {
-                    expCount.parentElement.style.color = '#4cd3e3';
-                }
-            });
-            expCount.textContent = expTextarea.value.length;
-        }
-        
-        // CV File upload handler
-        const fileInput = document.getElementById('cvFileInput');
-        const fileSelected = document.getElementById('fileSelected');
-        const fileName = document.getElementById('fileName');
-        const removeFile = document.getElementById('removeFile');
-        const uploadLabel = document.querySelector('.cv_upload_label');
-        
-        if (fileInput) {
-            fileInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    fileName.textContent = file.name;
-                    fileSelected.style.display = 'flex';
-                    uploadLabel.style.display = 'none';
-                }
-            });
-            
-            if (removeFile) {
-                removeFile.addEventListener('click', function() {
-                    fileInput.value = '';
-                    fileSelected.style.display = 'none';
-                    uploadLabel.style.display = 'flex';
-                });
+    }
+    function setTranscribingUI(key) {
+        const btn = getMicBtn(key), fb = getFeedback(key);
+        btn.classList.remove('is-recording'); btn.classList.add('is-transcribing');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
+        fb.classList.add('transcribing'); fb.querySelector('.stt-label').textContent = 'Transcribing…';
+    }
+    function resetUI(key) {
+        const btn = getMicBtn(key), fb = getFeedback(key);
+        btn.classList.remove('is-recording', 'is-transcribing');
+        btn.innerHTML = '<i class="fas fa-microphone"></i>'; btn.disabled = false;
+        fb.classList.add('d-none'); fb.classList.remove('transcribing');
+    }
+
+    async function startRecording(key) {
+        try { micStream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+        catch { alert('Microphone access denied. Please allow it in your browser settings.'); return; }
+        audioChunks = []; activeTarget = key;
+        const mime = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg', ''].find(t => t === '' || MediaRecorder.isTypeSupported(t));
+        mediaRecorder = new MediaRecorder(micStream, mime ? { mimeType: mime } : {});
+        mediaRecorder.ondataavailable = e => { if (e.data?.size > 0) audioChunks.push(e.data); };
+        mediaRecorder.onstop = async () => {
+            micStream.getTracks().forEach(t => t.stop()); micStream = null;
+            const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+            audioChunks = []; setTranscribingUI(key);
+            await sendToServer(blob, key); resetUI(key); activeTarget = null; mediaRecorder = null;
+        };
+        mediaRecorder.start(250); setRecordingUI(key, true);
+    }
+
+    function stopRecording(key) {
+        if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+        setRecordingUI(key, false); mediaRecorder.stop();
+    }
+
+    async function sendToServer(blob, key, retryCount = 0) {
+        const field = getField(key), formData = new FormData();
+        formData.append('audio', blob, 'recording.webm');
+        try {
+            const res = await fetch(TRANSCRIBE_URL, { method: 'POST', body: formData, credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            const ct = res.headers.get('content-type') || '';
+            if (!ct.includes('application/json')) { alert('Session expired. Please refresh the page.'); return; }
+            const data = await res.json();
+            if (res.status === 503 && retryCount < 1) {
+                const wait = (data.retry_after ?? 20) * 1000;
+                getFeedback(key).querySelector('.stt-label').textContent = `Retrying in ${Math.ceil(wait / 1000)}s…`;
+                await new Promise(r => setTimeout(r, wait));
+                return sendToServer(blob, key, retryCount + 1);
             }
-        }
-        
-        // Form submission
-        const form = document.getElementById('coachApplicationForm');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                const submitBtn = form.querySelector('.btn_submit');
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-                submitBtn.disabled = true;
-            });
-        }
-    </script>
+            if (!res.ok) { alert('Server error: ' + JSON.stringify(data.error || data)); return; }
+            const text = (data.text || '').trim();
+            if (text) {
+                const cur = field.value.trimEnd();
+                field.value = cur ? cur + ' ' + text : text;
+                field.scrollTop = field.scrollHeight;
+                field.dispatchEvent(new Event('input', { bubbles: true }));
+            } else { alert('No speech detected. Try again.'); }
+        } catch (err) { console.error(err); alert('Cannot reach server. Check your connection.'); }
+    }
+
+    document.querySelectorAll('.mic-btn[data-stt-target]').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const key = btn.dataset.sttTarget;
+            if (activeTarget === key) stopRecording(key);
+            else if (activeTarget) { stopRecording(activeTarget); setTimeout(() => startRecording(key), 400); }
+            else await startRecording(key);
+        });
+    });
+
+})();
+</script>
 {% endblock %}

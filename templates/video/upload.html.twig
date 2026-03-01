@@ -25,8 +25,7 @@
                 </div>
 
                 <div class="upload-card__body">
-                    {{ form_start(form, { attr: { id: 'userVideoUploadForm' } }) }}
-                        {{ form_errors(form) }}
+                    {{ form_start(form, { attr: { id: 'userVideoUploadForm', method: 'POST', enctype: 'multipart/form-data' } }) }}
                         <div class="row g-4">
                             <div class="col-md-6">
                                 <label class="form-label">Title <span class="text-danger">*</span></label>
