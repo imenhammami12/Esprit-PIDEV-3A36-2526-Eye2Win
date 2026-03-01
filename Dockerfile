@@ -1,37 +1,27 @@
-FROM php:8.2-fpm
+FROM php:8.3-fpm
 
-# Installation des extensions PHP nécessaires
+# Installation des dépendances système
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip \
-    nginx
+    git curl libpng-dev libonig-dev libxml2-dev \
+    zip unzip libzip-dev nginx \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+# Extensions PHP (ajout de zip !)
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
 # Installer Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Dossier de travail
 WORKDIR /var/www
 
-# Copier les fichiers du projet
 COPY . .
 
-# Installer les dépendances Symfony
 RUN composer install --no-dev --optimize-autoloader
 
-# Permissions
 RUN chown -R www-data:www-data /var/www/var /var/www/public
 
-# Config Nginx
 COPY docker/nginx.conf /etc/nginx/sites-available/default
 
-# Script de démarrage
 COPY docker/start.sh /start.sh
 RUN chmod +x /start.sh
 
