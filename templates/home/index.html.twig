@@ -70,28 +70,28 @@
             <div class="et-stats-row">
 
                 <div class="et-stat">
-                    <span class="et-stat-val" id="stat-players">{{ totalPlayers }}</span>
+                    <span class="et-stat-val" id="stat-players">{{ totalPlayers|default(0) }}</span>
                     <span class="et-stat-lbl">Players</span>
                 </div>
 
                 <div class="et-stat-div"></div>
 
                 <div class="et-stat">
-                    <span class="et-stat-val" id="stat-tournaments">{{ totalTournaments }}</span>
+                    <span class="et-stat-val" id="stat-tournaments">{{ totalTournaments|default(0) }}</span>
                     <span class="et-stat-lbl">Tournaments</span>
                 </div>
 
                 <div class="et-stat-div"></div>
 
                 <div class="et-stat">
-                    <span class="et-stat-val" id="stat-teams">{{ totalTeams }}</span>
+                    <span class="et-stat-val" id="stat-teams">{{ totalTeams|default(0) }}</span>
                     <span class="et-stat-lbl">Teams</span>
                 </div>
 
                 <div class="et-stat-div"></div>
 
                 <div class="et-stat">
-                    <span class="et-stat-val" id="stat-coaches">{{ totalCoaches }}</span>
+                    <span class="et-stat-val" id="stat-coaches">{{ totalCoaches|default(0) }}</span>
                     <span class="et-stat-lbl">Coaches</span>
                 </div>
 
@@ -241,12 +241,12 @@
                 </div>
                 <div class="et-ev-badge">
                     <i class="fas fa-users"></i>
-                    <span class="et-ev-badge-val">{{ totalTeams }}</span>
+                    <span class="et-ev-badge-val">{{ totalTeams|default(0) }}</span>
                     <span class="et-ev-badge-lbl">Active Teams</span>
                 </div>
                 <div class="et-ev-badge">
                     <i class="fas fa-gamepad"></i>
-                    <span class="et-ev-badge-val">{{ totalTournaments }}</span>
+                    <span class="et-ev-badge-val">{{ totalTournaments|default(0) }}</span>
                     <span class="et-ev-badge-lbl">Tournaments</span>
                 </div>
             </div>
