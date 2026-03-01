@@ -9,6 +9,10 @@ RUN apt-get update && apt-get install -y \
 # Extensions PHP (ajout de zip !)
 RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
+# So PHP-FPM workers run in prod (no DebugBundle / WebProfilerBundle in container)
+RUN echo 'env[APP_ENV] = prod' >> /usr/local/etc/php-fpm.d/www.conf \
+    && echo 'env[APP_DEBUG] = 0' >> /usr/local/etc/php-fpm.d/www.conf
+
 # Installer Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
