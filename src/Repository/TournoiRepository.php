@@ -20,6 +20,8 @@ class TournoiRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, Tournoi::class);
     }
+
+    // ── Méthode existante — inchangée ─────────────────────────────────
     public function findBySearchAndFilter(?string $search, ?string $type, string $sort, string $direction): array
     {
         $qb = $this->createQueryBuilder('t');
@@ -30,7 +32,6 @@ class TournoiRepository extends ServiceEntityRepository
         }
 
         if ($type) {
-            // Assuming the database stores the backed value of the enum
             $qb->andWhere('t.typeTournoi = :type')
                ->setParameter('type', $type);
         }
@@ -38,5 +39,17 @@ class TournoiRepository extends ServiceEntityRepository
         $qb->orderBy('t.' . $sort, $direction);
 
         return $qb->getQuery()->getResult();
+    }
+
+    // ── NOUVEAU — stats page d'accueil ────────────────────────────────
+    /**
+     * Compte le nombre total de tournois en base.
+     */
+    public function countAllTournois(): int
+    {
+        return (int) $this->createQueryBuilder('t')
+            ->select('COUNT(t.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 }

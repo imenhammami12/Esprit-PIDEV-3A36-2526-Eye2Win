@@ -16,14 +16,8 @@ class UserRepository extends ServiceEntityRepository
 
     // ══════════════════════════════════════════════════════════════
     //  STATS GLOBALES — source unique de vérité
-    //  On charge tous les users UNE SEULE fois et on calcule tout
-    //  en PHP pour éviter tout problème de nom de colonne Doctrine.
     // ══════════════════════════════════════════════════════════════
 
-    /**
-     * Retourne toutes les statistiques globales en un seul appel.
-     * Utilisé par le controller (rendu initial) et la route AJAX /stats.
-     */
     public function getGlobalStats(): array
     {
         $allUsers = $this->findAll();
@@ -33,22 +27,19 @@ class UserRepository extends ServiceEntityRepository
         $suspended   = 0;
         $banned      = 0;
         $coaches     = 0;
-        $admins      = 0;  // ROLE_ADMIN uniquement (sans ROLE_SUPER_ADMIN)
+        $admins      = 0;
         $superAdmins = 0;
 
         foreach ($allUsers as $user) {
-            // ── Status ──────────────────────────────────────────
             $status = $user->getAccountStatus();
             if ($status === AccountStatus::ACTIVE)    $active++;
             if ($status === AccountStatus::SUSPENDED) $suspended++;
             if ($status === AccountStatus::BANNED)    $banned++;
 
-            // ── Rôles ────────────────────────────────────────────
-            $roles = $user->getRoles(); // retourne toujours au moins ['ROLE_USER']
+            $roles = $user->getRoles();
 
             if (in_array('ROLE_SUPER_ADMIN', $roles, true)) {
                 $superAdmins++;
-                // Un super-admin n'est PAS compté dans $admins
             } elseif (in_array('ROLE_ADMIN', $roles, true)) {
                 $admins++;
             }
@@ -75,12 +66,6 @@ class UserRepository extends ServiceEntityRepository
     //  FIND ADMINS
     // ══════════════════════════════════════════════════════════════
 
-    /**
-     * Retourne tous les users ROLE_ADMIN ou ROLE_SUPER_ADMIN,
-     * triés par username.
-     *
-     * @return User[]
-     */
     public function findAdmins(): array
     {
         $admins = [];
@@ -98,14 +83,9 @@ class UserRepository extends ServiceEntityRepository
     }
 
     // ══════════════════════════════════════════════════════════════
-    //  MÉTHODES UTILITAIRES
+    //  MÉTHODES UTILITAIRES — inchangées
     // ══════════════════════════════════════════════════════════════
 
-    /**
-     * Retourne les users ayant exactement ce rôle (PHP-side).
-     *
-     * @return User[]
-     */
     public function findUsersByRole(string $role): array
     {
         return array_values(array_filter(
@@ -114,19 +94,11 @@ class UserRepository extends ServiceEntityRepository
         ));
     }
 
-    /**
-     * Compte les users ayant exactement ce rôle.
-     */
     public function countByRole(string $role): int
     {
         return count($this->findUsersByRole($role));
     }
 
-    /**
-     * Recherche pour les invitations d'équipe.
-     *
-     * @return User[]
-     */
     public function searchForInvitation(string $query): array
     {
         return $this->createQueryBuilder('u')
@@ -139,9 +111,6 @@ class UserRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    /**
-     * @return User[]
-     */
     public function findActiveUsers(): array
     {
         return $this->createQueryBuilder('u')
@@ -152,9 +121,6 @@ class UserRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    /**
-     * @return User[]
-     */
     public function searchUsers(string $search): array
     {
         return $this->createQueryBuilder('u')
@@ -173,9 +139,6 @@ class UserRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
-    /**
-     * @return User[]
-     */
     public function findRecent(int $days = 30): array
     {
         $date = new \DateTime("-{$days} days");
@@ -186,5 +149,25 @@ class UserRepository extends ServiceEntityRepository
             ->orderBy('u.createdAt', 'DESC')
             ->getQuery()
             ->getResult();
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    //  NOUVEAU — stats page d'accueil
+    // ══════════════════════════════════════════════════════════════
+
+    /**
+     * Compte le nombre total d'utilisateurs enregistrés.
+     */
+    public function countAllUsers(): int
+    {
+        return $this->countTotal(); // réutilise la méthode existante
+    }
+
+    /**
+     * Compte les utilisateurs ayant le rôle ROLE_COACH.
+     */
+    public function countCoaches(): int
+    {
+        return $this->countByRole('ROLE_COACH'); // réutilise la méthode existante
     }
 }

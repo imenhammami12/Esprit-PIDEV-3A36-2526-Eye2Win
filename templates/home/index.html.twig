@@ -72,32 +72,34 @@
         </div>
     </div>
 
-    {# HUD stat bar #}
-    <div class="et-hero-statsbar">
-        <div class="container">
-            <div class="et-stats-row">
-                <div class="et-stat">
-                    <span class="et-stat-val" data-target="2400">0</span>
-                    <span class="et-stat-lbl">Players</span>
-                </div>
-                <div class="et-stat-div"></div>
-                <div class="et-stat">
-                    <span class="et-stat-val" data-target="180">0</span>
-                    <span class="et-stat-lbl">Tournaments</span>
-                </div>
-                <div class="et-stat-div"></div>
-                <div class="et-stat">
-                    <span class="et-stat-val" data-target="95">0</span>
-                    <span class="et-stat-lbl">% Satisfaction</span>
-                </div>
-                <div class="et-stat-div"></div>
-                <div class="et-stat">
-                    <span class="et-stat-val" data-target="48">0</span>
-                    <span class="et-stat-lbl">Coaches</span>
-                </div>
+    {# HUD stat bar — données réelles injectées par le controller #}
+{# HUD stat bar — données réelles injectées par le controller #}
+<div class="et-hero-statsbar">
+    <div class="container">
+        <div class="et-stats-row">
+            <div class="et-stat">
+                <span class="et-stat-val" data-target="{{ totalPlayers|default(0) }}">0</span>
+                <span class="et-stat-lbl">Players</span>
+            </div>
+            <div class="et-stat-div"></div>
+            <div class="et-stat">
+                <span class="et-stat-val" data-target="{{ totalTournaments|default(0) }}">0</span>
+                <span class="et-stat-lbl">Tournaments</span>
+            </div>
+            <div class="et-stat-div"></div>
+            <div class="et-stat">
+                <span class="et-stat-val" data-target="{{ satisfaction|default(95) }}">0</span>
+                <span class="et-stat-lbl">% Satisfaction</span>
+            </div>
+            <div class="et-stat-div"></div>
+            <div class="et-stat">
+                <span class="et-stat-val" data-target="{{ totalCoaches|default(0) }}">0</span>
+                <span class="et-stat-lbl">Coaches</span>
             </div>
         </div>
     </div>
+</div>
+
 </section>
 
 {# ═══════════════════════════════════════════════
@@ -207,7 +209,6 @@
    UPCOMING EVENT SECTION
 ═══════════════════════════════════════════════ #}
 <section class="et-event">
-    {# ✅ FIX: event_bg en WebP avec fallback PNG via JS #}
     <div class="et-event-bg" id="eventBg"></div>
     <div class="et-event-overlay"></div>
     <div class="et-event-scan"></div>
@@ -221,7 +222,7 @@
                 </span>
                 <h2 class="et-event-title">EyeTwin<br><span class="et-gradient-fire">Championship</span></h2>
                 <p class="et-event-desc">
-                    The biggest eSport event of the year is coming. Compete for glory, prestige, and exclusive rewards. 
+                    The biggest eSport event of the year is coming. Compete for glory, prestige, and exclusive rewards.
                     Register your team and prove you belong at the top.
                 </p>
 
@@ -320,7 +321,6 @@
                 <div class="et-vid-corner br"></div>
 
                 <div class="et-vid-thumb">
-                    {# ✅ FIX: preload="none" — ne charge pas la vidéo au démarrage #}
                     <video preload="none" muted loading="lazy">
                         <source src="{{ video.videoUrl }}" type="video/mp4">
                     </video>
@@ -964,7 +964,7 @@
 (function(){
     'use strict';
 
-    /* ✅ FIX #1 — WebP detection + lazy background images */
+    /* ── WebP detection + lazy background images ── */
     function supportsWebP(cb) {
         const img = new Image();
         img.onload = img.onerror = function() { cb(img.width === 2); };
@@ -974,13 +974,11 @@
     supportsWebP(function(supported) {
         const ext = supported ? 'webp' : 'png';
 
-        // Hero arcade background
         const heroArcade = document.getElementById('heroArcade');
         if (heroArcade) {
             heroArcade.style.backgroundImage = "url('/assets/img/latest_war_img_1." + ext + "')";
         }
 
-        // Event background (lazy — chargé seulement quand visible)
         const eventBg = document.getElementById('eventBg');
         if (eventBg) {
             const observer = new IntersectionObserver(function(entries) {
@@ -1031,7 +1029,7 @@
         })();
     }
 
-    /* ── STAT COUNTER ── */
+    /* ── STAT COUNTER (lit data-target injecté par Twig) ── */
     const io = new IntersectionObserver(entries => {
         entries.forEach(e => {
             if (!e.isIntersecting) return;

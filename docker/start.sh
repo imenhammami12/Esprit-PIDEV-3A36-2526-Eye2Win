@@ -10,8 +10,10 @@ export APP_DEBUG=0
 php bin/console cache:clear --env=prod
 php bin/console cache:warmup --env=prod
 
-# Migrations (si tu as une DB)
-php bin/console doctrine:migrations:migrate --no-interaction
+# Migrations: run only if DATABASE_URL is set; do not fail deploy if DB is unreachable
+if [ -n "${DATABASE_URL}" ]; then
+  php bin/console doctrine:migrations:migrate --no-interaction || true
+fi
 
 # Démarrer PHP-FPM et Nginx
 php-fpm -D
