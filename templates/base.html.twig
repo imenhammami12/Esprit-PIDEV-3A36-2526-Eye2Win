@@ -75,7 +75,7 @@
     *, a, button, [role="button"] { cursor: none !important; }
 
     /* ════════════════════════════════════════
-       CURSOR CANVAS — 120×120
+       CURSOR CANVAS — 120x120
     ════════════════════════════════════════ */
     #et-cursor-canvas {
         position: fixed; pointer-events: none; z-index: 99999;
@@ -191,7 +191,7 @@
     .notif-date { font-family:var(--font-mono); font-size:.6rem; color:var(--muted); margin-top:.2rem; }
 
     /* ════════════════════════════════════════════
-       PROFILE TRIGGER — pill in navbar ✨
+       PROFILE TRIGGER — pill in navbar
     ════════════════════════════════════════════ */
     .et-profile-trigger {
         display:inline-flex; align-items:center; gap:9px;
@@ -207,7 +207,6 @@
         background:rgba(232,55,42,0.09); border-color:rgba(232,55,42,0.5);
         box-shadow:0 0 20px rgba(232,55,42,0.12); text-decoration:none;
     }
-    /* Avatar */
     .et-pf-av { position:relative; width:30px; height:30px; flex-shrink:0; }
     .et-pf-av-inner {
         width:30px; height:30px; border-radius:50%;
@@ -238,7 +237,7 @@
     .et-profile-trigger.show .et-pf-chevron { transform:rotate(180deg); color:var(--red-hot); }
 
     /* ════════════════════════════════════════════
-       PROFILE DROPDOWN PANEL ✨
+       PROFILE DROPDOWN PANEL
     ════════════════════════════════════════════ */
     .et-profile-menu {
         min-width:280px!important; padding:0!important;
@@ -251,7 +250,6 @@
         animation:et-pd-in .22s cubic-bezier(.22,1,.36,1)!important;
     }
     @keyframes et-pd-in { from{opacity:0;transform:translateY(-8px) scale(.95)} to{opacity:1;transform:none} }
-
     .et-pd-header {
         position:relative; padding:18px 18px 14px;
         background:linear-gradient(135deg,rgba(232,55,42,.1),rgba(255,107,43,.05),rgba(255,32,96,.03));
@@ -271,7 +269,6 @@
     .et-pd-badge { font-family:var(--font-hud); font-size:.46rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; padding:2px 7px; border-radius:4px; }
     .et-pd-badge-online { background:rgba(0,230,118,.1); border:1px solid rgba(0,230,118,.3); color:var(--green); }
     .et-pd-badge-rank   { background:rgba(246,216,96,.1); border:1px solid rgba(246,216,96,.3); color:var(--gold); }
-
     .et-pd-stats { display:grid; grid-template-columns:repeat(3,1fr); border-bottom:1px solid rgba(255,255,255,.05); }
     .et-pd-stat { padding:10px 8px; text-align:center; border-right:1px solid rgba(255,255,255,.05); transition:background .18s; }
     .et-pd-stat:last-child { border-right:none; }
@@ -279,7 +276,6 @@
     .et-pd-stat:hover .et-pd-sv { color:var(--red-hot); }
     .et-pd-sv { font-family:var(--font-hud); font-size:.8rem; font-weight:700; color:var(--text); transition:color .18s; display:block; }
     .et-pd-sl { font-family:var(--font-mono); font-size:.46rem; color:var(--muted); letter-spacing:.1em; text-transform:uppercase; margin-top:1px; display:block; }
-
     .et-pd-menu { padding:7px; }
     .et-pd-item {
         display:flex; align-items:center; gap:10px;
@@ -298,34 +294,27 @@
     .et-pd-sub { font-family:var(--font-mono); font-size:.48rem; color:var(--muted); margin-top:1px; display:block; }
     .et-pd-arr { font-size:.45rem; color:rgba(255,255,255,.12); transition:all .18s; position:relative; z-index:1; }
     .et-pd-item:hover .et-pd-arr { color:var(--red-hot); transform:translateX(3px); }
-
-    /* 2FA */
     .et-pd-2fa .et-pd-ic { color:rgba(0,229,255,.6); }
     .et-pd-2fa:hover .et-pd-ic { background:rgba(0,229,255,.1); border-color:rgba(0,229,255,.35); box-shadow:0 0 10px rgba(0,229,255,.15); color:var(--cyan); }
     .et-pd-2fa:hover::before { background:linear-gradient(90deg,rgba(0,229,255,.07),transparent); }
     .et-pd-2fa:hover { border-color:rgba(0,229,255,.15); }
-    /* Support */
     .et-pd-support .et-pd-ic { color:rgba(255,107,43,.6); }
     .et-pd-support:hover .et-pd-ic { background:rgba(255,107,43,.1); border-color:rgba(255,107,43,.35); box-shadow:0 0 10px rgba(255,107,43,.15); color:var(--orange); }
     .et-pd-support:hover::before { background:linear-gradient(90deg,rgba(255,107,43,.07),transparent); }
     .et-pd-support:hover { border-color:rgba(255,107,43,.15); }
-    /* Admin */
     .et-pd-admin .et-pd-ic { color:rgba(246,216,96,.6); }
     .et-pd-admin .et-pd-ttl { color:rgba(246,216,96,.7)!important; }
     .et-pd-admin:hover .et-pd-ic { background:rgba(246,216,96,.1); border-color:rgba(246,216,96,.35); box-shadow:0 0 10px rgba(246,216,96,.15); color:var(--gold); }
     .et-pd-admin:hover .et-pd-ttl { color:var(--gold)!important; }
     .et-pd-admin:hover::before { background:linear-gradient(90deg,rgba(246,216,96,.07),transparent); }
     .et-pd-admin:hover { border-color:rgba(246,216,96,.2); }
-    /* Logout */
     .et-pd-logout .et-pd-ic { color:rgba(255,100,80,.5); }
     .et-pd-logout .et-pd-ttl { color:rgba(255,100,80,.55)!important; }
     .et-pd-logout:hover .et-pd-ic { background:rgba(255,80,60,.12); border-color:rgba(255,80,60,.4); box-shadow:0 0 10px rgba(255,80,60,.2); color:var(--red-hot); }
     .et-pd-logout:hover .et-pd-ttl { color:var(--red-hot)!important; }
     .et-pd-logout:hover::before { background:linear-gradient(90deg,rgba(255,80,60,.1),transparent); }
     .et-pd-logout:hover { border-color:rgba(255,80,60,.2); }
-
     .et-pd-divider { height:1px; margin:5px 7px; background:linear-gradient(90deg,transparent,rgba(232,55,42,.12),transparent); }
-
     .et-pd-footer { padding:10px 14px; background:rgba(246,216,96,.02); border-top:1px solid rgba(246,216,96,.07); display:flex; align-items:center; justify-content:space-between; }
     .et-pd-coins { font-family:var(--font-hud); font-size:.58rem; font-weight:700; letter-spacing:.08em; color:var(--gold); display:flex; align-items:center; gap:6px; }
     .et-pd-coins-val { color:#fff; }
@@ -377,7 +366,6 @@
     .hud-corner.tr { top:12px; right:12px; border-width:1.5px 1.5px 0 0; }
     .hud-corner.bl { bottom:12px; left:12px; border-width:0 0 1.5px 1.5px; }
     .hud-corner.br { bottom:12px; right:12px; border-width:0 1.5px 1.5px 0; }
-
     ::-webkit-scrollbar { width:5px; }
     ::-webkit-scrollbar-track { background:var(--dark2); }
     ::-webkit-scrollbar-thumb { background:rgba(232,55,42,.4); border-radius:3px; }
@@ -387,6 +375,20 @@
     @keyframes page-fade-in { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
     .ripple { position:absolute; border-radius:50%; background:rgba(232,55,42,.25); transform:scale(0); animation:ripple-anim .5s linear; pointer-events:none; }
     @keyframes ripple-anim { to{transform:scale(3);opacity:0} }
+
+    /* ═══════════════════════════════════════
+       UPLOADER DROPDOWN — dot accent
+    ═══════════════════════════════════════ */
+    .nav-uploader-toggle { display:inline-flex !important; align-items:center; gap:6px; }
+    .nav-upload-dot {
+        width:6px; height:6px; border-radius:50;
+        background:linear-gradient(135deg,var(--red-hot),var(--orange));
+        box-shadow:0 0 6px rgba(232,55,42,.7);
+        flex-shrink:0;
+        animation:nav-pulse 2s ease-in-out infinite;
+        border-radius: 50%;
+        display: inline-block;
+    }
     </style>
 </head>
 
@@ -459,11 +461,47 @@
                                 </li>
 
                                 {% if app.user %}
-                                    <li class="nav-item"><a class="nav-link" href="{{ path('app_planning') }}">Planning</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="{{ path('app_tournoi_landing') }}">Tournois</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="{{ path('app_video_upload') }}">Uploader</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="{{ path('app_teams_index') }}">Teams</a></li>
-                                    <li class="nav-item"><a class="nav-link" href="{{ path('community_channels_index') }}">Community</a></li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="{{ path('app_planning') }}">Planning</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="{{ path('app_tournoi_landing') }}">Tournois</a>
+                                    </li>
+
+                                    {# ══ HIGHLIGHTS — lien direct ══ #}
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="{{ path('clips_public') }}">Highlights</a>
+                                    </li>
+
+                                    {# ══ UPLOADER — dropdown avec sous-liens ══ #}
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link nav-uploader-toggle dropdown-toggle"
+                                           href="#" id="uploaderDropdown"
+                                           role="button" data-toggle="dropdown"
+                                           aria-haspopup="true" aria-expanded="false">
+                                            <span class="nav-upload-dot"></span>
+                                            Uploader
+                                        </a>
+                                        <div class="dropdown-menu" aria-labelledby="uploaderDropdown">
+                                            <a class="dropdown-item" href="{{ path('app_video_upload') }}">
+                                                <i class="fas fa-upload"></i> Uploader
+                                            </a>
+                                            <a class="dropdown-item" href="{{ path('clips_import') }}">
+                                                <i class="fas fa-film"></i> My Clips
+                                            </a>
+                                            <div class="dropdown-divider"></div>
+                                            <a class="dropdown-item" href="{{ path('app_guides') }}">
+                                                <i class="fas fa-book-open"></i> Guides
+                                            </a>
+                                        </div>
+                                    </li>
+
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="{{ path('app_teams_index') }}">Teams</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="{{ path('community_channels_index') }}">Community</a>
+                                    </li>
                                     <li class="nav-item">
                                         <a class="nav-link nav-live-link" href="{{ path('live_index') }}" style="display:flex;align-items:center;gap:6px;">
                                             <span class="nav-live-dot"></span> Live
@@ -522,7 +560,7 @@
                                         </div>
                                     </li>
 
-                                    {# ══ PROFILE DROPDOWN — DESIGN AMÉLIORÉ ══ #}
+                                    {# ══ PROFILE DROPDOWN ══ #}
                                     <li class="nav-item dropdown" id="et-profile-li">
                                         <a class="nav-link et-profile-trigger dropdown-toggle"
                                            href="#" id="etProfileDropdown"
@@ -540,7 +578,6 @@
                                         <div class="dropdown-menu dropdown-menu-right et-profile-menu p-0"
                                              aria-labelledby="etProfileDropdown">
 
-                                            {# Header card #}
                                             <div class="et-pd-header">
                                                 <div class="et-pd-scanline"></div>
                                                 <div class="et-pd-row">
@@ -563,7 +600,6 @@
                                                 </div>
                                             </div>
 
-                                            {# Stats row #}
                                             <div class="et-pd-stats">
                                                 <div class="et-pd-stat">
                                                     <span class="et-pd-sv">{{ app.user.coinBalance }}</span>
@@ -579,7 +615,6 @@
                                                 </div>
                                             </div>
 
-                                            {# Menu items #}
                                             <div class="et-pd-menu">
                                                 <a class="et-pd-item" href="{{ path('user_profile') }}">
                                                     <div class="et-pd-ic"><i class="fas fa-user"></i></div>
@@ -627,7 +662,6 @@
                                                 </a>
                                             </div>
 
-                                            {# Coins footer #}
                                             <div class="et-pd-footer">
                                                 <div class="et-pd-coins">
                                                     <i class="fas fa-coins"></i>
@@ -730,7 +764,6 @@
 
     /* ══════════════════════════════════════════════════════════
        EYETWIN — GAMING CURSOR SYSTEM v2
-       Canvas 120×120 | Crosshair 10 layers | localStorage
     ══════════════════════════════════════════════════════════ */
     const STORAGE_KEY = 'et_cursor_type';
     const CURSORS     = ['crosshair','sword','energy','arrow'];
@@ -744,14 +777,13 @@
 
     const canvas = document.getElementById('et-cursor-canvas');
     const ctx    = canvas.getContext('2d', { alpha:true, desynchronized:true });
-    const CX = 60, CY = 60; // centre du canvas 120×120
+    const CX = 60, CY = 60;
 
     const HOTSPOT = {
         crosshair:{ x:60, y:60 }, sword:{ x:4, y:4 },
         energy:{ x:60, y:60 },    arrow:{ x:60, y:20 },
     };
 
-    /* ── Mouse events ── */
     document.addEventListener('mousemove', e => {
         trailPoints.push({ x:mouseX, y:mouseY, t:performance.now() });
         if (trailPoints.length > 8) trailPoints.shift();
@@ -767,7 +799,6 @@
     document.addEventListener('mousedown', ()=>{ isClick=true; clickTime=performance.now(); spawnSparks(mouseX,mouseY); });
     document.addEventListener('mouseup',   ()=>{ isClick=false; });
 
-    /* ── Sparks ── */
     const SPARK_PAL = {
         crosshair:['#e8372a','#ff4d3d','#ff6b2b','#fff','rgba(232,55,42,.5)'],
         sword:['#ff4d3d','#ff6b2b','#ff2060','#fff','#f6d860'],
@@ -785,9 +816,6 @@
         }
     }
 
-    /* ══════════════════════════════════════════
-       DRAW: CROSSHAIR v2 — 10 couches animées
-    ══════════════════════════════════════════ */
     let radarAngle=0, scanRot=0;
 
     function drawCrosshair(ts) {
@@ -797,10 +825,7 @@
         const gap = isClick?16:(isHover?11:8);
         const len = isClick?9:(isHover?15:18);
         const thick = isHover?1.6:1.2;
-
         ctx.save(); ctx.translate(CX,CY);
-
-        /* 1 — Ghost trail mini-crosshairs */
         const now=performance.now();
         trailPoints.forEach(p=>{
             const age=(now-p.t)/200; if(age>1) return;
@@ -812,57 +837,39 @@
                 ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
             }); ctx.restore();
         }); ctx.globalAlpha=1;
-
-        /* 2 — Outermost ring */
         ctx.beginPath(); ctx.arc(0,0,38+breathe,0,Math.PI*2);
         ctx.strokeStyle=`rgba(232,55,42,${.05+.04*pulse})`; ctx.lineWidth=.6; ctx.stroke();
-
-        /* 3 — Radar sweep */
         ctx.save(); ctx.rotate(radarAngle);
         for(let i=0;i<40;i++){
             const a=-(i/40)*Math.PI*.85, fade=1-i/40;
             ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,28,a-.04,a+.04); ctx.closePath();
             ctx.fillStyle=`rgba(232,55,42,${fade*.3})`; ctx.fill();
         } ctx.restore();
-
-        /* 4 — Outer segmented ring (8 arcs, counter-rotate) */
         ctx.lineWidth=.9;
         for(let i=0;i<8;i++){
             const startA=(i/8)*Math.PI*2+scanRot, endA=startA+(Math.PI*2/8)-.2;
             ctx.beginPath(); ctx.arc(0,0,26,startA,endA);
             ctx.strokeStyle=`rgba(232,55,42,${.28+.15*pulse})`; ctx.stroke();
         }
-
-        /* 5 — Inner ring */
         ctx.beginPath(); ctx.arc(0,0,12+(isHover?2:0),0,Math.PI*2);
         ctx.strokeStyle=`rgba(232,55,42,${.55+.3*pulse})`; ctx.lineWidth=isHover?1.2:.9; ctx.stroke();
-
-        /* 6 — 4 diagonal tick marks */
         [.25,.75,1.25,1.75].forEach(f=>{
             const a=f*Math.PI, r=12+(isHover?2:0);
             ctx.beginPath(); ctx.moveTo(Math.cos(a)*(r-2),Math.sin(a)*(r-2)); ctx.lineTo(Math.cos(a)*(r+5),Math.sin(a)*(r+5));
             ctx.strokeStyle=`rgba(232,55,42,${.45+.25*pulse})`; ctx.lineWidth=.8; ctx.stroke();
         });
-
-        /* 7 — Main 4 lines */
         ctx.strokeStyle=isClick?'rgba(255,255,255,.95)':`rgba(232,55,42,${.88+.1*pulse})`;
         ctx.lineWidth=thick; ctx.lineCap='square';
         ctx.shadowColor=isClick?'rgba(255,120,80,.9)':'rgba(232,55,42,.55)'; ctx.shadowBlur=isHover?9:5;
         [[0,-(gap+len),0,-gap],[0,gap,0,gap+len],[-(gap+len),0,-gap,0],[gap,0,gap+len,0]].forEach(([x1,y1,x2,y2])=>{
             ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
         }); ctx.shadowBlur=0;
-
-        /* 8 — End caps */
         const cw=3; ctx.lineWidth=.8; ctx.strokeStyle=`rgba(232,55,42,${.45+.25*pulse})`;
         [[-cw,-(gap+len),cw,-(gap+len)],[-cw,gap+len,cw,gap+len],[-(gap+len),-cw,-(gap+len),cw],[gap+len,-cw,gap+len,cw]].forEach(([x1,y1,x2,y2])=>{
             ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
         });
-
-        /* 9 — Center dot */
         ctx.beginPath(); ctx.arc(0,0,isClick?4:(isHover?2.8:2),0,Math.PI*2);
         ctx.fillStyle=isClick?'#fff':'#e8372a'; ctx.shadowColor=isClick?'#fff':'rgba(232,55,42,.9)'; ctx.shadowBlur=isClick?16:7; ctx.fill(); ctx.shadowBlur=0;
-
-        /* 10 — Hit-marker X flash */
         const hitAge=(performance.now()-clickTime)/420;
         if(hitAge<1&&clickTime>0){
             const s=5+hitAge*12;
@@ -871,8 +878,6 @@
             [[-s,-s,s,s],[-s,s,s,-s]].forEach(([x1,y1,x2,y2])=>{ ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); });
             ctx.shadowBlur=0;
         }
-
-        /* BONUS — HUD brackets on hover */
         if(isHover){
             const br=32, bl=9;
             ctx.strokeStyle=`rgba(232,55,42,${.35+.25*pulse})`; ctx.lineWidth=.9; ctx.lineCap='square';
@@ -884,7 +889,6 @@
         ctx.restore();
     }
 
-    /* ── Draw: SWORD (inchangé) ── */
     function drawSword(ts) {
         const now=ts;
         trailPoints.push({x:mouseX,y:mouseY,t:now});
@@ -913,7 +917,6 @@
         ctx.strokeStyle='rgba(255,180,100,0.5)'; ctx.lineWidth=.7; ctx.stroke(); ctx.restore();
     }
 
-    /* ── Draw: ENERGY (inchangé) ── */
     function drawEnergy(ts) {
         energyOrbit+=.04;
         const pulse=.5+.5*Math.sin(ts*.005), hs=isHover?1.25:1;
@@ -932,7 +935,6 @@
         ctx.restore();
     }
 
-    /* ── Draw: ARROW (inchangé) ── */
     function drawArrow(ts) {
         arrowTension=isClick?Math.min(1,(ts-clickTime)/250):Math.max(0,arrowTension-.08);
         const fp=.5+.5*Math.sin(ts*.003);
@@ -947,7 +949,6 @@
         ctx.restore();
     }
 
-    /* ── RAF loop ── */
     function loop(ts) {
         rafPending=false;
         const hot=HOTSPOT[cursorType]||HOTSPOT.crosshair;
@@ -962,7 +963,6 @@
         if(cursorType==='energy'||cursorType==='crosshair'||arrowTension>.01){ rafPending=true; requestAnimationFrame(loop); }
     }
 
-    /* ── Continuous RAF for energy & crosshair ── */
     (function continuousLoop(ts) {
         if(cursorType==='energy'||cursorType==='crosshair'){
             const hot=HOTSPOT[cursorType];
@@ -973,7 +973,6 @@
         requestAnimationFrame(continuousLoop);
     })(0);
 
-    /* ── Picker UI ── */
     const btn=document.getElementById('et-cursor-btn');
     const panel=document.getElementById('et-cursor-panel');
     const opts=document.querySelectorAll('.et-cursor-opt');
@@ -993,7 +992,6 @@
     document.addEventListener('keydown',e=>{ if(e.key==='Escape') panel.classList.remove('open'); });
     setCursor(cursorType);
 
-    /* ── Profile chevron sync ── */
     const pfTrigger=document.querySelector('.et-profile-trigger');
     if(pfTrigger){
         pfTrigger.addEventListener('click',function(){
@@ -1002,9 +1000,7 @@
         document.addEventListener('click',e=>{ if(!pfTrigger.closest('.dropdown').contains(e.target)) pfTrigger.classList.remove('show'); });
     }
 
-    /* ══════════════════════════════════════════════════════════
-       BACKGROUND PARTICLES
-    ══════════════════════════════════════════════════════════ */
+    /* ── Background particles ── */
     const bgCanvas=document.getElementById('bgCanvas');
     if(bgCanvas){
         const bctx=bgCanvas.getContext('2d',{alpha:true}); bctx.imageSmoothingEnabled=false;
@@ -1030,27 +1026,22 @@
         })(0);
     }
 
-    /* ── Scroll progress ── */
     const sp=document.getElementById('scroll-progress');
     window.addEventListener('scroll',()=>{ const pct=(document.documentElement.scrollTop/(document.documentElement.scrollHeight-window.innerHeight))*100; if(sp) sp.style.width=pct+'%'; },{passive:true});
 
-    /* ── Navbar shrink ── */
     const navbar=document.querySelector('.main_menu');
     window.addEventListener('scroll',()=>{ if(navbar){ navbar.style.background=window.scrollY>60?'rgba(5,5,12,0.95)':''; navbar.style.padding=window.scrollY>60?'0':''; } },{passive:true});
 
-    /* ── Ripple on nav links ── */
     document.querySelectorAll('.navbar-nav .nav-link').forEach(link=>{
         link.style.position='relative'; link.style.overflow='hidden';
         link.addEventListener('click',function(e){ const rect=this.getBoundingClientRect(); const r=document.createElement('span'); r.className='ripple'; r.style.cssText=`width:40px;height:40px;left:${e.clientX-rect.left-20}px;top:${e.clientY-rect.top-20}px;`; this.appendChild(r); setTimeout(()=>r.remove(),500); });
     });
 
-    /* ── Scroll reveal ── */
     if('IntersectionObserver' in window){
         const io=new IntersectionObserver(entries=>{ entries.forEach(e=>{ if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='none';io.unobserve(e.target);} }); },{threshold:.07});
         document.querySelectorAll('section > .container > .row > [class*="col"]').forEach(el=>{ el.style.opacity='0'; el.style.transform='translateY(20px)'; el.style.transition='opacity .55s ease,transform .55s ease'; io.observe(el); });
     }
 
-    /* ── Glitch logo ── */
     const logo=document.querySelector('.navbar-brand img');
     if(logo){ setInterval(()=>{ if(Math.random()>.88){ logo.animate([{filter:'none',transform:'none'},{filter:'hue-rotate(180deg) brightness(1.5)',transform:'skewX(-4deg) translateX(2px)'},{filter:'hue-rotate(-90deg)',transform:'skewX(3deg) translateX(-2px)'},{filter:'none',transform:'none'}],{duration:140,easing:'steps(3)'}); } },4000); }
 
