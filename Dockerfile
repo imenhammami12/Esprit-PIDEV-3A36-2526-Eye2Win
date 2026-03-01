@@ -1,13 +1,13 @@
 FROM php:8.3-fpm
 
-# Installation des dépendances système
+# Installation des dépendances système (+ libpq-dev pour PostgreSQL)
 RUN apt-get update && apt-get install -y \
     git curl libpng-dev libonig-dev libxml2-dev \
-    zip unzip libzip-dev nginx \
+    zip unzip libzip-dev nginx libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Extensions PHP (ajout de zip !)
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+# Extensions PHP (pdo_pgsql pour Render Postgres, pdo_mysql pour compat locale)
+RUN docker-php-ext-install pdo_mysql pdo_pgsql mbstring exif pcntl bcmath gd zip
 
 # So PHP-FPM workers run in prod (no DebugBundle / WebProfilerBundle in container)
 RUN echo 'env[APP_ENV] = prod' >> /usr/local/etc/php-fpm.d/www.conf \
