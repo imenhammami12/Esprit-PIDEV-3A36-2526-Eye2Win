@@ -52,7 +52,7 @@
                         <div class="custom-error-message">{{ form_errors(form.dateFin) }}</div>
                     </div>
                     
-                    {# Type #}
+                    {# Type & Prix #}
                     <div class="col-md-6 form-group-enhanced">
                         <label class="form-label fw-bold">
                             <i class="bi bi-list-task me-1"></i>
@@ -62,13 +62,31 @@
                         <div class="custom-error-message">{{ form_errors(form.typeTournoi) }}</div>
                     </div>
 
+                    <div class="col-md-6 form-group-enhanced">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-currency-dollar me-1"></i>
+                            Prix de participation (TND)
+                        </label>
+                        {{ form_widget(form.prix) }}
+                        <div class="custom-error-message">{{ form_errors(form.prix) }}</div>
+                    </div>
+
                     {# Description #}
                     <div class="col-md-12 form-group-enhanced">
-                        <label class="form-label fw-bold">
-                            <i class="bi bi-file-text me-1"></i>
-                            Description
-                        </label>
-                        {{ form_widget(form.description) }}
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label fw-bold mb-0">
+                                <i class="bi bi-file-text me-1"></i>
+                                Description
+                            </label>
+                            <button type="button" id="generateDescBtn" class="btn btn-sm" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color:white; border:none;">
+                                <span id="generateBtnText"><i class="bi bi-stars me-1"></i> Générer avec IA</span>
+                                <span id="generateBtnSpinner" class="d-none">
+                                    <span class="spinner-border spinner-border-sm me-1"></span> Génération...
+                                </span>
+                            </button>
+                        </div>
+                        {{ form_widget(form.description, {'attr': {'id': 'descriptionField', 'rows': 5}}) }}
+                        <div id="aiError" class="text-danger small mt-1" style="display:none;"></div>
                         <div class="custom-error-message">{{ form_errors(form.description) }}</div>
                     </div>
 
@@ -142,29 +160,52 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// AI Description generator
+document.getElementById('generateDescBtn').addEventListener('click', function() {
+    const nomField = document.querySelector('[name*="[nom]"]');
+    const typeField = document.querySelector('[name*="[typeTournoi]"]');
+    const descField = document.querySelector('[name*="[description]"]');
+    const btnText = document.getElementById('generateBtnText');
+    const btnSpinner = document.getElementById('generateBtnSpinner');
+    const aiError = document.getElementById('aiError');
+    const name = nomField ? nomField.value.trim() : '';
+    const type = typeField ? typeField.options[typeField.selectedIndex]?.text ?? '' : '';
+    if (!name) { aiError.textContent = 'Veuillez d\'abord saisir le nom du tournoi.'; aiError.style.display = 'block'; return; }
+    aiError.style.display = 'none';
+    btnText.classList.add('d-none'); btnSpinner.classList.remove('d-none'); this.disabled = true;
+    fetch('{{ path('admin_tournoi_generate_description') }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, type: type })
+    })
+    .then(async res => {
+        const data = await res.json();
+        if (!res.ok) {
+            throw new Error(data.error || `Erreur serveur (${res.status})`);
+        }
+        return data;
+    })
+    .then(data => {
+        descField.value = data.description;
+    })
+    .catch((err) => {
+        aiError.textContent = err.message || 'Erreur de connexion à l\'IA.';
+        aiError.style.display = 'block';
+    })
+    .finally(() => {
+        btnText.classList.remove('d-none');
+        btnSpinner.classList.add('d-none');
+        this.disabled = false;
+    });
+});
+
 // Reuse the enhanced error styles
 const style = document.createElement('style');
 style.textContent = `
-    .form-control.is-valid {
-        border-color: #43e97b;
-        box-shadow: 0 0 0 0.15rem rgba(67, 233, 123, 0.25);
-    }
-    
-    .form-control.is-invalid {
-        border-color: #dc3545;
-        box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.25);
-    }
-
-    .custom-error-message, 
-    .custom-error-message ul, 
-    .custom-error-message li, 
-    .custom-error-message span {
-        color: #ff0000 !important; /* Bright Red */
-        font-weight: bold;
-        list-style-type: none;
-        padding-left: 0;
-        margin-top: 5px;
-        display: block;
+    .form-control.is-valid { border-color: #43e97b; box-shadow: 0 0 0 0.15rem rgba(67, 233, 123, 0.25); }
+    .form-control.is-invalid { border-color: #dc3545; box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.25); }
+    .custom-error-message, .custom-error-message ul, .custom-error-message li, .custom-error-message span {
+        color: #ff0000 !important; font-weight: bold; list-style-type: none; padding-left: 0; margin-top: 5px; display: block;
     }
 `;
 document.head.appendChild(style);

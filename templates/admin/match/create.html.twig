@@ -73,6 +73,29 @@
                         {{ form_widget(form.prix, {'attr': {'class': 'form-select'}}) }}
                         <div class="custom-error-message">{{ form_errors(form.prix) }}</div>
                     </div>
+
+                    {# Play Mode #}
+                    <div class="col-md-6 form-group-enhanced">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-controller me-1"></i>
+                            Mode de Jeu
+                        </label>
+                        {{ form_widget(form.playMode, {'attr': {'class': 'form-select', 'id': 'playModeSelect'}}) }}
+                        <div class="custom-error-message">{{ form_errors(form.playMode) }}</div>
+                    </div>
+
+                    {# Localisation #}
+                    <div class="col-md-12 form-group-enhanced" id="localisationSection" style="display: none;">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-geo-alt me-1"></i>
+                            Localisation
+                        </label>
+                        {{ form_widget(form.localisation, {'attr': {'class': 'form-control', 'id': 'localisationInput', 'readonly': true, 'placeholder': 'Select on map...'}}) }}
+                        <div class="custom-error-message">{{ form_errors(form.localisation) }}</div>
+                        
+                        <div id="map" style="height: 300px; width: 100%; margin-top: 1rem; border-radius: 8px; border: 1px solid #ddd;"></div>
+                        <small class="text-muted mt-1 d-block">Cliquez sur la carte pour choisir l'emplacement du match.</small>
+                    </div>
                 </div>
                 
                 {# Action Buttons #}
@@ -91,29 +114,129 @@
 </div>
 {% endblock %}
 
-{% block javascripts %}
-<script>
-    // Include same validation scripts as Tournoi
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('createMatchForm');
-        // ... (Reuse validation JS logic if desired or abstract it)
-    });
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        #map { z-index: 1; transition: opacity 0.3s ease; }
+        #localisationSection { animation: slideDown 0.4s ease-out; }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+{% endblock %}
 
-    // Force red error messages
+{% block javascripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Robust selectors to handle Symfony prefixed IDs
+    const playModeSelect = document.querySelector('[name*="[playMode]"]') || document.getElementById('playModeSelect');
+    const localisationSection = document.getElementById('localisationSection');
+    const localisationInput = document.querySelector('[name*="[localisation]"]') || document.getElementById('localisationInput');
+    let map, marker;
+
+    console.log('PlayMode selector found:', !!playModeSelect);
+
+    function initMap() {
+        if (map) return;
+        
+        const mapContainer = document.getElementById('map');
+        if (!mapContainer) {
+            console.error('Map container not found');
+            return;
+        }
+
+        if (typeof L === 'undefined') {
+            console.error('Leaflet library not loaded');
+            const aiError = document.getElementById('aiError'); // Reusing the AI error div for map issues
+            if (aiError) {
+                aiError.textContent = 'Erreur: La bibliothèque de cartes (Leaflet) n\'a pas pu être chargée.';
+                aiError.style.display = 'block';
+            }
+            return;
+        }
+
+        // Initial center: Tunis
+        map = L.map('map').setView([36.8065, 10.1815], 13);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        map.on('click', function(e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+
+            if (marker) {
+                marker.setLatLng(e.latlng);
+            } else {
+                marker = L.marker(e.latlng).addTo(map);
+            }
+
+            // Reverse Geocoding using Nominatim (free)
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                .then(response => response.json())
+                .then(data => {
+                    const address = data.display_name;
+                    localisationInput.value = address;
+                })
+                .catch(() => {
+                    localisationInput.value = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                });
+        });
+    }
+
+    function toggleLocalisation() {
+        if (!playModeSelect || !localisationSection) return;
+
+        const val = playModeSelect.value;
+        const text = playModeSelect.options[playModeSelect.selectedIndex]?.text || '';
+        
+        // Very broad check to catch any variation of "Sur Site" or "ONSITE"
+        const isOnSite = val.toUpperCase().includes('ONSITE') || 
+                         val.includes('Sur Site') || 
+                         text.includes('Sur Site');
+
+        if (isOnSite) {
+            localisationSection.style.display = 'block';
+            // Wait for animation and display:block to settle
+            setTimeout(() => {
+                initMap();
+                if (map) {
+                    map.invalidateSize();
+                }
+            }, 500);
+        } else {
+            localisationSection.style.display = 'none';
+        }
+    }
+
+    if (playModeSelect) {
+        playModeSelect.addEventListener('change', toggleLocalisation);
+        // Initial check
+        toggleLocalisation();
+    }
+
+    // Form Handling
+    const form = document.querySelector('form');
+    const submitBtn = document.getElementById('submitBtn');
+    if (form && submitBtn) {
+        form.addEventListener('submit', function() {
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+            submitBtn.style.opacity = '0.8';
+        });
+    }
+
+    // CSS for errors and animations
     const style = document.createElement('style');
     style.textContent = `
-        .custom-error-message, 
-        .custom-error-message ul, 
-        .custom-error-message li, 
-        .custom-error-message span {
-            color: #ff0000 !important; /* Bright Red */
-            font-weight: bold;
-            list-style-type: none;
-            padding-left: 0;
-            margin-top: 5px;
-            display: block;
+        .custom-error-message, .custom-error-message ul, .custom-error-message li, .custom-error-message span {
+            color: #ff0000 !important; font-weight: bold; list-style-type: none; padding-left: 0; margin-top: 5px; display: block;
         }
+        #map { box-shadow: 0 0 15px rgba(0,0,0,0.1); }
     `;
     document.head.appendChild(style);
+});
 </script>
 {% endblock %}

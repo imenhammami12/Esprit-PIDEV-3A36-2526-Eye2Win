@@ -66,9 +66,13 @@
                                             <span class="text-white-50">End:</span> &nbsp; {{ tournament.dateFin ? tournament.dateFin|date('M d, Y') : 'TBA' }}
                                         </span>
                                     </div>
-                                    <div class="d-flex align-items-center">
+                                    <div class="d-flex align-items-center mb-2">
                                         <div style="width: 24px;"><i class="fas fa-gamepad text-danger"></i></div>
                                         <span>{{ tournament.matchs|length }} Matches</span>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <div style="width: 24px;"><i class="fas fa-ticket-alt text-danger"></i></div>
+                                        <span><span class="text-white-50">Entry Fee:</span> {{ tournament.prix|number_format(2, '.', ',') }} TND</span>
                                     </div>
                                 </div>
                                 

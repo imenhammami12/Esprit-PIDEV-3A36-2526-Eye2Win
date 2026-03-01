@@ -45,9 +45,16 @@ class Tournoi
     #[ORM\OneToMany(mappedBy: 'tournoi', targetEntity: Matches::class, orphanRemoval: true)]
     private Collection $matchs;
 
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'tournaments')]
+    private Collection $participants;
+    
+    #[ORM\Column(type: 'float', options: ["default" => 0.0])]
+    private ?float $prix = 0.0;
+
     public function __construct()
     {
         $this->matchs = new ArrayCollection();
+        $this->participants = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -153,6 +160,42 @@ class Tournoi
                 $match->setTournoi(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getParticipants(): Collection
+    {
+        return $this->participants;
+    }
+
+    public function addParticipant(User $participant): static
+    {
+        if (!$this->participants->contains($participant)) {
+            $this->participants->add($participant);
+        }
+
+        return $this;
+    }
+
+    public function removeParticipant(User $participant): static
+    {
+        $this->participants->removeElement($participant);
+
+        return $this;
+    }
+
+    public function getPrix(): ?float
+    {
+        return $this->prix;
+    }
+
+    public function setPrix(?float $prix): static
+    {
+        $this->prix = $prix;
 
         return $this;
     }

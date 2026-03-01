@@ -38,7 +38,8 @@
                     <th>Score</th>
                     <th>Equipe 2</th>
                     <th>Date</th>
-                    <th>Prix</th>
+                    <th>Mode</th>
+                    <th>Localisation</th>
                     <th style="width: 150px;">Actions</th>
                 </tr>
             </thead>
@@ -60,11 +61,15 @@
                             {{ match.dateMatch ? match.dateMatch|date('M d, Y') : 'N/A' }}
                         </td>
                         <td>
-                            {% if match.prix %}
-                                <span class="badge bg-info">{{ match.prix.name }}</span>
+                            {% if match.playMode %}
+                                {% set modeColor = match.playMode.value == 'Sur Site' ? 'warning' : 'primary' %}
+                                <span class="badge bg-{{ modeColor }}">{{ match.playMode.value }}</span>
                             {% else %}
-                                <span class="text-muted">-</span>
+                                <span class="badge bg-secondary">En Ligne</span>
                             {% endif %}
+                        </td>
+                        <td style="max-width: 200px;" class="text-truncate" title="{{ match.localisation }}">
+                            {{ match.localisation|default('-') }}
                         </td>
                         <td>
                             <div class="btn-group" role="group">

@@ -152,6 +152,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     #[ORM\OneToMany(targetEntity: MatchValorant::class, mappedBy: 'owner', orphanRemoval: true)]
     private Collection $valorantMatches;
 
+    #[ORM\ManyToMany(targetEntity: Tournoi::class, mappedBy: 'participants')]
+    private Collection $tournaments;
+
     public function __construct()
     {
         $this->ownedTeams        = new ArrayCollection();
@@ -161,6 +164,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
         $this->auditLogs         = new ArrayCollection();
         $this->trainingSessions  = new ArrayCollection();
         $this->videos            = new ArrayCollection();
+        $this->tournaments = new ArrayCollection();
         $this->createdAt         = new \DateTime();
         $this->lastLogin         = new \DateTime();
         $this->accountStatus     = AccountStatus::ACTIVE;
@@ -516,5 +520,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     {
         $codes = $this->getBackupCodes();
         return $codes ? count($codes) : 0;
+    }
+
+    /**
+     * @return Collection<int, Tournoi>
+     */
+    public function getTournaments(): Collection
+    {
+        return $this->tournaments;
+    }
+
+    public function addTournament(Tournoi $tournament): static
+    {
+        if (!$this->tournaments->contains($tournament)) {
+            $this->tournaments->add($tournament);
+            $tournament->addParticipant($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTournament(Tournoi $tournament): static
+    {
+        if ($this->tournaments->removeElement($tournament)) {
+            $tournament->removeParticipant($this);
+        }
+
+        return $this;
     }
 }
