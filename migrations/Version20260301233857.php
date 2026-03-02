@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DoctrineMigrations;
 
+use Doctrine\DBAL\Platforms\PostgreSQLPlatform;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
@@ -20,9 +21,9 @@ final class Version20260301233857 extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        $platform = $this->connection->getDatabasePlatform()->getName();
+        $isPostgres = $this->connection->getDatabasePlatform() instanceof PostgreSQLPlatform;
 
-        if ($platform === 'postgresql') {
+        if ($isPostgres) {
             $this->addSql('ALTER TABLE tournoi ALTER COLUMN prix TYPE DOUBLE PRECISION USING prix::double precision');
             $this->addSql('ALTER TABLE tournoi ALTER COLUMN prix SET DEFAULT 0');
             $this->addSql('ALTER TABLE tournoi ALTER COLUMN prix SET NOT NULL');
@@ -39,9 +40,9 @@ final class Version20260301233857 extends AbstractMigration
 
     public function down(Schema $schema): void
     {
-        $platform = $this->connection->getDatabasePlatform()->getName();
+        $isPostgres = $this->connection->getDatabasePlatform() instanceof PostgreSQLPlatform;
 
-        if ($platform === 'postgresql') {
+        if ($isPostgres) {
             $this->addSql('ALTER TABLE tournoi ALTER COLUMN prix TYPE DOUBLE PRECISION USING prix::double precision');
             $this->addSql('ALTER TABLE tournoi ALTER COLUMN prix SET DEFAULT 0');
             $this->addSql('ALTER TABLE tournoi ALTER COLUMN prix SET NOT NULL');
