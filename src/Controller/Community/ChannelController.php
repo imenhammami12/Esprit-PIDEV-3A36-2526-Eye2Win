@@ -11,13 +11,13 @@ use App\Repository\MessageRepository;
 use App\Repository\NotificationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Service\ChannelAccessService;
 use App\Repository\ChannelJoinRequestRepository;
-
 use App\Repository\ChannelMemberRepository;
 
 class ChannelController extends AbstractController
@@ -66,7 +66,7 @@ class ChannelController extends AbstractController
 
         return $this->render('community/channel/index.html.twig', [
             'channels' => $channels,
-            'channelNotifications' => $channelNotifications, //notif is now no more displayed in the page itself (icon)
+            'channelNotifications' => $channelNotifications,
             'pendingChannelIds' => $pendingChannelIds,
             'memberChannelIds' => $memberChannelIds,
         ]);
@@ -110,7 +110,6 @@ class ChannelController extends AbstractController
                          NotificationRepository $notificationRepo,
                          ChannelJoinRequestRepository $reqRepo): Response
     {
-        // Access control: only APPROVED+active+allowed (same logic as index)
         $visible = $channelRepo->findVisibleForUser($this->getUser());
         $visibleIds = array_map(fn($c) => $c->getId(), $visible);
 
@@ -118,7 +117,6 @@ class ChannelController extends AbstractController
             throw $this->createAccessDeniedException("Channel non accessible.");
         }
 
-        // ✅ NEW: enforce access for private
         if (!$access->canAccess($channel, $this->getUser())) {
             $user = $this->getUser();
             $pending = null;
@@ -136,7 +134,6 @@ class ChannelController extends AbstractController
             ]);
         }
 
-        //$messages = $messageRepo->findForChannelVisible($channel->getId());
         $messages = $messageRepo->findForChannelAll($channel->getId());
         $editId = $request->query->getInt('edit', 0);
         $editFormView = null;
@@ -159,30 +156,6 @@ class ChannelController extends AbstractController
             }
         }
 
-
-        /*/ Message form only if logged in
-        $message = new Message();
-        $form = $this->createForm(MessageType::class, $message);
-        $form->handleRequest($request);
-
-        if ($this->isGranted('ROLE_USER') && $form->isSubmitted() && $form->isValid())
-        {
-            $now = new \DateTimeImmutable();
-            $user = $this->getUser();
-
-            $message->setChannel($channel);
-            $message->setSentAt($now);
-            $message->setEditedAt($now);
-            $message->setIsDeleted(false);
-            $message->setSenderName(method_exists($user, 'getUsername') ? $user->getUsername() : $user->getUserIdentifier());
-            $message->setSenderEmail($user->getUserIdentifier());
-
-            $em->persist($message);
-            $em->flush();
-
-            return $this->redirectToRoute('community_channels_show', ['id' => $channel->getId()]);
-        }*/
-// Message form only if logged in  FOR REAL TIME CHAT
         $message = new Message();
         $form = $this->createForm(MessageType::class, $message, [
             'action' => $this->generateUrl('community_message_send', ['id' => $channel->getId()]),
@@ -198,11 +171,58 @@ class ChannelController extends AbstractController
         ]);
     }
 
+    /**
+     * Polling endpoint — returns new messages after a given ID
+     */
+    #[Route('/channels/{id}/poll', name: 'community_channels_poll', requirements: ['id' => '\d+'], methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function poll(Channel $channel, Request $request, MessageRepository $messageRepo, ChannelAccessService $access): JsonResponse
+    {
+        if (!$access->canAccess($channel, $this->getUser())) {
+            return $this->json(['messages' => []]);
+        }
+
+        $afterId = (int) $request->query->get('after', 0);
+
+        $messages = $messageRepo->createQueryBuilder('m')
+            ->where('m.channel = :channel')
+            ->andWhere('m.id > :afterId')
+            ->setParameter('channel', $channel)
+            ->setParameter('afterId', $afterId)
+            ->orderBy('m.id', 'ASC')
+            ->setMaxResults(50)
+            ->getQuery()
+            ->getResult();
+
+        $data = array_map(function (Message $m) {
+            $attachments = [];
+            foreach ($m->getAttachments() as $a) {
+                $attachments[] = [
+                    'url'  => $a->getUrl(),
+                    'name' => $a->getOriginalName(),
+                    'mime' => $a->getMimeType(),
+                    'size' => $a->getSize(),
+                ];
+            }
+
+            return [
+                'id'          => $m->getId(),
+                'content'     => $m->getContent(),
+                'senderName'  => $m->getSenderName(),
+                'senderEmail' => $m->getSenderEmail(),
+                'sentAt'      => $m->getSentAt()?->format('H:i'),
+                'isDeleted'   => $m->isDeleted(),
+                'attachments' => $attachments,
+            ];
+        }, $messages);
+
+        return $this->json(['messages' => $data]);
+    }
+
     #[IsGranted('ROLE_USER')]
     #[Route('/channels/{id}/edit', name: 'community_channels_edit', requirements: ['id' => '\d+'])]
     public function edit(Channel $channel, Request $request, EntityManagerInterface $em): Response
     {
-        // only creator can edit
         $identifier = $this->getUser()?->getUserIdentifier();
         if ($channel->getCreatedBy() !== $identifier) {
             throw $this->createAccessDeniedException("you can't modify this channel.");
@@ -228,7 +248,6 @@ class ChannelController extends AbstractController
     #[Route('/channels/{id}/delete', name: 'community_channels_delete', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function delete(Channel $channel, Request $request, EntityManagerInterface $em): Response
     {
-        // only creator can delete
         $identifier = $this->getUser()?->getUserIdentifier();
         if ($channel->getCreatedBy() !== $identifier) {
             throw $this->createAccessDeniedException("you can't delete this channel.");
@@ -245,6 +264,4 @@ class ChannelController extends AbstractController
         $this->addFlash('success', 'Channel supprimé ✅');
         return $this->redirectToRoute('community_channels_index');
     }
-
-
 }
