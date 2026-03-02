@@ -175,7 +175,7 @@ class RegistrationController extends AbstractController
                 $this->addFlash('error', 'An account already exists with this information.');
             } catch (\Exception $e) {
                 // Any other error during registration
-                $this->addFlash('error', 'An error occurred while creating your account. Please try again.');
+                $this->addFlash('error', 'DEBUG: ' . $e->getMessage() . ' | ' . $e->getFile() . ':' . $e->getLine());
                 
                 // Error logging for debugging (optional)
                 // $this->logger->error('Registration error: ' . $e->getMessage());
