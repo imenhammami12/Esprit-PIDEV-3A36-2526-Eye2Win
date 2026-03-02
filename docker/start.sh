@@ -4,8 +4,8 @@ set -e
 export APP_ENV=prod
 export APP_DEBUG=0
 
-# Supprimer le cache avant de le recréer
-rm -rf /var/www/var/cache/prod
+# Force clear all cache
+rm -rf /var/www/var/cache/*
 
 php bin/console cache:clear --env=prod
 php bin/console cache:warmup --env=prod
