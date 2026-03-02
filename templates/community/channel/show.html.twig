@@ -447,7 +447,7 @@
             const channelId = {{ channel.id }};
 
             // ✅ Polling instead of Mercure (works on Render free tier)
-            let lastMessageId = {{ messages|last is defined ? messages|last.id : 0 }};
+            let lastMessageId = {{ messages|length > 0 ? messages|last.id : 0 }};
 
             function pollMessages() {
                 fetch(`/channels/${channelId}/poll?after=${lastMessageId}`, {
