@@ -20,12 +20,12 @@ class TrainingSession
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $joinedAt = null;
 
-#[ORM\ManyToOne(inversedBy: 'trainingSessions')]
-#[ORM\JoinColumn(name: '"ID_planning"', referencedColumnName: '"IDplanning"', nullable: false)]
-private ?Planning $planning = null;
+    #[ORM\ManyToOne(inversedBy: 'trainingSessions')]
+    #[ORM\JoinColumn(name: '"ID_planning"', referencedColumnName: '"IDplanning"', nullable: false)]
+    private ?Planning $planning = null;
 
     #[ORM\ManyToOne(inversedBy: 'trainingSessions')]
-    #[ORM\JoinColumn(name: 'IDcurrent_user', nullable: false)]
+    #[ORM\JoinColumn(name: '"IDcurrent_user"', nullable: false)]
     private ?User $user = null;
 
     public function __construct()
