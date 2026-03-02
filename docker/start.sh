@@ -4,10 +4,11 @@ set -e
 export APP_ENV=prod
 export APP_DEBUG=0
 
-# Force clear all cache
+# Nettoyer complètement le cache
 rm -rf /var/www/var/cache/*
 
-php bin/console cache:clear --env=prod
+# Clear et warmup au démarrage (pas au build)
+php bin/console cache:clear --env=prod --no-warmup
 php bin/console cache:warmup --env=prod
 
 chown -R www-data:www-data /var/www/var
