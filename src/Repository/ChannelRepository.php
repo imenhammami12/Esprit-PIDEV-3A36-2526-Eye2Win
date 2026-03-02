@@ -100,64 +100,62 @@ class ChannelRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-    public function findAdminList(string $q, string $status, string $type, string $active, string $sort, string $dir): array
-    {
-        $qb = $this->createQueryBuilder('c');
+public function findAdminList(string $q, string $status, string $type, string $active, string $sort, string $dir): array
+{
+    $qb = $this->createQueryBuilder('c');
 
-        // Search
-        if ($q !== '') {
-            $qb->andWhere('LOWER(c.name) LIKE :q OR LOWER(c.game) LIKE :q OR LOWER(c.createdBy) LIKE :q')
-                ->setParameter('q', '%'.mb_strtolower($q).'%');
-        }
+    // Search
+    if ($q !== '') {
+        $qb->andWhere('LOWER(c.name) LIKE :q OR LOWER(c.game) LIKE :q OR LOWER(c.createdBy) LIKE :q')
+            ->setParameter('q', '%'.mb_strtolower($q).'%');
+    }
 
-        // Status
-        if ($status !== 'all') {
-            $qb->andWhere('c.status = :status')->setParameter('status', $status);
-        }
+    // Status
+    if ($status !== 'all') {
+        $qb->andWhere('c.status = :status')->setParameter('status', $status);
+    }
 
-        // Type
-        if ($type !== 'all') {
-            $qb->andWhere('c.type = :type')->setParameter('type', $type);
-        }
+    // Type
+    if ($type !== 'all') {
+        $qb->andWhere('c.type = :type')->setParameter('type', $type);
+    }
 
-        // Active
-        if ($active !== 'all') {
-            $qb->andWhere('c.isActive = :active')->setParameter('active', $active === '1');
-        }
-        $sortMap = [
-            'id'        => 'c.id',
-            'name'      => 'c.name',
-            'game'      => 'c.game',
-            'type'      => 'c.type',
-            'status'    => 'c.status',
-            'active'    => 'c.isActive',
-            'createdAt' => 'c.createdAt',
-            'createdBy' => 'c.createdBy',
-            'approvedAt'=> 'c.approvedAt',
-        ];
+    // Active
+    if ($active !== 'all') {
+        $qb->andWhere('c.isActive = :active')->setParameter('active', $active === '1');
+    }
 
-        $sortExpr = $sortMap[$sort] ?? 'c.createdAt';
-        $dirSql   = strtoupper($dir) === 'asc' ? 'ASC' : 'DESC';
+    $sortMap = [
+        'id'        => 'c.id',
+        'name'      => 'c.name',
+        'game'      => 'c.game',
+        'type'      => 'c.type',
+        'status'    => 'c.status',
+        'active'    => 'c.isActive',
+        'createdAt' => 'c.createdAt',
+        'createdBy' => 'c.createdBy',
+        'approvedAt'=> 'c.approvedAt',
+    ];
 
+    // Colonnes texte uniquement (LOWER applicable)
+    $textColumns = ['name', 'game', 'type', 'status', 'createdBy'];
+
+    $sortExpr = $sortMap[$sort] ?? 'c.createdAt';
+    $dirSql   = strtoupper($dir) === 'asc' ? 'ASC' : 'DESC';
+
+    // LOWER uniquement sur les colonnes texte
+    if (in_array($sort, $textColumns, true)) {
         $qb->orderBy('LOWER(' . $sortExpr . ')', $dirSql);
+    } else {
+        $qb->orderBy($sortExpr, $dirSql);
+    }
 
-        if($sortExpr !== "c.id"){
-            $qb->addOrderBy("c.id", $dirSql);
-        }
+    if ($sortExpr !== 'c.id') {
+        $qb->addOrderBy('c.id', $dirSql);
+    }
 
-        return $qb->getQuery()->getResult();
-
-        /*if($sortExpr !== 'c.id'){
-            $qb->addOrderBy('c.id','DESC');
-        }
-        return $qb->getQuery()->getResult();
-
-        return $qb
-            //->orderBy('c.id', 'DESC')
-            ->addOrderBy($sortExpr, $dirSql)
-            ->getQuery()
-            ->getResult();*/
-    }/// used in adminchannelcontroller for filtering
+    return $qb->getQuery()->getResult();
+}
 
     public function countByStatus(string $status): int
     {
