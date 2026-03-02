@@ -5,251 +5,696 @@
 
 {% block body %}
 
-    <style>
-        .channel-avatar-big{
-            width: 140px; height: 140px;
-            border-radius: 50%;
-            display:flex; align-items:center; justify-content:center;
-            font-weight: 900; font-size: 56px;
-            color: white;
-            background: linear-gradient(135deg, rgba(255,0,80,0.35), rgba(0,220,255,0.25));
-            border: 1px solid rgba(255,255,255,0.12);
-            box-shadow: 0 10px 35px rgba(0,0,0,0.35);
-            margin: 0 auto;
-            position: relative;
-        }
-        .status-dot{
-            position:absolute; right: 14px; bottom: 14px;
-            width: 14px; height: 14px; border-radius: 50%;
-            border: 2px solid rgba(0,0,0,0.35);
-        }
-    </style>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+    .ch-wrap {
+        font-family: 'Inter', sans-serif;
+        padding: 0 0 60px;
+    }
+
+    /* ── Breadcrumb bar ── */
+    .ch-breadcrumb {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 32px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .ch-breadcrumb-trail {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: rgba(255,255,255,0.45);
+    }
+    .ch-breadcrumb-trail a {
+        color: rgba(255,255,255,0.55);
+        text-decoration: none;
+        transition: color .2s;
+    }
+    .ch-breadcrumb-trail a:hover { color: #fff; }
+    .ch-breadcrumb-trail .sep { opacity: .3; }
+    .ch-breadcrumb-trail .current { color: rgba(255,255,255,0.90); font-weight: 500; }
+    .ch-back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 16px;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.10);
+        color: rgba(255,255,255,0.75);
+        font-size: 13px;
+        text-decoration: none;
+        transition: all .2s;
+    }
+    .ch-back-btn:hover {
+        background: rgba(255,255,255,0.10);
+        color: #fff;
+        border-color: rgba(255,255,255,0.20);
+    }
+
+    /* ── Hero banner ── */
+    .ch-hero {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 28px;
+        padding: 40px 36px;
+        background: rgba(10,10,18,0.80);
+        border: 1px solid rgba(255,255,255,0.07);
+    }
+    .ch-hero-bg {
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(ellipse at 15% 50%, rgba(255,30,80,0.18) 0%, transparent 55%),
+            radial-gradient(ellipse at 85% 20%, rgba(0,200,255,0.14) 0%, transparent 50%),
+            radial-gradient(ellipse at 50% 100%, rgba(100,50,255,0.10) 0%, transparent 60%);
+        z-index: 0;
+    }
+    .ch-hero-grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+        background-size: 40px 40px;
+        z-index: 0;
+    }
+    .ch-hero-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 28px;
+        flex-wrap: wrap;
+    }
+    .ch-avatar {
+        width: 88px;
+        height: 88px;
+        border-radius: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 36px;
+        font-weight: 700;
+        color: #fff;
+        background: linear-gradient(135deg, rgba(255,30,80,0.5), rgba(0,200,255,0.35));
+        border: 1px solid rgba(255,255,255,0.15);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.12);
+        flex-shrink: 0;
+        position: relative;
+    }
+    .ch-avatar-dot {
+        position: absolute;
+        bottom: -4px;
+        right: -4px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid rgba(10,10,18,1);
+    }
+    .ch-hero-info { flex: 1; min-width: 200px; }
+    .ch-hero-name {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 36px;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: .5px;
+        margin: 0 0 6px;
+        line-height: 1;
+    }
+    .ch-hero-desc {
+        color: rgba(255,255,255,0.55);
+        font-size: 14px;
+        margin: 0 0 14px;
+    }
+    .ch-badges {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .ch-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+        border: 1px solid transparent;
+    }
+    .ch-badge-approved { background: rgba(40,167,69,0.15); border-color: rgba(40,167,69,0.35); color: #4ade80; }
+    .ch-badge-pending  { background: rgba(23,162,184,0.15); border-color: rgba(23,162,184,0.35); color: #38bdf8; }
+    .ch-badge-rejected { background: rgba(220,53,69,0.15);  border-color: rgba(220,53,69,0.35);  color: #f87171; }
+    .ch-badge-active   { background: rgba(40,167,69,0.12); border-color: rgba(40,167,69,0.25); color: #86efac; }
+    .ch-badge-inactive { background: rgba(108,117,125,0.15); border-color: rgba(108,117,125,0.3); color: #9ca3af; }
+    .ch-badge-type     { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.12); color: rgba(255,255,255,0.75); }
+
+    /* ── Stats row ── */
+    .ch-stats-row {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        gap: 20px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+    }
+    .ch-stat {
+        flex: 1;
+        min-width: 120px;
+        padding: 16px 20px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.07);
+    }
+    .ch-stat-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .8px;
+        color: rgba(255,255,255,0.40);
+        margin-bottom: 6px;
+    }
+    .ch-stat-value {
+        font-family: 'Rajdhani', sans-serif;
+        font-size: 26px;
+        font-weight: 700;
+        color: #fff;
+    }
+    .ch-stat-sub {
+        font-size: 11px;
+        color: rgba(255,255,255,0.40);
+        margin-top: 2px;
+    }
+
+    /* ── Grid ── */
+    .ch-grid {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 20px;
+        align-items: start;
+    }
+    @media (max-width: 900px) {
+        .ch-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── Cards ── */
+    .ch-card {
+        background: rgba(10,10,18,0.70);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 18px;
+        overflow: hidden;
+    }
+    .ch-card-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 18px 22px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: .8px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.45);
+    }
+    .ch-card-header i { font-size: 14px; }
+    .ch-card-body { padding: 20px 22px; }
+
+    /* ── Actions ── */
+    .ch-action-btn {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 500;
+        border: 1px solid transparent;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all .2s;
+        margin-bottom: 8px;
+        background: transparent;
+        text-align: left;
+    }
+    .ch-action-btn:last-child { margin-bottom: 0; }
+
+    .ch-action-edit {
+        background: rgba(99,102,241,0.12);
+        border-color: rgba(99,102,241,0.25);
+        color: #a5b4fc;
+    }
+    .ch-action-edit:hover {
+        background: rgba(99,102,241,0.22);
+        border-color: rgba(99,102,241,0.45);
+        color: #c7d2fe;
+    }
+    .ch-action-approve {
+        background: rgba(40,167,69,0.12);
+        border-color: rgba(40,167,69,0.25);
+        color: #4ade80;
+    }
+    .ch-action-approve:hover {
+        background: rgba(40,167,69,0.22);
+        border-color: rgba(40,167,69,0.45);
+        color: #86efac;
+    }
+    .ch-action-reject {
+        background: rgba(220,53,69,0.10);
+        border-color: rgba(220,53,69,0.22);
+        color: #f87171;
+    }
+    .ch-action-reject:hover {
+        background: rgba(220,53,69,0.20);
+        border-color: rgba(220,53,69,0.40);
+        color: #fca5a5;
+    }
+    .ch-action-toggle {
+        background: rgba(251,191,36,0.10);
+        border-color: rgba(251,191,36,0.22);
+        color: #fbbf24;
+    }
+    .ch-action-toggle:hover {
+        background: rgba(251,191,36,0.20);
+        border-color: rgba(251,191,36,0.40);
+        color: #fde68a;
+    }
+    .ch-action-delete {
+        background: rgba(220,53,69,0.07);
+        border-color: rgba(220,53,69,0.15);
+        color: rgba(248,113,113,0.75);
+    }
+    .ch-action-delete:hover {
+        background: rgba(220,53,69,0.15);
+        border-color: rgba(220,53,69,0.30);
+        color: #f87171;
+    }
+    .ch-action-btn .icon-wrap {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        background: rgba(255,255,255,0.06);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 13px;
+    }
+
+    /* ── Info rows ── */
+    .ch-info-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 14px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .ch-info-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .ch-info-row:first-child { padding-top: 0; }
+    .ch-info-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.08);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255,255,255,0.50);
+        font-size: 13px;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+    .ch-info-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        color: rgba(255,255,255,0.35);
+        margin-bottom: 3px;
+    }
+    .ch-info-value {
+        font-size: 14px;
+        color: rgba(255,255,255,0.85);
+        font-weight: 500;
+    }
+
+    /* ── Messages table ── */
+    .ch-msg-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .ch-msg-table th {
+        padding: 10px 14px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        color: rgba(255,255,255,0.35);
+        font-weight: 600;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        text-align: left;
+    }
+    .ch-msg-table td {
+        padding: 12px 14px;
+        font-size: 13px;
+        color: rgba(255,255,255,0.75);
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        vertical-align: middle;
+    }
+    .ch-msg-table tr:last-child td { border-bottom: none; }
+    .ch-msg-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .ch-sender-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+    }
+    .ch-sender-avatar {
+        width: 26px;
+        height: 26px;
+        border-radius: 7px;
+        background: rgba(99,102,241,0.20);
+        border: 1px solid rgba(99,102,241,0.30);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        font-weight: 700;
+        color: #a5b4fc;
+        flex-shrink: 0;
+    }
+    .ch-msg-deleted {
+        font-style: italic;
+        color: rgba(255,255,255,0.30);
+    }
+    .ch-msg-time {
+        font-size: 11px;
+        color: rgba(255,255,255,0.35);
+        white-space: nowrap;
+    }
+    .ch-empty {
+        text-align: center;
+        padding: 40px 20px;
+        color: rgba(255,255,255,0.30);
+        font-size: 13px;
+    }
+    .ch-empty i { font-size: 28px; display: block; margin-bottom: 10px; opacity: .4; }
+
+    /* ── Divider ── */
+    .ch-divider {
+        height: 1px;
+        background: rgba(255,255,255,0.06);
+        margin: 20px 0;
+    }
+
+    /* ── Modal ── */
+    .ch-modal .modal-content {
+        background: rgba(12,12,22,0.98);
+        border: 1px solid rgba(255,255,255,0.10);
+        border-radius: 18px;
+        backdrop-filter: blur(20px);
+    }
+    .ch-modal .modal-header {
+        border-bottom: 1px solid rgba(255,255,255,0.07);
+        padding: 20px 24px;
+    }
+    .ch-modal .modal-title { color: #fff; font-weight: 600; font-size: 15px; }
+    .ch-modal .modal-body { padding: 20px 24px; }
+    .ch-modal .modal-footer {
+        border-top: 1px solid rgba(255,255,255,0.07);
+        padding: 16px 24px;
+        gap: 10px;
+    }
+    .ch-modal .form-control, .ch-modal textarea {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.10);
+        color: rgba(255,255,255,0.90);
+        border-radius: 10px;
+    }
+    .ch-modal .form-control:focus, .ch-modal textarea:focus {
+        background: rgba(255,255,255,0.07);
+        border-color: rgba(99,102,241,0.50);
+        box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+        color: #fff;
+    }
+</style>
+
+<div class="ch-wrap">
+
+    {# Breadcrumb #}
+    <div class="ch-breadcrumb">
+        <div class="ch-breadcrumb-trail">
+            <a href="{{ path('admin_dashboard') }}"><i class="bi bi-house-fill"></i></a>
+            <span class="sep">/</span>
+            <a href="{{ path('admin_channels_index') }}">Channels</a>
+            <span class="sep">/</span>
+            <span class="current">{{ channel.name }}</span>
+        </div>
+        <a href="{{ path('admin_channels_index') }}" class="ch-back-btn">
+            <i class="bi bi-arrow-left"></i> Back to List
+        </a>
+    </div>
 
     {% set isPending  = channel.status == 'pending' %}
     {% set isApproved = channel.status == 'approved' %}
     {% set isRejected = channel.status == 'rejected' %}
 
-    <div class="user-profile-header">
-        <div class="row align-items-center">
-            <div class="col">
-                <h1 class="page-title">Channel Details</h1>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb-list">
-                        <li><a href="{{ path('admin_dashboard') }}"><i class="bi bi-house"></i> Dashboard</a></li>
-                        <li><a href="{{ path('admin_channels_index') }}">Channels</a></li>
-                        <li class="active">{{ channel.name }}</li>
-                    </ol>
-                </nav>
+    {# Hero Banner #}
+    <div class="ch-hero">
+        <div class="ch-hero-bg"></div>
+        <div class="ch-hero-grid"></div>
+
+        <div class="ch-hero-content">
+            <div class="ch-avatar">
+                {{ channel.name|slice(0,2)|upper }}
+                <span class="ch-avatar-dot" style="background:
+                    {% if isApproved and channel.isActive %}#22c55e
+                    {% elseif isApproved and not channel.isActive %}#f59e0b
+                    {% elseif isPending %}#38bdf8
+                    {% else %}#ef4444{% endif %};"></span>
             </div>
 
-            <div class="col-auto">
-                <a href="{{ path('admin_channels_index') }}" class="btn btn-outline-light btn-sm">
-                    <i class="bi bi-arrow-left"></i> Back to List
-                </a>
+            <div class="ch-hero-info">
+                <h1 class="ch-hero-name">{{ channel.name }}</h1>
+                <p class="ch-hero-desc">{{ channel.description ?: 'No description provided.' }}</p>
+                <div class="ch-badges">
+                    <span class="ch-badge {% if isApproved %}ch-badge-approved{% elseif isPending %}ch-badge-pending{% else %}ch-badge-rejected{% endif %}">
+                        <i class="bi bi-{% if isApproved %}check-circle{% elseif isPending %}clock{% else %}x-circle{% endif %}"></i>
+                        {{ channel.status|capitalize }}
+                    </span>
+                    <span class="ch-badge {{ channel.isActive ? 'ch-badge-active' : 'ch-badge-inactive' }}">
+                        <i class="bi bi-{{ channel.isActive ? 'lightning-fill' : 'pause-circle' }}"></i>
+                        {{ channel.isActive ? 'Active' : 'Inactive' }}
+                    </span>
+                    <span class="ch-badge ch-badge-type">
+                        <i class="bi bi-{{ channel.type == 'public' ? 'globe' : 'lock' }}"></i>
+                        {{ channel.type|capitalize }}
+                    </span>
+                    <span class="ch-badge ch-badge-type">
+                        <i class="bi bi-controller"></i>
+                        {{ channel.game }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="ch-stats-row">
+            <div class="ch-stat">
+                <div class="ch-stat-label">Messages</div>
+                <div class="ch-stat-value">{{ messagesCount }}</div>
+                <div class="ch-stat-sub">Total in channel</div>
+            </div>
+            <div class="ch-stat">
+                <div class="ch-stat-label">Created</div>
+                <div class="ch-stat-value">{{ channel.createdAt ? channel.createdAt|date('d MMM') : '—' }}</div>
+                <div class="ch-stat-sub">{{ channel.createdAt ? channel.createdAt|date('Y') : '' }}</div>
+            </div>
+            <div class="ch-stat">
+                <div class="ch-stat-label">Created By</div>
+                <div class="ch-stat-value" style="font-size:18px;">{{ channel.createdBy|split('@')|first }}</div>
+                <div class="ch-stat-sub">{{ channel.createdBy }}</div>
+            </div>
+            <div class="ch-stat">
+                <div class="ch-stat-label">Channel ID</div>
+                <div class="ch-stat-value">#{{ channel.id }}</div>
+                <div class="ch-stat-sub">Unique identifier</div>
             </div>
         </div>
     </div>
 
-    <div class="user-details-grid">
+    {# Main Grid #}
+    <div class="ch-grid">
 
-        {# LEFT CARD #}
-        <div class="table-card p-4">
-            <div class="text-center">
-                <div class="channel-avatar-big">
-                    {{ channel.name|slice(0,2)|upper }}
-                    <span class="status-dot"
-                          style="background:
-                                  {% if isApproved and channel.isActive %}#28a745
-                                  {% elseif isApproved and not channel.isActive %}#ffc107
-                                  {% elseif isPending %}#17a2b8
-                                  {% else %}#dc3545{% endif %};">
-                    </span>
-                </div>
-
-                <h3 class="mt-3 mb-1">{{ channel.name }}</h3>
-                <div class="text-muted mb-3">{{ channel.description ?: 'No description.' }}</div>
-
-                <div class="d-flex justify-content-center gap-2 flex-wrap mb-4">
-                    <span class="badge {% if isApproved %}bg-success{% elseif isPending %}bg-info{% else %}bg-danger{% endif %}">
-                        {{ channel.status|capitalize }}
-                    </span>
-                    <span class="badge {{ channel.isActive ? 'bg-success' : 'bg-secondary' }}">
-                        {{ channel.isActive ? 'Active' : 'Inactive' }}
-                    </span>
-                    <span class="badge bg-dark">
-                        {{ channel.type }}
-                    </span>
-                </div>
+        {# LEFT — Actions #}
+        <div class="ch-card">
+            <div class="ch-card-header">
+                <i class="bi bi-lightning-charge"></i> Quick Actions
             </div>
+            <div class="ch-card-body">
 
-            <h6 class="text-uppercase text-muted mb-2">Quick Actions</h6>
-
-            <div class="d-grid gap-2">
-                <a href="{{ path('admin_channels_edit', {id: channel.id}) }}" class="btn btn-primary">
-                    <i class="bi bi-pencil"></i> Edit Channel
+                <a href="{{ path('admin_channels_edit', {id: channel.id}) }}" class="ch-action-btn ch-action-edit">
+                    <span class="icon-wrap"><i class="bi bi-pencil"></i></span>
+                    Edit Channel
                 </a>
 
                 {% if isPending %}
-                    <form method="post" action="{{ path('admin_channels_approve', {id: channel.id}) }}">
+                    <form method="post" action="{{ path('admin_channels_approve', {id: channel.id}) }}" style="margin-bottom:8px;">
                         <input type="hidden" name="_token" value="{{ csrf_token('approve_' ~ channel.id) }}">
-                        <button class="btn btn-success w-100" type="submit">
-                            <i class="bi bi-check2-circle"></i> Approve Channel
+                        <button type="submit" class="ch-action-btn ch-action-approve" style="margin-bottom:0;">
+                            <span class="icon-wrap"><i class="bi bi-check2-circle"></i></span>
+                            Approve Channel
                         </button>
                     </form>
-
-                    <button class="btn btn-danger" type="button"
+                    <button type="button" class="ch-action-btn ch-action-reject"
                             data-bs-toggle="modal" data-bs-target="#rejectModal">
-                        <i class="bi bi-x-circle"></i> Reject Channel
+                        <span class="icon-wrap"><i class="bi bi-x-circle"></i></span>
+                        Reject Channel
                     </button>
                 {% endif %}
 
-                <form method="post" action="{{ path('admin_channels_toggle', {id: channel.id}) }}">
+                <form method="post" action="{{ path('admin_channels_toggle', {id: channel.id}) }}" style="margin-bottom:8px;">
                     <input type="hidden" name="_token" value="{{ csrf_token('toggle_' ~ channel.id) }}">
-                    <button class="btn btn-warning w-100" type="submit">
-                        <i class="bi bi-toggle2-on"></i>
-                        {{ channel.isActive ? 'Deactivate' : 'Activate' }}
+                    <button type="submit" class="ch-action-btn ch-action-toggle" style="margin-bottom:0;">
+                        <span class="icon-wrap"><i class="bi bi-toggle2-{{ channel.isActive ? 'on' : 'off' }}"></i></span>
+                        {{ channel.isActive ? 'Deactivate' : 'Activate' }} Channel
                     </button>
                 </form>
 
-                <button class="btn btn-outline-danger" type="button"
+                <div class="ch-divider"></div>
+
+                <button type="button" class="ch-action-btn ch-action-delete"
                         data-bs-toggle="modal" data-bs-target="#deleteModal">
-                    <i class="bi bi-trash"></i> Delete Channel
+                    <span class="icon-wrap"><i class="bi bi-trash"></i></span>
+                    Delete Channel
                 </button>
+
+                {% if channel.rejectionReason %}
+                    <div class="ch-divider"></div>
+                    <div style="padding: 12px; border-radius: 10px; background: rgba(220,53,69,0.08); border: 1px solid rgba(220,53,69,0.18);">
+                        <div style="font-size: 11px; text-transform: uppercase; letter-spacing: .6px; color: #f87171; margin-bottom: 6px;">
+                            <i class="bi bi-exclamation-triangle me-1"></i> Rejection Reason
+                        </div>
+                        <div style="font-size: 13px; color: rgba(255,255,255,0.70);">{{ channel.rejectionReason }}</div>
+                    </div>
+                {% endif %}
             </div>
         </div>
 
-        {# RIGHT CARD #}
-        <div class="table-card p-4">
-            <div class="personal-info-dark">
-                <div class="personal-info-header">
-                    <div class="info-title"><i class="bi bi-info-circle"></i> Channel Information</div>
-                </div>
-
-                <div class="info-group">
-                    <div class="info-item">
-                        <div class="info-icon"><i class="bi bi-hash"></i></div>
-                        <div class="info-content">
-                            <div class="info-label">Channel ID</div>
-                            <div class="info-value">#{{ channel.id }}</div>
-                        </div>
-                    </div>
-
-                    <div class="info-item">
-                        <div class="info-icon"><i class="bi bi-person"></i></div>
-                        <div class="info-content">
-                            <div class="info-label">Created By</div>
-                            <div class="info-value">{{ channel.createdBy ?: '—' }}</div>
-                        </div>
-                    </div>
-
-                    <div class="info-item">
-                        <div class="info-icon"><i class="bi bi-calendar-event"></i></div>
-                        <div class="info-content">
-                            <div class="info-label">Created At</div>
-                            <div class="info-value">
-                                {{ channel.createdAt ? channel.createdAt|date('M d, Y - H:i') : '—' }}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="info-item">
-                        <div class="info-icon"><i class="bi bi-chat-dots"></i></div>
-                        <div class="info-content">
-                            <div class="info-label">Messages</div>
-                            <div class="info-value">{{ messagesCount }}</div>
-                        </div>
-                    </div>
-
-                    {% if channel.rejectionReason %}
-                        <div class="info-item">
-                            <div class="info-icon"><i class="bi bi-exclamation-triangle"></i></div>
-                            <div class="info-content">
-                                <div class="info-label">Rejection Reason</div>
-                                <div class="info-value">{{ channel.rejectionReason }}</div>
-                            </div>
-                        </div>
-                    {% endif %}
-                </div>
+        {# RIGHT — Messages #}
+        <div class="ch-card">
+            <div class="ch-card-header">
+                <i class="bi bi-chat-dots"></i> Recent Messages
+                <span style="margin-left: auto; background: rgba(255,255,255,0.06); padding: 2px 10px; border-radius: 999px; font-size: 11px; color: rgba(255,255,255,0.55);">
+                    {{ messagesCount }} total
+                </span>
             </div>
-
-            <hr style="border-color: rgba(255,255,255,0.08);">
-
-            <h5 class="mb-3">Recent Messages</h5>
-            <div class="table-responsive">
-                <table class="table table-dark table-borderless align-middle">
-                    <thead>
-                    <tr>
-                        <th>Sender</th>
-                        <th>Message</th>
-                        <th class="text-end">Time</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for m in lastMessages %}
-                        <tr>
-                            <td>{{ m.senderName }}</td>
-                            <td style="max-width: 380px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                {{ m.isDeleted ? 'this message is deleted.' : m.content }}
-                            </td>
-                            <td class="text-end">{{ m.sentAt ? m.sentAt|date('d/m/Y H:i') : '' }}</td>
-                        </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="3" class="text-center text-muted py-4">No messages yet.</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+            <div class="ch-card-body" style="padding: 0;">
+                {% if lastMessages|length > 0 %}
+                    <table class="ch-msg-table">
+                        <thead>
+                            <tr>
+                                <th>Sender</th>
+                                <th>Message</th>
+                                <th style="text-align:right;">Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for m in lastMessages %}
+                            <tr>
+                                <td>
+                                    <div class="ch-sender-chip">
+                                        <div class="ch-sender-avatar">
+                                            {{ m.senderName|slice(0,1)|upper }}
+                                        </div>
+                                        <span style="font-size:13px; color: rgba(255,255,255,0.80); font-weight:500;">
+                                            {{ m.senderName }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td style="max-width: 320px;">
+                                    {% if m.isDeleted %}
+                                        <span class="ch-msg-deleted"><i class="bi bi-slash-circle me-1"></i>Message deleted</span>
+                                    {% else %}
+                                        <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; max-width: 320px;">
+                                            {{ m.content }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align:right;">
+                                    <span class="ch-msg-time">
+                                        {{ m.sentAt ? m.sentAt|date('d/m H:i') : '' }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <div class="ch-empty">
+                        <i class="bi bi-chat-square-dots"></i>
+                        No messages in this channel yet.
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
+</div>
 
-    {# REJECT MODAL #}
-    <div class="modal fade" id="rejectModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content bg-dark text-white">
-                <div class="modal-header">
-                    <h5 class="modal-title">Reject Channel</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <form method="post" action="{{ path('admin_channels_reject', {id: channel.id}) }}">
-                    <div class="modal-body">
-                        <input type="hidden" name="_token" value="{{ csrf_token('reject_' ~ channel.id) }}">
-                        <label class="form-label">Reason</label>
-                        <textarea class="form-control" name="reason" rows="3" required></textarea>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-danger">Reject</button>
-                    </div>
-                </form>
+{# REJECT MODAL #}
+<div class="modal fade ch-modal" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-x-circle me-2 text-danger"></i>Reject Channel</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
+            <form method="post" action="{{ path('admin_channels_reject', {id: channel.id}) }}">
+                <div class="modal-body">
+                    <input type="hidden" name="_token" value="{{ csrf_token('reject_' ~ channel.id) }}">
+                    <label class="form-label" style="color: rgba(255,255,255,0.60); font-size: 12px; text-transform: uppercase; letter-spacing: .6px;">Reason for rejection</label>
+                    <textarea class="form-control" name="reason" rows="3" required
+                              placeholder="Explain why this channel is being rejected..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Reject Channel</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    {# DELETE MODAL #}
-    <div class="modal fade" id="deleteModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content bg-dark text-white">
-                <div class="modal-header">
-                    <h5 class="modal-title">Delete Channel</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <form method="post" action="{{ path('admin_channels_delete', {id: channel.id}) }}">
-                    <div class="modal-body">
-                        <input type="hidden" name="_token" value="{{ csrf_token('admin_delete_channel_' ~ channel.id) }}">
-                        <p class="mb-0">
-                            Delete <strong>{{ channel.name }}</strong>?<br>
-                            Messages: <strong>{{ messagesCount }}</strong>
+{# DELETE MODAL #}
+<div class="modal fade ch-modal" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-trash me-2 text-danger"></i>Delete Channel</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{{ path('admin_channels_delete', {id: channel.id}) }}">
+                <div class="modal-body">
+                    <input type="hidden" name="_token" value="{{ csrf_token('admin_delete_channel_' ~ channel.id) }}">
+                    <div style="padding: 16px; border-radius: 12px; background: rgba(220,53,69,0.08); border: 1px solid rgba(220,53,69,0.20); margin-bottom: 16px;">
+                        <p style="margin: 0; color: rgba(255,255,255,0.80); font-size: 14px;">
+                            You are about to permanently delete <strong style="color:#fff;">{{ channel.name }}</strong>.
+                            This channel contains <strong style="color:#f87171;">{{ messagesCount }} message{{ messagesCount != 1 ? 's' : '' }}</strong> that will also be deleted.
                         </p>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-danger">Delete</button>
-                    </div>
-                </form>
-            </div>
+                    <p style="color: rgba(255,255,255,0.45); font-size: 13px; margin: 0;">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete Permanently</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
 {% endblock %}
