@@ -21,7 +21,7 @@ class TrainingSession
     private ?\DateTimeInterface $joinedAt = null;
 
 #[ORM\ManyToOne(inversedBy: 'trainingSessions')]
-#[ORM\JoinColumn(name: 'ID_planning', referencedColumnName: '"IDplanning"', nullable: false)]
+#[ORM\JoinColumn(name: '"ID_planning"', referencedColumnName: '"IDplanning"', nullable: false)]
 private ?Planning $planning = null;
 
     #[ORM\ManyToOne(inversedBy: 'trainingSessions')]
