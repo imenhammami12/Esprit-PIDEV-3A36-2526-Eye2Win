@@ -14,7 +14,7 @@ class Planning
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(name: 'IDplanning')]
+    #[ORM\Column(name: '"IDplanning"')]  // ← avec guillemets échappés
     private ?int $id = null;
 
     #[ORM\Column(length: 255, nullable: true)]

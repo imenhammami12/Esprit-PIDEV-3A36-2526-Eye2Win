@@ -31,9 +31,9 @@ class Review
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\ManyToOne(inversedBy: 'reviews')]
-    #[ORM\JoinColumn(name: 'ID_planning', referencedColumnName: 'IDplanning', nullable: false)]
-    private ?Planning $planning = null;
+#[ORM\ManyToOne(inversedBy: 'reviews')]
+#[ORM\JoinColumn(name: 'ID_planning', referencedColumnName: '"IDplanning"', nullable: false)]
+private ?Planning $planning = null;
 
     public function __construct()
     {
