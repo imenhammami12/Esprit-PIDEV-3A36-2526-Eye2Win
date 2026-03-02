@@ -23,4 +23,17 @@ class TempAdminController extends AbstractController
         
         return new Response('Done! ' . $user->getEmail() . ' is now ROLE_ADMIN. DELETE THIS FILE NOW!');
     }
+
+    #[Route('/setup-migration-x7k9q2', name: 'temp_migration')]
+    public function migration(EntityManagerInterface $em): Response
+    {
+        try {
+            $em->getConnection()->executeStatement('ALTER TABLE "user" ALTER COLUMN is_totp_enabled DROP DEFAULT');
+            $em->getConnection()->executeStatement('ALTER TABLE "user" ALTER COLUMN is_totp_enabled TYPE BOOLEAN USING (is_totp_enabled::int != 0)');
+            $em->getConnection()->executeStatement('ALTER TABLE "user" ALTER COLUMN is_totp_enabled SET DEFAULT FALSE');
+            return new Response('Migration OK! La colonne is_totp_enabled est maintenant BOOLEAN.');
+        } catch (\Exception $e) {
+            return new Response('Error: ' . $e->getMessage());
+        }
+    }
 }
