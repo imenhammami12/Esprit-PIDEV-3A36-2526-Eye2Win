@@ -30,29 +30,27 @@ public function migration(EntityManagerInterface $em): Response
     $conn = $em->getConnection();
     $results = [];
 
-    // Lister TOUTES les colonnes SMALLINT sans filtre sur le nom
-    $sql = "
-        SELECT table_name, column_name, column_default
-        FROM information_schema.columns
-        WHERE table_schema = 'public'
-        AND data_type = 'smallint'
-        ORDER BY table_name, column_name
-    ";
+    $columns = [
+        ['table' => 'notification',          'column' => 'read'],
+        ['table' => 'password_reset_tokens', 'column' => 'used'],
+        ['table' => 'planning',              'column' => 'need_partner'],
+    ];
 
-    $columns = $conn->executeQuery($sql)->fetchAllAssociative();
-
-    if (empty($columns)) {
-        return new Response('✅ Aucune colonne SMALLINT trouvée.');
-    }
-
-    // Afficher la liste sans convertir pour diagnostiquer
-    $list = [];
     foreach ($columns as $item) {
-        $list[] = "📋 {$item['table_name']}.{$item['column_name']} (default: {$item['column_default']})";
+        $table = $item['table'];
+        $col   = $item['column'];
+        try {
+            $conn->executeStatement("ALTER TABLE \"$table\" ALTER COLUMN \"$col\" DROP DEFAULT");
+            $conn->executeStatement("ALTER TABLE \"$table\" ALTER COLUMN \"$col\" TYPE BOOLEAN USING (\"$col\"::int != 0)");
+            $conn->executeStatement("ALTER TABLE \"$table\" ALTER COLUMN \"$col\" SET DEFAULT FALSE");
+            $results[] = "✅ $table.$col converti en BOOLEAN";
+        } catch (\Exception $e) {
+            $results[] = "⚠️ $table.$col ERREUR : " . $e->getMessage();
+        }
     }
 
     return new Response(
-        '<h2>Colonnes SMALLINT restantes</h2>' . implode('<br>', $list),
+        '<h2>Résultats</h2>' . implode('<br>', $results),
         200,
         ['Content-Type' => 'text/html']
     );
