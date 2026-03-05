@@ -52,8 +52,11 @@ tests/                  # PHPUnit tests
 
 ## Contributors
 - [@imenhammami12](https://github.com/imenhammami12)
-- <!-- Ajoute les noms de tes coéquipiers ici -->
-
+- [@ayaben03](https://github.com/ayaben03)
+- [@chaimaamri](https://github.com/chaimaamri)
+- [@islemijko](https://github.com/islemijko)
+- [@trikijoe](https://github.com/trikijoe)
+  
 ## Academic Context
 Developed at **Esprit School of Engineering – Tunisia**  
 PIDEV – 3A36 | Academic Year 2025–2026
@@ -129,3 +132,4 @@ docker-compose up -d --build
 ⚠️ **Notes**
 - Secrets and credentials should never be committed to version control.
 - Adapt paths and commands based on your environment.
+
