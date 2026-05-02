@@ -129,7 +129,3 @@ docker-compose up -d --build
 - Esprit School of Engineering – Tunisia for the academic framework and support.
 
 
-⚠️ **Notes**
-- Secrets and credentials should never be committed to version control.
-- Adapt paths and commands based on your environment.
-
