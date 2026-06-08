@@ -207,4 +207,45 @@ class LiveStreamController extends AbstractController
             'streams' => $streams,
         ]);
     }
+
+    #[Route('/api/moderation/check/{id}', name: 'live_moderation_check', methods: ['POST'])]
+public function moderationCheck(
+    LiveStream $live,
+    Request $request,
+    EntityManagerInterface $em
+): JsonResponse {
+    if (!$live->isLive()) {
+        return new JsonResponse(['error' => 'Stream not live'], 400);
+    }
+
+    try {
+        $client = \Symfony\Component\HttpClient\HttpClient::create();
+        $response = $client->request('POST', 'http://localhost:5001/detect', [
+            'json' => ['image' => $request->request->get('image')],
+            'timeout' => 5,
+        ]);
+
+        $result = $response->toArray();
+
+        if ($result['dangerous'] === true) {
+            $live->setStatus('ended');
+            $live->setEndedAt(new \DateTime());
+            $em->flush();
+
+            return new JsonResponse([
+                'action' => 'stream_ended',
+                'reason' => 'dangerous_object_detected',
+                'objects' => $result['dangerous_objects'],
+            ]);
+        }
+
+        return new JsonResponse([
+            'action' => 'ok',
+            'detections' => $result['all_detections'],
+        ]);
+
+    } catch (\Exception $e) {
+        return new JsonResponse(['error' => 'Detection service unavailable'], 503);
+    }
+}
 }

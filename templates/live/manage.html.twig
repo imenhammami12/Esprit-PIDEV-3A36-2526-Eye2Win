@@ -1,4 +1,3 @@
-{# templates/live/manage.html.twig #}
 {% extends 'base.html.twig' %}
 
 {% block title %}{{ live.title }} — Studio - EyeTwin{% endblock %}
@@ -14,13 +13,50 @@
             <div class="alert alert-info">{{ flash }}</div>
         {% endfor %}
 
+        {# ===== MODERATION MODAL ===== #}
+        <div id="moderationModal" style="display:none; position:fixed; inset:0; z-index:999999; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); align-items:center; justify-content:center;">
+            <div style="background:linear-gradient(135deg,#1a0308,#2d0510); border:2px solid #e8372a; border-radius:16px; padding:2.5rem; max-width:480px; width:90%; text-align:center; box-shadow:0 0 60px rgba(232,55,42,0.5); animation:modal-in 0.4s cubic-bezier(.22,1,.36,1);">
+
+                <div style="width:70px;height:70px;background:rgba(232,55,42,0.2);border:2px solid #e8372a;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:2rem;animation:pulse 1s infinite;">
+                    🚨
+                </div>
+
+                <div style="font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:900;color:#ff4d3d;letter-spacing:.1em;margin-bottom:.75rem;">
+                    STREAM TERMINATED
+                </div>
+
+                <div style="font-family:'Share Tech Mono',monospace;font-size:.82rem;color:rgba(255,255,255,0.8);margin-bottom:1rem;line-height:1.6;">
+                    A dangerous object was detected by our AI moderation system. Your live stream has been automatically stopped.
+                </div>
+
+                <div id="modalDetectedObjects" style="display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin-bottom:1.5rem;"></div>
+
+                <div style="background:rgba(232,55,42,0.08);border:1px solid rgba(232,55,42,0.3);border-radius:10px;padding:1rem;margin-bottom:1.5rem;font-size:.8rem;color:rgba(255,255,255,0.7);line-height:1.6;">
+                    ⚠️ <strong style="color:#ff4d3d;">Warning:</strong> This is a violation of our community guidelines. Next time, your account will be <strong style="color:#ff4d3d;">permanently banned</strong>.<br><br>
+                    If you believe this is an error, please contact our support team.
+                </div>
+
+                <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
+                    <a href="{{ path('live_index') }}" style="background:#e53e3e;color:white;border:none;border-radius:8px;padding:10px 24px;font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;">
+                        <i class="fas fa-home"></i> GO TO HOME
+                    </a>
+                    <a href="{{ path('app_complaints_new') }}" style="background:rgba(255,255,255,0.08);color:white;border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:10px 24px;font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.1em;text-decoration:none;display:inline-flex;align-items:center;gap:.4rem;">
+                        <i class="fas fa-headset"></i> CONTACT SUPPORT
+                    </a>
+                </div>
+            </div>
+        </div>
+
         {# ===== HEADER ===== #}
         <div class="profile_card mb-4" style="background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 100%); border: 1px solid #2a2a4a;">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
                     <div class="d-flex align-items-center gap-3 mb-1">
                         {% if live.isLive %}
-
+                            <span style="background:#e53e3e; color:white; padding:5px 14px; border-radius:20px; font-size:12px; display:flex; align-items:center; gap:6px;">
+                                <span style="width:7px;height:7px;background:white;border-radius:50%;animation:pulse 1.5s infinite;display:inline-block;"></span>
+                                LIVE
+                            </span>
                         {% elseif live.isEnded %}
                             <span style="background:#555; color:white; padding:5px 14px; border-radius:20px; font-size:12px;">ENDED</span>
                         {% else %}
@@ -35,16 +71,20 @@
                 <div class="d-flex gap-2 flex-wrap">
                     {% if not live.isEnded %}
                         {% if not live.isLive %}
-                            <form method="POST" action="{{ path('live_start', {id: live.id}) }}">
+                            <form method="POST" action="{{ path('live_start', {id: live.id}) }}" id="obsStartForm">
                                 <input type="hidden" name="_token" value="{{ csrf_token('live_start_' ~ live.id) }}">
-                                <button type="submit" class="btn_profile btn_apply" style="padding:10px 24px;" onclick="return confirm('Start your live stream now?')">
-                                    <i class="fas fa-play-circle"></i> GO LIVE
+                                <button type="submit" class="btn_profile btn_apply" style="padding:10px 24px;" onclick="return confirm('Start your live stream via OBS?')">
+                                    <i class="fas fa-tv"></i> GO LIVE (OBS)
                                 </button>
                             </form>
+                            <button type="button" id="webcamStartBtn" class="btn_profile btn_apply"
+                                    style="padding:10px 24px; background:linear-gradient(135deg,#1a0a2e,#2d1b69); border:1px solid #667eea;">
+                                <i class="fas fa-camera"></i> GO LIVE (Webcam)
+                            </button>
                         {% else %}
-                            <form method="POST" action="{{ path('live_end', {id: live.id}) }}">
+                            <form method="POST" action="{{ path('live_end', {id: live.id}) }}" id="endStreamForm">
                                 <input type="hidden" name="_token" value="{{ csrf_token('live_end_' ~ live.id) }}">
-                                <button type="submit" style="background:#e53e3e; color:white; border:none; border-radius:6px; padding:10px 24px; cursor:pointer; font-weight:bold; font-size:14px;" onclick="return confirm('End the live stream?')">
+                                <button type="submit" id="endStreamBtn" style="background:#e53e3e; color:white; border:none; border-radius:6px; padding:10px 24px; cursor:pointer; font-weight:bold; font-size:14px;" onclick="return confirm('End the live stream?')">
                                     <i class="fas fa-stop-circle"></i> END STREAM
                                 </button>
                             </form>
@@ -64,9 +104,33 @@
             {# ===== LEFT COLUMN ===== #}
             <div class="col-lg-8">
 
-                {# Live Preview Player #}
+                {# WEBCAM LIVE PANEL #}
+                <div id="webcamPanel" style="display:none;" class="profile_card mb-4 p-0">
+                    <div style="background:#000; aspect-ratio:16/9; position:relative; overflow:hidden; border-radius:8px 8px 0 0;">
+                        <video id="webcamVideo" autoplay muted playsinline style="width:100%; height:100%; display:block; transform:scaleX(-1);"></video>
+                        <div style="position:absolute; top:12px; left:12px; background:#667eea; color:white; padding:4px 14px; border-radius:20px; font-size:12px; font-weight:bold; display:flex; align-items:center; gap:6px;">
+                            <span style="width:7px;height:7px;background:white;border-radius:50%;animation:pulse 1.5s infinite;display:inline-block;"></span>
+                            WEBCAM LIVE
+                        </div>
+                        <div id="webcamModerationStatus" style="position:absolute; bottom:12px; left:12px; background:rgba(0,0,0,0.75); color:#00e676; padding:4px 12px; border-radius:6px; font-size:11px; font-family:monospace; display:flex; align-items:center; gap:6px;">
+                            <span style="width:6px;height:6px;background:#00e676;border-radius:50%;animation:pulse 2s infinite;display:inline-block;"></span>
+                            AI Moderation: Active
+                        </div>
+                        <div id="webcamTimer" style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.7); color:#ff6b6b; padding:4px 12px; border-radius:6px; font-size:11px; font-family:monospace;">
+                            <i class="fas fa-clock"></i> <span id="webcamDuration">00:00</span>
+                        </div>
+                    </div>
+                    <div style="padding:12px 16px; background:#0f0f23; border-top:1px solid #2a2a4a; display:flex; justify-content:space-between; align-items:center; border-radius:0 0 8px 8px;">
+                        <span style="color:#888; font-size:12px;"><i class="fas fa-camera" style="color:#667eea;"></i> Broadcasting via Webcam</span>
+                        <button id="webcamStopBtn" style="background:#e53e3e; color:white; border:none; border-radius:6px; padding:8px 20px; cursor:pointer; font-weight:bold; font-size:13px;">
+                            <i class="fas fa-stop-circle"></i> Stop Webcam Live
+                        </button>
+                    </div>
+                </div>
+
+                {# OBS Live Preview Player #}
                 {% if live.isLive %}
-                <div class="profile_card mb-4 p-0" style="overflow:hidden;">
+                <div class="profile_card mb-4 p-0" id="obsPreviewPanel" style="overflow:hidden;">
                     <div style="background:#000; aspect-ratio:16/9; position:relative;">
                         <video id="previewVideo" controls autoplay muted style="width:100%; height:100%; display:block;"></video>
                         <div style="position:absolute; top:12px; left:12px; background:#e53e3e; color:white; padding:4px 14px; border-radius:20px; font-size:12px; font-weight:bold; display:flex; align-items:center; gap:6px;">
@@ -75,6 +139,10 @@
                         </div>
                         <div style="position:absolute; top:12px; right:12px; background:rgba(0,0,0,0.7); color:#48bb78; padding:4px 12px; border-radius:6px; font-size:11px; font-family:monospace;" id="latencyBadge">
                             <i class="fas fa-signal"></i> Connecting...
+                        </div>
+                        <div id="moderationStatus" style="position:absolute; bottom:12px; left:12px; background:rgba(0,0,0,0.75); color:#00e676; padding:4px 12px; border-radius:6px; font-size:11px; font-family:monospace; display:flex; align-items:center; gap:6px;">
+                            <span style="width:6px;height:6px;background:#00e676;border-radius:50%;animation:pulse 2s infinite;display:inline-block;"></span>
+                            AI Moderation: Active
                         </div>
                     </div>
                 </div>
@@ -98,7 +166,7 @@
                     </div>
                     <div class="col-4">
                         <div class="profile_card text-center" style="padding: 20px 10px;">
-                            <div style="font-size:28px; font-weight:900; color:#667eea;" id="durationDisplay">
+                            <div style="font-size:28px; font-weight:900; color:#667eea;">
                                 {% if live.startedAt %}
                                     {{ live.startedAt|date('H:i') }}
                                 {% else %}
@@ -112,8 +180,7 @@
 
                 {# OBS Configuration #}
                 <div class="profile_card" style="border: 1px solid #2a2a4a;">
-                    <h4 class="card_title"><i class="fas fa-tv" style="color:#667eea;"></i> Streaming Configuration</h4>
-
+                    <h4 class="card_title"><i class="fas fa-tv" style="color:#667eea;"></i> Streaming Configuration (OBS)</h4>
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label style="color:#888; font-size:11px; text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:6px;">RTMP Server</label>
@@ -138,35 +205,65 @@
                             <small style="color:#e53e3e; font-size:11px;"><i class="fas fa-lock"></i> Keep this secret</small>
                         </div>
                     </div>
-
-                    <div class="row g-3 mt-1">
-                        <div class="col-md-4">
-                            <div style="background:#0f0f23; border:1px solid #2a2a4a; border-radius:6px; padding:12px; text-align:center;">
-                                <div style="color:#667eea; font-size:11px; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Recommended Bitrate</div>
-                                <div style="color:#fff; font-weight:bold;">3000–6000 kbps</div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div style="background:#0f0f23; border:1px solid #2a2a4a; border-radius:6px; padding:12px; text-align:center;">
-                                <div style="color:#667eea; font-size:11px; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Resolution</div>
-                                <div style="color:#fff; font-weight:bold;">1920×1080 / 1280×720</div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div style="background:#0f0f23; border:1px solid #2a2a4a; border-radius:6px; padding:12px; text-align:center;">
-                                <div style="color:#667eea; font-size:11px; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px;">Frame Rate</div>
-                                <div style="color:#fff; font-weight:bold;">30 or 60 FPS</div>
-                            </div>
-                        </div>
-                    </div>
-
-
                 </div>
-
             </div>
 
             {# ===== RIGHT COLUMN ===== #}
             <div class="col-lg-4">
+
+                {# WEBCAM MODE CARD #}
+                {% if not live.isLive and not live.isEnded %}
+                <div class="profile_card mb-4" style="border: 1px solid rgba(102,126,234,0.3); background: linear-gradient(135deg, #0a0a1f 0%, #0f0f23 100%);">
+                    <h4 class="card_title" style="color:#667eea;">
+                        <i class="fas fa-camera"></i> Webcam Live
+                    </h4>
+                    <p style="color:#888; font-size:13px; margin-bottom:12px;">
+                        Stream directly from your browser — no OBS needed. Your webcam feed is monitored by AI in real time.
+                    </p>
+                    <div style="display:flex; flex-direction:column; gap:8px; font-size:12px; color:#a0a0b0;">
+                        <div><i class="fas fa-check-circle" style="color:#48bb78;"></i> No software installation required</div>
+                        <div><i class="fas fa-check-circle" style="color:#48bb78;"></i> AI moderation active during stream</div>
+                        <div><i class="fas fa-check-circle" style="color:#48bb78;"></i> Auto-terminates on dangerous objects</div>
+                        <div><i class="fas fa-info-circle" style="color:#667eea;"></i> Uses your browser's camera</div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {# AI Moderation Card #}
+                {% if live.isLive %}
+                <div class="profile_card mb-4" style="border: 1px solid rgba(0,230,118,0.2); background: linear-gradient(135deg, #0a1a0f 0%, #0f0f23 100%);">
+                    <h4 class="card_title" style="color:#00e676;">
+                        <i class="fas fa-shield-alt"></i> AI Moderation
+                    </h4>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div style="display:flex; align-items:center; justify-content:space-between;">
+                            <span style="color:#888; font-size:12px;">Status</span>
+                            <span style="color:#00e676; font-size:12px; font-weight:bold; display:flex; align-items:center; gap:5px;">
+                                <span style="width:7px;height:7px;background:#00e676;border-radius:50%;animation:pulse 2s infinite;display:inline-block;"></span>
+                                ACTIVE
+                            </span>
+                        </div>
+                        <div style="display:flex; align-items:center; justify-content:space-between;">
+                            <span style="color:#888; font-size:12px;">Check interval</span>
+                            <span style="color:#fff; font-size:12px;">Every 5 seconds</span>
+                        </div>
+                        <div style="display:flex; align-items:center; justify-content:space-between;">
+                            <span style="color:#888; font-size:12px;">Model</span>
+                            <span style="color:#fff; font-size:12px;">YOLOv8s</span>
+                        </div>
+                        <div style="background:rgba(232,55,42,0.08); border:1px solid rgba(232,55,42,0.2); border-radius:8px; padding:10px; margin-top:4px;">
+                            <div style="color:#e53e3e; font-size:11px; font-weight:bold; margin-bottom:6px;">
+                                <i class="fas fa-ban"></i> Monitored Objects
+                            </div>
+                            <div style="display:flex; flex-wrap:wrap; gap:4px;">
+                                {% for obj in ['knife','scissors','gun','rifle','sword','bat','bottle','fork'] %}
+                                <span style="background:rgba(232,55,42,0.15); border:1px solid rgba(232,55,42,0.3); color:#ff6b6b; font-size:10px; padding:2px 8px; border-radius:4px; font-family:monospace;">{{ obj }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
 
                 {# Share Link #}
                 <div class="profile_card mb-4">
@@ -177,10 +274,6 @@
                             <i class="fas fa-copy"></i>
                         </button>
                     </div>
-                    <p style="color:#666; font-size:11px; margin-top:6px;">
-                        <i class="fas fa-coins" style="color:#f6d860;"></i>
-                        {{ live.coinPrice == 0 ? 'Free access for all viewers' : 'Viewers pay ' ~ live.coinPrice ~ ' EyeTwin Coins' }}
-                    </p>
                 </div>
 
                 {# Stream Details #}
@@ -215,19 +308,6 @@
                             <span class="info_value">{{ live.startedAt|date('H:i, d M Y') }}</span>
                         </div>
                         {% endif %}
-                        {% if live.endedAt %}
-                        <div class="info_row">
-                            <span class="info_label" style="font-size:13px;">Ended</span>
-                            <span class="info_value">{{ live.endedAt|date('H:i, d M Y') }}</span>
-                        </div>
-                        {% endif %}
-                        <div class="info_row">
-                            <span class="info_label" style="font-size:13px;">Revenue</span>
-                            <span class="info_value" style="color:#f6d860;">
-                                <i class="fas fa-coins"></i>
-                                {{ live.accesses|length * live.coinPrice }} coins
-                            </span>
-                        </div>
                     </div>
                 </div>
 
@@ -250,9 +330,16 @@
 </section>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
 @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.3; }
+}
+
+@keyframes modal-in {
+    from { transform: scale(0.8); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
 }
 </style>
 
@@ -260,26 +347,23 @@
 <script>
 function toggleKey() {
     const input = document.getElementById('streamKey');
-    const icon = document.getElementById('eyeIcon');
-    input.type = input.type === 'password' ? 'text' : 'password';
+    const icon  = document.getElementById('eyeIcon');
+    input.type  = input.type === 'password' ? 'text' : 'password';
     icon.className = input.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
 }
-
 function copyKey() {
     const input = document.getElementById('streamKey');
-    const prev = input.type;
-    input.type = 'text';
+    const prev  = input.type;
+    input.type  = 'text';
     navigator.clipboard.writeText(input.value).then(() => {
         input.type = prev;
         showToast('Stream key copied!');
     });
 }
-
 function copyText(id, msg) {
     navigator.clipboard.writeText(document.getElementById(id).value)
         .then(() => showToast(msg));
 }
-
 function showToast(msg) {
     const el = document.createElement('div');
     el.textContent = '✅ ' + msg;
@@ -288,34 +372,170 @@ function showToast(msg) {
     setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 2000);
 }
 
+const STREAM_ID = {{ live.id }};
+
+/* ════ MODERATION MODAL ════ */
+function showModerationBanner(objects) {
+    // Stop webcam tracks if active
+    if (typeof webcamStream !== 'undefined' && webcamStream) {
+        webcamStream.getTracks().forEach(t => t.stop());
+        webcamStream = null;
+    }
+    // Stop moderation intervals
+    if (typeof webcamModInterval !== 'undefined') clearInterval(webcamModInterval);
+    if (typeof webcamDurTimer !== 'undefined') clearInterval(webcamDurTimer);
+
+    const modal  = document.getElementById('moderationModal');
+    const objsEl = document.getElementById('modalDetectedObjects');
+
+    objsEl.innerHTML = objects.map(o =>
+        `<span style="background:rgba(232,55,42,0.2);border:1px solid rgba(232,55,42,0.4);color:#ff6b6b;font-family:'Share Tech Mono',monospace;font-size:.75rem;padding:.2rem .6rem;border-radius:4px;">
+            ⚠️ ${o.label} (${Math.round(o.confidence * 100)}%)
+        </span>`
+    ).join('');
+
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+async function sendFrameForModeration(canvas, videoEl) {
+    canvas.width  = 640;
+    canvas.height = 360;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(videoEl, 0, 0, 640, 360);
+    const base64Image = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
+
+    try {
+        const res = await fetch(`/live/api/moderation/check/${STREAM_ID}`, {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body   : `image=${encodeURIComponent(base64Image)}`
+        });
+        return await res.json();
+    } catch(e) {
+        console.warn('Moderation check failed:', e);
+        return null;
+    }
+}
+
+/* ════ WEBCAM LIVE MODE ════ */
+{% if not live.isLive and not live.isEnded %}
+const webcamStartBtn = document.getElementById('webcamStartBtn');
+const webcamPanel    = document.getElementById('webcamPanel');
+const webcamVideo    = document.getElementById('webcamVideo');
+const webcamStopBtn  = document.getElementById('webcamStopBtn');
+const webcamDurEl    = document.getElementById('webcamDuration');
+
+let webcamStream      = null;
+let webcamModeActive  = false;
+let webcamModerationCanvas = document.createElement('canvas');
+let webcamStartTime   = null;
+let webcamDurTimer    = null;
+let webcamModInterval = null;
+
+if (webcamStartBtn) {
+    webcamStartBtn.addEventListener('click', async () => {
+        try {
+            try {
+                webcamStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            } catch(e) {
+                webcamStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+            }
+
+            webcamVideo.srcObject = webcamStream;
+            webcamModeActive = true;
+
+            const formData = new FormData();
+            formData.append('_token', '{{ csrf_token("live_start_" ~ live.id) }}');
+            await fetch('{{ path("live_start", {id: live.id}) }}', { method: 'POST', body: formData });
+
+            webcamPanel.style.display = 'block';
+            webcamStartBtn.style.display = 'none';
+            const obsForm = document.getElementById('obsStartForm');
+            if (obsForm) obsForm.style.display = 'none';
+
+            webcamStartTime = Date.now();
+            webcamDurTimer = setInterval(() => {
+                const secs = Math.floor((Date.now() - webcamStartTime) / 1000);
+                const m = String(Math.floor(secs / 60)).padStart(2, '0');
+                const s = String(secs % 60).padStart(2, '0');
+                webcamDurEl.textContent = `${m}:${s}`;
+            }, 1000);
+
+            webcamModInterval = setInterval(async () => {
+                if (!webcamModeActive) return;
+                if (!webcamVideo || webcamVideo.readyState < 2) return;
+                const data = await sendFrameForModeration(webcamModerationCanvas, webcamVideo);
+                if (data && data.action === 'stream_ended') {
+                    webcamModeActive = false;
+                    showModerationBanner(data.objects);
+                }
+            }, 5000);
+
+            showToast('🎥 Webcam live started!');
+        } catch (err) {
+            alert('Could not access webcam: ' + err.message + '\n\nMake sure you allow camera access in browser settings.');
+        }
+    });
+}
+
+if (webcamStopBtn) {
+    webcamStopBtn.addEventListener('click', () => {
+        if (confirm('Stop the webcam live stream?')) stopWebcam(false);
+    });
+}
+
+async function stopWebcam(byModeration) {
+    webcamModeActive = false;
+    clearInterval(webcamModInterval);
+    clearInterval(webcamDurTimer);
+    if (webcamStream) {
+        webcamStream.getTracks().forEach(t => t.stop());
+        webcamStream = null;
+    }
+    if (!byModeration) {
+        const formData = new FormData();
+        formData.append('_token', '{{ csrf_token("live_end_" ~ live.id) }}');
+        await fetch('{{ path("live_end", {id: live.id}) }}', { method: 'POST', body: formData });
+        window.location.href = '/live';
+    }
+}
+{% endif %}
+
+/* ════ OBS / HLS MODE ════ */
 {% if live.isLive %}
-const video = document.getElementById('previewVideo');
-const hlsSrc = 'http://127.0.0.1:8888/{{ live.streamKey }}/index.m3u8';
-const badge = document.getElementById('latencyBadge');
+const video   = document.getElementById('previewVideo');
+const hlsSrc  = 'http://127.0.0.1:8888/{{ live.streamKey }}/index.m3u8';
+const badge   = document.getElementById('latencyBadge');
 
 if (video && Hls.isSupported()) {
-    const hls = new Hls({
-        lowLatencyMode: true,
-        liveSyncDurationCount: 2,
-        liveMaxLatencyDurationCount: 4,
-        maxLiveSyncPlaybackRate: 1.5,
-    });
+    const hls = new Hls({ lowLatencyMode:true, liveSyncDurationCount:2, liveMaxLatencyDurationCount:4, maxLiveSyncPlaybackRate:1.5 });
     hls.loadSource(hlsSrc);
     hls.attachMedia(video);
-    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        video.play();
-        if (badge) badge.innerHTML = '<i class="fas fa-signal"></i> Live';
-    });
+    hls.on(Hls.Events.MANIFEST_PARSED, () => { video.play(); if(badge) badge.innerHTML='<i class="fas fa-signal"></i> Live'; });
     hls.on(Hls.Events.ERROR, (e, data) => {
         if (data.fatal) {
-            if (badge) badge.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Reconnecting...';
+            if(badge) badge.innerHTML='<i class="fas fa-exclamation-triangle"></i> Reconnecting...';
             setTimeout(() => { hls.loadSource(hlsSrc); hls.attachMedia(video); }, 3000);
         }
     });
 } else if (video && video.canPlayType('application/vnd.apple.mpegurl')) {
-    video.src = hlsSrc;
-    video.play();
+    video.src = hlsSrc; video.play();
 }
+
+let obsActive = true;
+const obsCanvas = document.createElement('canvas');
+
+setInterval(async () => {
+    if (!obsActive) return;
+    const vid = document.getElementById('previewVideo');
+    if (!vid || vid.readyState < 2) return;
+    const data = await sendFrameForModeration(obsCanvas, vid);
+    if (data && data.action === 'stream_ended') {
+        obsActive = false;
+        showModerationBanner(data.objects);
+    }
+}, 5000);
 {% endif %}
 </script>
 {% endblock %}
