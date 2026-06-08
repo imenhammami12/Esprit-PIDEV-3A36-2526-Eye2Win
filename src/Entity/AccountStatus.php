@@ -4,10 +4,10 @@ namespace App\Entity;
 
 enum AccountStatus: string
 {
-    case ACTIVE = 'ACTIVE';
-    case SUSPENDED = 'SUSPENDED';
-    case BANNED = 'BANNED';
-    case PENDING = 'PENDING';
+    case ACTIVE = 'active';
+    case SUSPENDED = 'suspended';
+    case BANNED = 'banned';
+    case PENDING = 'pending';
 
     public function getLabel(): string
     {
